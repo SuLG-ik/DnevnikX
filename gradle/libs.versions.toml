@@ -1,0 +1,117 @@
+[versions]
+agp = "8.1.0-alpha01"
+kotlin = "1.8.0"
+compose-compiler = "1.4.0"
+compose = "1.4.0-alpha05"
+compose-material3 = "1.1.0-alpha05"
+ksp = "1.8.0-1.0.8"
+lifecycle = "2.6.0-alpha04"
+ktor = "2.2.2"
+coroutines = "1.6.4"
+android-core = "1.9.0"
+android-activity = "1.7.0-alpha03"
+android-splash = "1.0.0"
+mvi = "3.1.0"
+decompose = "1.0.0-beta-04"
+essenty = "0.10.0"
+colormath = "3.2.0"
+koin = "3.3.2"
+koin-annotations = "1.1.0"
+room = "2.5.0"
+junit = "4.13.2"
+junit-android = "1.1.5"
+napier = "2.6.1"
+datastore = "1.1.0-alpha01"
+material = "1.8.0-rc01"
+accompanist = "0.29.0-alpha"
+datetime = "0.4.0"
+desugar = "2.0.0"
+serialization = "1.5.0-RC"
+
+[libraries]
+compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
+compose-ui-graphics = { module = "androidx.compose.runtime:runtime", version.ref = "compose" }
+compose-runtime = { module = "androidx.compose.material:material", version.ref = "compose" }
+compose-material = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }
+compose-material3 = { module = "androidx.compose.animation:animation", version.ref = "compose" }
+compose-animation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
+compose-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
+compose-test = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose" }
+compose-test-manifest = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose" }
+compose-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
+lifecycle-core = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
+lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycle" }
+lifecycle-viewmodel-saved-state = { module = "androidx.lifecycle:lifecycle-viewmodel-savedstate", version.ref = "lifecycle" }
+mvi-core = { module = "com.arkivanov.mvikotlin:mvikotlin", version.ref = "mvi" }
+mvi-main = { module = "com.arkivanov.mvikotlin:mvikotlin-main", version.ref = "mvi" }
+mvi-logging = { module = "com.arkivanov.mvikotlin:mvikotlin-logging", version.ref = "mvi" }
+mvi-coroutines = { module = "com.arkivanov.mvikotlin:mvikotlin-extensions-coroutines", version.ref = "mvi" }
+mvi-rx = { module = "com.arkivanov.mvikotlin:rx", version.ref = "mvi" }
+ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+ktor-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+ktor-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+ktor-websockets = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
+ktor-typesafe = { module = "io.ktor:ktor-client-resources", version.ref = "ktor" }
+ktor-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor" }
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+coroutines-guava = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-guava", version.ref = "coroutines" }
+coroutines-tasks = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutines" }
+activity-core = { module = "androidx.activity:activity-ktx", version.ref = "android-activity" }
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "android-activity" }
+android-core = { module = "androidx.core:core-ktx", version.ref = "android-core" }
+android-splash = { module = "androidx.core:core-splashscreen", version.ref = "android-splash" }
+decompose-core = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
+decompose-compose = { module = "com.arkivanov.decompose:extensions-compose-jetpack", version.ref = "decompose" }
+colormath = { module = "com.github.ajalt.colormath:colormath", version.ref = "colormath" }
+essenty-lifecycle = { module = "com.arkivanov.essenty:lifecycle", version.ref = "essenty" }
+essenty-parcelable = { module = "com.arkivanov.essenty:parcelable", version.ref = "essenty" }
+essenty-instance = { module = "com.arkivanov.essenty:instance-keeper", version.ref = "essenty" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin-annotations" }
+koin-compiler = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koin-annotations" }
+room-core = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+junit = { module = "junit:junit", version.ref = "junit" }
+junit-android = { module = "androidx.test.ext:junit-ktx", version.ref = "junit-android" }
+napier = { module = "io.github.aakira:napier", version.ref = "napier" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+datastore = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+accompanist-systemuicontroller = { module="com.google.accompanist:accompanist-systemuicontroller", version.ref="accompanist" }
+accompanist-placeholder = { module="com.google.accompanist:accompanist-placeholder", version.ref="accompanist" }
+kotlinx-datetime = { module="org.jetbrains.kotlinx:kotlinx-datetime", version.ref="datetime" }
+kotlinx-serialization-json = { module="org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref="serialization" }
+desugar-libs = { module="com.android.tools:desugar_jdk_libs", version.ref="desugar" }
+desugar-minimal = { module="com.android.tools:desugar_jdk_libs_minimal", version.ref="desugar" }
+
+[bundles]
+compose = ["compose-ui", "compose-ui-graphics", "compose-runtime", "compose-material", "compose-material3", "compose-animation"]
+compose-debug = ["compose-tooling", "compose-test-manifest"]
+compose-test = ["compose-test"]
+lifecycle = ["lifecycle-core", "lifecycle-viewmodel", "lifecycle-viewmodel-saved-state"]
+mvi = ["mvi-core", "mvi-main", "mvi-logging", "mvi-coroutines", "mvi-rx"]
+ktor = ["ktor-core", "ktor-cio", "ktor-negotiation", "ktor-json", "ktor-logging", "ktor-websockets", "ktor-typesafe"]
+coroutines = ["coroutines-core", "coroutines-android"]
+android = ["activity-core", "activity-compose", "android-core", "android-splash"]
+decompose = ["decompose-core", "decompose-compose"]
+essenty = ["essenty-lifecycle", "essenty-parcelable", "essenty-instance"]
+koin = ["koin-core", "koin-android", "koin-annotations"]
+room = ["room-core", "room-ktx"]
+desugar = ["desugar-libs", "desugar-minimal"]
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
