@@ -1,19 +1,17 @@
 package ru.sulgik.dnevnikx
 
-import io.github.aakira.napier.Napier
+import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logger
-import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.resources.Resources
 import io.ktor.http.ContentType
 import io.ktor.http.URLProtocol
 import io.ktor.http.contentType
 import io.ktor.http.path
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.util.toMap
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.contextual
@@ -40,16 +38,18 @@ class ClientModule {
                     parameters.append("vendor", "school")
                     parameters.append("devkey", "0c7968cd2b6e14a4eed3c94e593ae9f0")
                     parameters.append("out_format", "json")
+                    Log.d("pisus", "parameters: ${parameters.build().toMap().map { it.value.joinToString() }.joinToString()}")
                 }
             }
-            install(Logging) {
-                logger = object : Logger {
-                    override fun log(message: String) {
-                        Napier.d(message, tag = "UnauthorizedHttpClient")
-                    }
-                }
-                level = LogLevel.ALL
-            }
+//            if (BuildConfig.DEBUG)
+//            install(Logging) {
+//                logger = object : Logger {
+//                    override fun log(message: String) {
+//                        Napier.d(message, tag = "UnauthorizedHttpClient")
+//                    }
+//                }
+//                level = LogLevel.ALL
+//            }
             install(ContentNegotiation) {
                 json(Json {
                     encodeDefaults = true

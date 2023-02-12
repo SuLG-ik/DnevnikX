@@ -9,7 +9,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.bringToFront
@@ -22,7 +21,7 @@ import ru.sulgik.dnevnikx.ui.Content
 import ru.sulgik.dnevnikx.ui.authChildStack
 import ru.sulgik.dnevnikx.ui.diary.DiaryComponent
 import ru.sulgik.dnevnikx.ui.marks.MarksComponent
-import ru.sulgik.dnevnikx.ui.profile.ProfileComponent
+import ru.sulgik.dnevnikx.ui.profile.ProfileHostComponent
 
 class ApplicationComponent(
     componentContext: AuthorizedComponentContext,
@@ -44,7 +43,7 @@ class ApplicationComponent(
         return when (config) {
             Config.Dairy -> DiaryComponent(componentContext)
             Config.Marks -> MarksComponent(componentContext)
-            Config.Profile -> ProfileComponent(componentContext)
+            Config.Profile -> ProfileHostComponent(componentContext)
         }
     }
 
@@ -52,7 +51,7 @@ class ApplicationComponent(
         navigation.bringToFront(config)
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalDecomposeApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(modifier: Modifier) {
         val childState by childStack.subscribeAsState()

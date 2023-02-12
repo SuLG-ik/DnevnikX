@@ -1,5 +1,6 @@
 package ru.sulgik.dnevnikx.repository.data
 
+import com.arkivanov.essenty.parcelable.Parcelable
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 

@@ -59,6 +59,7 @@ class DiaryStoreImpl(
                                     previousPeriod = if (previousPeriod in periods) previousPeriod else null,
                                     selectedPeriod = currentPeriod,
                                     periods = periods,
+                                    isOther = false,
                                 ),
                             )
                         )
@@ -72,6 +73,21 @@ class DiaryStoreImpl(
                     )
                 }
             }
+
+            onIntent<DiaryStore.Intent.SelectOtherPeriod> {
+                val state = state
+                if (state.periods.isLoading || state.periods.data == null)
+                    return@onIntent
+                dispatch(
+                    state.copy(
+                        periods = state.periods.copy(
+                            data = state.periods.data.copy(
+                                isOther = true
+                            )
+                        )
+                    )
+                )
+            }
             var selectPeriodJob: Job? = null
             onIntent<DiaryStore.Intent.SelectPeriod> {
                 val state = state
@@ -82,9 +98,10 @@ class DiaryStoreImpl(
                         diary = DiaryStore.State.Diary(),
                         periods = state.periods.copy(
                             data = state.periods.data.copy(
-                                selectedPeriod = it.period
+                                selectedPeriod = it.period,
+                                isOther = false,
+                            ),
                             )
-                        )
                     )
                 )
                 val cachedDiary = cache[it.period]
@@ -132,6 +149,9 @@ private fun DiaryOutput.toState(): DiaryStore.State.Diary {
                             time = lesson.time,
                             homework = lesson.homework.map { homework ->
                                 DiaryStore.State.Homework(homework.text)
+                            },
+                            files = lesson.files.map { file ->
+                                DiaryStore.State.File(file.name, file.url)
                             },
                             marks = lesson.marks.map { mark ->
                                 DiaryStore.State.Mark(mark.mark, mark.value)

@@ -26,7 +26,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -40,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import ru.sulgik.dnevnikx.R
+import ru.sulgik.dnevnikx.ui.view.autofill
 import ru.sulgik.dnevnikx.ui.view.pulse
 
 val message = buildAnnotatedString {
@@ -105,7 +108,7 @@ fun AuthScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun AuthInput(
     username: String,
@@ -139,7 +142,9 @@ fun AuthInput(
                 focusManager.moveFocus(FocusDirection.Next)
             }),
             shape = MaterialTheme.shapes.extraLarge,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .autofill(AutofillType.Username, onFill = { onEditUsername(it) }),
         )
         OutlinedTextField(
             value = password,
@@ -155,7 +160,8 @@ fun AuthInput(
             ),
             visualTransformation = PasswordVisualTransformation(),
             shape = MaterialTheme.shapes.extraLarge,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .autofill(AutofillType.Password, onFill = { onEditPassword(it) }),
         )
         OutlinedButton(onClick = onConfirm) {
             Text("Продолжить")

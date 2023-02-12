@@ -1,8 +1,8 @@
 package ru.sulgik.dnevnikx.ui
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.parcelable.Parcelable
@@ -16,7 +16,6 @@ abstract class ModalComponentContext(
     componentContext: DIComponentContext,
     private val initialState: ModalState = ModalState(false),
 ) : BaseComponentContext(componentContext) {
-
 
     private val _modalState by lazy {
         mutableStateOf(

@@ -17,6 +17,7 @@ fun Application.setupDI() {
             BaseMviModule().module,
             RepositoryModule().module,
             StoresModule().module,
+            AndroidModule().module,
         )
     }
 }

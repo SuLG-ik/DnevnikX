@@ -6,7 +6,6 @@ import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
-import org.koin.core.component.createScope
 import ru.sulgik.dnevnikx.data.AuthScope
 import ru.sulgik.dnevnikx.ui.BaseComponentContext
 import ru.sulgik.dnevnikx.ui.Content

@@ -16,7 +16,7 @@ android {
         minSdk = 21
         targetSdk = 33
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.0.1-001"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -32,13 +32,17 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("debug")
+            buildConfigField("String", "APP_VERSION", "\"v0.0.1\"")
+        }
+        debug {
+            buildConfigField("String", "APP_VERSION", "\"v0.0.1-001\"")
         }
     }
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         kotlinOptions.languageVersion = "1.9"
     }
     compileOptions {
-//        isCoreLibraryDesugaringEnabled = true
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -48,6 +52,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
@@ -70,7 +75,7 @@ android {
 }
 
 dependencies {
-//    coreLibraryDesugaring(libs.desugar.libs)
+    coreLibraryDesugaring(libs.desugar.libs)
 //    coreLibraryDesugaring(libs.desugar.minimal)
     implementation(libs.bundles.compose)
     implementation(libs.kotlin.reflect)

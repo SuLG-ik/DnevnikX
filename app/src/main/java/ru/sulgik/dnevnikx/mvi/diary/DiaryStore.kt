@@ -9,6 +9,7 @@ interface DiaryStore : Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Lab
 
     sealed interface Intent {
         data class SelectPeriod(val period: DatePeriod) : Intent
+        data object SelectOtherPeriod : Intent
     }
 
     data class State(
@@ -27,6 +28,7 @@ interface DiaryStore : Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Lab
             val nextPeriod: DatePeriod?,
             val previousPeriod: DatePeriod?,
             val periods: List<DatePeriod>,
+            val isOther: Boolean,
         )
 
         data class Diary(
@@ -48,11 +50,18 @@ interface DiaryStore : Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Lab
             val title: String,
             val time: TimePeriod,
             val homework: List<Homework>,
-            val marks: List<Mark>
+            val files: List<File>,
+            val marks: List<Mark>,
         )
 
         data class Homework(
             val text: String,
+        )
+
+
+        data class File(
+            val name: String,
+            val url: String,
         )
 
         data class Mark(

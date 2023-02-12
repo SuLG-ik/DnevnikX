@@ -15,12 +15,19 @@ data class DiaryOutput(
         val title: String,
         val time: TimePeriod,
         val homework: List<Homework>,
+        val files: List<File>,
         val marks: List<Mark>,
     )
 
     data class Homework(
         val text: String,
     )
+
+    data class File(
+        val name: String,
+        val url: String,
+    )
+
     data class Mark(
         val mark: String,
         val value: Int,

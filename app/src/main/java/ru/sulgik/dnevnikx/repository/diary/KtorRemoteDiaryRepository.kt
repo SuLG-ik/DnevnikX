@@ -8,7 +8,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
 import ru.sulgik.dnevnikx.data.AuthScope
-import ru.sulgik.dnevnikx.mvi.diary.DiaryStore
 import ru.sulgik.dnevnikx.repository.Client
 import ru.sulgik.dnevnikx.repository.data.DatePeriod
 import ru.sulgik.dnevnikx.repository.data.DiaryOutput
@@ -44,6 +43,9 @@ class KtorRemoteDiaryRepository(
                             time = TimePeriod(lesson.value.start, lesson.value.end),
                             homework = lesson.value.homework.map { homework ->
                                 DiaryOutput.Homework(homework.value.text)
+                            },
+                            files = lesson.value.files.map { file ->
+                                DiaryOutput.File(file.name, file.url)
                             },
                             marks = lesson.value.marks.map { mark ->
                                 DiaryOutput.Mark(mark.mark, mark.value)
@@ -81,14 +83,24 @@ private data class GetDiaryBody(
         @SerialName("endtime")
         val end: LocalTime,
         val homework: Map<String, Homework>,
+        val files: List<File>,
         @SerialName("assessments")
         val marks: List<Mark> = emptyList(),
     )
+
     @Serializable
     class Homework(
         @SerialName("value")
         val text: String,
 
+        )
+
+    @Serializable
+    data class File(
+        @SerialName("filename")
+        val name: String,
+        @SerialName("link")
+        val url: String,
     )
 
     @Serializable

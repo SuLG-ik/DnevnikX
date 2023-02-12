@@ -5,6 +5,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,20 +36,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toJavaLocalTime
 import ru.sulgik.dnevnikx.R
 import ru.sulgik.dnevnikx.mvi.diary.DiaryStore
 import ru.sulgik.dnevnikx.repository.data.DatePeriod
 import ru.sulgik.dnevnikx.repository.data.TimePeriod
 import ru.sulgik.dnevnikx.ui.marks.markColor
+import ru.sulgik.dnevnikx.ui.view.MiddleEllipsisText
 import ru.sulgik.dnevnikx.ui.view.outlined
 import ru.sulgik.dnevnikx.utils.defaultPlaceholder
-import java.text.SimpleDateFormat
 import java.time.DayOfWeek.*
 import java.time.Month.*
 import java.time.format.DateTimeFormatter
@@ -61,6 +62,7 @@ fun DiaryScreen(
     diary: DiaryStore.State.Diary,
     onSelect: (DatePeriod) -> Unit,
     onOther: () -> Unit,
+    onFile: (DiaryStore.State.File) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -112,6 +114,7 @@ fun DiaryScreen(
                             diary.data.diary.forEach { diary ->
                                 DiaryDate(
                                     diary = diary,
+                                    onFile = onFile,
                                     modifier = Modifier
                                         .padding(horizontal = 10.dp)
                                         .fillMaxWidth()
@@ -128,6 +131,7 @@ fun DiaryScreen(
 @Composable
 fun DiaryDate(
     diary: DiaryStore.State.DiaryDate,
+    onFile: (DiaryStore.State.File) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -144,7 +148,7 @@ fun DiaryDate(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             diary.lessons.forEach {
-                DiaryLesson(lesson = it)
+                DiaryLesson(lesson = it, onFile = onFile)
             }
         }
     }
@@ -177,6 +181,7 @@ fun DiaryDatePlaceholder(
 @Composable
 fun DiaryLesson(
     lesson: DiaryStore.State.Lesson,
+    onFile: (DiaryStore.State.File) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -200,6 +205,12 @@ fun DiaryLesson(
             )
             lesson.homework.forEach {
                 Homework(it.text)
+            }
+            lesson.files.forEach {
+                File(
+                    text = it.name,
+                    onClick = { onFile(it) }
+                )
             }
         }
         Marks(
@@ -241,7 +252,7 @@ fun Homework(
 ) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Icon(
-            painter = painterResource(id = R.drawable.homework_icon),
+            painter = painterResource(id = R.drawable.diary_homework),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(15.dp)
@@ -249,6 +260,34 @@ fun Homework(
         Spacer(modifier = Modifier.width(10.dp))
         Text(
             text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+@Composable
+fun File(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null,
+            onClick = onClick
+        ), verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.diary_download),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(15.dp)
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        MiddleEllipsisText(
+            text = text,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.primary
         )
@@ -412,9 +451,9 @@ fun RowScope.CurrentPeriods(
     }
     val isOther =
         period.currentPeriod != period.selectedPeriod && period.nextPeriod != period.selectedPeriod && period.previousPeriod != period.selectedPeriod && period.currentPeriod != null
-    val formatter = remember { SimpleDateFormat("ddMM", Locale.getDefault()) }
+    val formatter = remember { DateTimeFormatter.ofPattern("dd.MM", Locale.getDefault()) }
     Period(
-        period = if (isOther) period.currentPeriod!!.format(formatter) else "Выбрать",
+        period = if (isOther) period.selectedPeriod.format(formatter) else "Выбрать",
         onSelect = onOther,
         selected = isOther
     )
@@ -437,6 +476,7 @@ fun RowScope.Period(
             .clickable(onClick = onSelect)
             .padding(7.dp),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
     ) {
         AnimatedVisibility(visible = selected) {
             Row {
@@ -458,8 +498,8 @@ fun RowScope.Period(
     }
 }
 
-fun DatePeriod.format(formatter: SimpleDateFormat): String {
-    return "${formatter.format(start)}-${formatter.format(end)}"
+fun DatePeriod.format(formatter: DateTimeFormatter): String {
+    return "${formatter.format(start.toJavaLocalDate())} - ${formatter.format(end.toJavaLocalDate())}"
 }
 
 @Composable
