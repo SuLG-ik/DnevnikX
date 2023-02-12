@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.sulgik.dnevnikx.mvi.marks.MarksStore
+import ru.sulgik.dnevnikx.platform.LocalTimeFormatter
 import ru.sulgik.dnevnikx.ui.DIComponentContext
 import ru.sulgik.dnevnikx.ui.ModalComponentContext
 
@@ -42,7 +43,7 @@ class MarkInfoComponent(
             ) {
                 TopAppBar(title = {
                     Text(
-                        text = "${mark.first.title}, ${mark.second.date.format()}",
+                        text = "${mark.first.title}, ${LocalTimeFormatter.current.format(mark.second.date)}",
                         modifier = Modifier
                     )
                 },

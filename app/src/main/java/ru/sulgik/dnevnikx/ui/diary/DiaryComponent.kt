@@ -11,24 +11,23 @@ import org.koin.core.component.get
 import ru.sulgik.dnevnikx.mvi.diary.DiaryStore
 import ru.sulgik.dnevnikx.mvi.getStore
 import ru.sulgik.dnevnikx.mvi.states
+import ru.sulgik.dnevnikx.platform.ComparableRange
+import ru.sulgik.dnevnikx.platform.DatePeriod
+import ru.sulgik.dnevnikx.platform.TimeFormatter
 import ru.sulgik.dnevnikx.platform.UriHandler
-import ru.sulgik.dnevnikx.repository.data.ComparableRange
-import ru.sulgik.dnevnikx.repository.data.DatePeriod
 import ru.sulgik.dnevnikx.ui.AuthorizedComponentContext
 import ru.sulgik.dnevnikx.ui.BaseAuthorizedComponentContext
 import ru.sulgik.dnevnikx.ui.ModalUI
 import ru.sulgik.dnevnikx.ui.childDIContext
 import ru.sulgik.dnevnikx.ui.picker.PickerComponent
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 class DiaryComponent(
     componentContext: AuthorizedComponentContext,
 ) : BaseAuthorizedComponentContext(componentContext) {
 
-    val formatter = DateTimeFormatter.ofPattern("dd.MM", Locale.getDefault())
 
+    val timeFormatter = get<TimeFormatter>()
     val store = getStore<DiaryStore>()
 
     private val currentData = LocalDate.now()
@@ -61,7 +60,7 @@ class DiaryComponent(
                 start.toJavaLocalDate(),
                 end.toJavaLocalDate()
             ),
-            format(formatter)
+            timeFormatter.format(this)
         )
     }
 

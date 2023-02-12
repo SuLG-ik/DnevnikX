@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Badge
@@ -37,16 +36,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.toJavaLocalDate
 import ru.sulgik.dnevnikx.R
 import ru.sulgik.dnevnikx.mvi.marks.MarksStore
+import ru.sulgik.dnevnikx.platform.LocalTimeFormatter
 import ru.sulgik.dnevnikx.ui.diary.NoData
 import ru.sulgik.dnevnikx.ui.diary.Period
 import ru.sulgik.dnevnikx.ui.diary.PeriodPlaceholder
 import ru.sulgik.dnevnikx.ui.view.outlined
 import ru.sulgik.dnevnikx.utils.defaultPlaceholder
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,10 +66,10 @@ fun MarksScreen(
             )
         },
         modifier = modifier,
-    ) {
+    ) { paddingValues ->
         Box(
             modifier = Modifier
-                .padding(it)
+                .padding(paddingValues)
                 .fillMaxSize()
         ) {
             val scrollState = rememberScrollState()
@@ -114,7 +111,6 @@ fun MarksScreen(
                     }
                 }
             }
-
         }
     }
 }
@@ -129,7 +125,7 @@ fun Lesson(
     Column(
         modifier = modifier
             .outlined()
-            .padding(15.dp)
+            .padding(15.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -154,7 +150,7 @@ fun Lesson(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             lesson.marks.forEach { mark ->
-                Mark(mark = mark, onClick = onMark)
+                Mark(mark = mark, onClick = onMark, modifier = Modifier.weight(1f, fill = true))
             }
         }
     }
@@ -194,7 +190,7 @@ fun LessonPlaceholder(
         }
         Spacer(modifier = Modifier.height(15.dp))
         FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(13.dp),
         ) {
             repeat(12) {
                 MarkPlaceholder()
@@ -238,7 +234,7 @@ fun Mark(
             )
         }
         Text(
-            text = mark.date.format(),
+            text = LocalTimeFormatter.current.format(mark.date),
             style = MaterialTheme.typography.bodySmall,
             fontSize = 16.sp,
             color = LocalContentColor.current.copy(alpha = 0.5f)
@@ -258,12 +254,6 @@ fun MarkPlaceholder(
             .defaultPlaceholder(),
     )
 
-}
-
-private val formatter = DateTimeFormatter.ofPattern("dd.MM")
-
-fun LocalDate.format(): String {
-    return formatter.format(this.toJavaLocalDate())
 }
 
 @Composable

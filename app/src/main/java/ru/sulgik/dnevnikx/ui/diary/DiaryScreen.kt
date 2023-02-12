@@ -40,19 +40,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.toJavaLocalDate
-import kotlinx.datetime.toJavaLocalTime
 import ru.sulgik.dnevnikx.R
 import ru.sulgik.dnevnikx.mvi.diary.DiaryStore
-import ru.sulgik.dnevnikx.repository.data.DatePeriod
-import ru.sulgik.dnevnikx.repository.data.TimePeriod
+import ru.sulgik.dnevnikx.platform.DatePeriod
+import ru.sulgik.dnevnikx.platform.LocalTimeFormatter
 import ru.sulgik.dnevnikx.ui.marks.markColor
 import ru.sulgik.dnevnikx.ui.view.MiddleEllipsisText
 import ru.sulgik.dnevnikx.ui.view.outlined
 import ru.sulgik.dnevnikx.utils.defaultPlaceholder
 import java.time.DayOfWeek.*
 import java.time.Month.*
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -198,7 +195,7 @@ fun DiaryLesson(
                 .fillMaxWidth()
                 .weight(1f, fill = false)
         ) {
-            Text(text = lesson.time.format(), style = MaterialTheme.typography.bodyMedium)
+            Text(text = LocalTimeFormatter.current.format(lesson.time), style = MaterialTheme.typography.bodyMedium)
             Text(
                 text = lesson.title,
                 style = MaterialTheme.typography.bodyLarge,
@@ -294,11 +291,6 @@ fun File(
     }
 }
 
-private val formatter = DateTimeFormatter.ofPattern("HH:mm")
-
-private fun TimePeriod.format(): String {
-    return "${formatter.format(start.toJavaLocalTime())}-${formatter.format(end.toJavaLocalTime())}"
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -451,9 +443,8 @@ fun RowScope.CurrentPeriods(
     }
     val isOther =
         period.currentPeriod != period.selectedPeriod && period.nextPeriod != period.selectedPeriod && period.previousPeriod != period.selectedPeriod && period.currentPeriod != null
-    val formatter = remember { DateTimeFormatter.ofPattern("dd.MM", Locale.getDefault()) }
     Period(
-        period = if (isOther) period.selectedPeriod.format(formatter) else "Выбрать",
+        period = if (isOther) LocalTimeFormatter.current.format(period.selectedPeriod) else "Выбрать",
         onSelect = onOther,
         selected = isOther
     )
@@ -498,9 +489,6 @@ fun RowScope.Period(
     }
 }
 
-fun DatePeriod.format(formatter: DateTimeFormatter): String {
-    return "${formatter.format(start.toJavaLocalDate())} - ${formatter.format(end.toJavaLocalDate())}"
-}
 
 @Composable
 fun RowScope.PeriodPlaceholder(modifier: Modifier = Modifier) {

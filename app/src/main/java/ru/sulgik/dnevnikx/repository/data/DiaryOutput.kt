@@ -1,6 +1,7 @@
 package ru.sulgik.dnevnikx.repository.data
 
 import kotlinx.datetime.LocalDate
+import ru.sulgik.dnevnikx.platform.TimePeriod
 
 data class DiaryOutput(
     val diary: List<Item>,

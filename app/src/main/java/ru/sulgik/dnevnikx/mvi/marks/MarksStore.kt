@@ -2,7 +2,7 @@ package ru.sulgik.dnevnikx.mvi.marks
 
 import com.arkivanov.mvikotlin.core.store.Store
 import kotlinx.datetime.LocalDate
-import ru.sulgik.dnevnikx.repository.data.DatePeriod
+import ru.sulgik.dnevnikx.platform.DatePeriod
 
 interface MarksStore : Store<MarksStore.Intent, MarksStore.State, MarksStore.Label> {
 

@@ -4,7 +4,9 @@ import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import ru.sulgik.dnevnikx.platform.TimeFormatter
 import ru.sulgik.dnevnikx.platform.UriHandler
+import ru.sulgik.dnevnikx.platform.android.AndroidTimeFormatter
 import ru.sulgik.dnevnikx.platform.android.AndroidUriHandler
 
 class AndroidModule {
@@ -14,6 +16,7 @@ class AndroidModule {
         scope<AppCompatActivity> {
             scoped { AndroidUriHandler(get<AppCompatActivity>()) } bind UriHandler::class
         }
+        single { AndroidTimeFormatter() } bind TimeFormatter::class
     }
 
 }

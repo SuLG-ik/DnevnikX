@@ -17,7 +17,7 @@ import org.koin.core.annotation.Factory
 import ru.sulgik.dnevnikx.data.AuthScope
 import ru.sulgik.dnevnikx.mvi.directReducer
 import ru.sulgik.dnevnikx.mvi.syncDispatch
-import ru.sulgik.dnevnikx.repository.data.DatePeriod
+import ru.sulgik.dnevnikx.platform.DatePeriod
 import ru.sulgik.dnevnikx.repository.data.DiaryOutput
 import ru.sulgik.dnevnikx.repository.diary.RemoteDiaryRepository
 import ru.sulgik.dnevnikx.repository.periods.RemotePeriodsRepository

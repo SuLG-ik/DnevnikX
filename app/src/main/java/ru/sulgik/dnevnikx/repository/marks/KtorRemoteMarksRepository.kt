@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
 import ru.sulgik.dnevnikx.data.AuthScope
 import ru.sulgik.dnevnikx.repository.Client
-import ru.sulgik.dnevnikx.repository.data.DatePeriod
+import ru.sulgik.dnevnikx.platform.DatePeriod
 import ru.sulgik.dnevnikx.repository.data.MarksOutput
 import ru.sulgik.dnevnikx.repository.data.safeBody
 import ru.sulgik.dnevnikx.utils.CustomLocalDateSerializer

@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -19,6 +20,8 @@ import org.koin.androidx.scope.activityScope
 import org.koin.core.component.getScopeId
 import org.koin.core.qualifier.TypeQualifier
 import org.koin.core.scope.Scope
+import ru.sulgik.dnevnikx.platform.LocalTimeFormatter
+import ru.sulgik.dnevnikx.platform.android.AndroidTimeFormatter
 import ru.sulgik.dnevnikx.ui.proxy.ProxyComponent
 import ru.sulgik.dnevnikx.ui.theme.DnevnikXTheme
 import ru.sulgik.dnevnikx.ui.withDI
@@ -33,8 +36,13 @@ class MainActivity : AppCompatActivity(), AndroidScopeComponent {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
         component = ProxyComponent(defaultComponentContext().withDI(scope))
+        val formatter = AndroidTimeFormatter()
         setContent {
-            component.Content(modifier = Modifier.fillMaxSize())
+            CompositionLocalProvider(
+                LocalTimeFormatter provides formatter
+            ) {
+                component.Content(modifier = Modifier.fillMaxSize())
+            }
         }
     }
 }
