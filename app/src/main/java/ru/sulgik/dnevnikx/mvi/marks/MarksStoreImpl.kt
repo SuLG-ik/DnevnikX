@@ -120,7 +120,7 @@ class MarksStoreImpl(
     ) {
 
     private sealed interface Action {
-        data object Setup : Action
+        object Setup : Action
     }
 
 }

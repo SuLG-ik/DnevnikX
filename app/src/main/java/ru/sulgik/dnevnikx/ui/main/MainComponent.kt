@@ -56,7 +56,7 @@ class MainComponent(
     sealed interface Config : Parcelable {
 
         @Parcelize
-        data object Auth : Config
+        object Auth : Config
 
         @Parcelize
         data class Application(

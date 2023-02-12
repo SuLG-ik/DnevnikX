@@ -58,14 +58,14 @@ fun AuthScreen(
     isLoading: Boolean,
     username: String,
     password: String,
+    error: String?,
     onEditUsername: (String) -> Unit,
     onEditPassword: (String) -> Unit,
     onConfirm: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
-            .animateContentSize(),
+        modifier = modifier,
     ) {
         Column(
             modifier = Modifier
@@ -87,6 +87,7 @@ fun AuthScreen(
                 AuthInput(
                     username = username,
                     password = password,
+                    error = error,
                     onEditUsername = onEditUsername,
                     onEditPassword = onEditPassword,
                     onConfirm = onConfirm,
@@ -113,6 +114,7 @@ fun AuthScreen(
 fun AuthInput(
     username: String,
     password: String,
+    error: String?,
     onEditUsername: (String) -> Unit,
     onEditPassword: (String) -> Unit,
     onConfirm: () -> Unit,
@@ -124,6 +126,12 @@ fun AuthInput(
         modifier = modifier,
     ) {
         Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = error ?: "",
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.error,
+        )
         val focusManager = LocalFocusManager.current
         OutlinedTextField(
             value = username,
@@ -160,7 +168,8 @@ fun AuthInput(
             ),
             visualTransformation = PasswordVisualTransformation(),
             shape = MaterialTheme.shapes.extraLarge,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .autofill(AutofillType.Password, onFill = { onEditPassword(it) }),
         )
         OutlinedButton(onClick = onConfirm) {

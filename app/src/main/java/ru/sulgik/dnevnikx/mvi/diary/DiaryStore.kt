@@ -9,7 +9,7 @@ interface DiaryStore : Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Lab
 
     sealed interface Intent {
         data class SelectPeriod(val period: DatePeriod) : Intent
-        data object SelectOtherPeriod : Intent
+        object SelectOtherPeriod : Intent
     }
 
     data class State(

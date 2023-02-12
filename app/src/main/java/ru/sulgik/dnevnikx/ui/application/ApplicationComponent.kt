@@ -84,7 +84,7 @@ class ApplicationComponent(
 
 
         @Parcelize
-        data object Dairy : Config {
+        object Dairy : Config {
             override val icon: Int
                 get() = R.drawable.nav_dairy_icon
             override val title: Int
@@ -92,7 +92,7 @@ class ApplicationComponent(
         }
 
         @Parcelize
-        data object Marks : Config {
+        object Marks : Config {
             override val icon: Int
                 get() = R.drawable.nav_marks_icon
             override val title: Int
@@ -101,7 +101,7 @@ class ApplicationComponent(
         }
 
         @Parcelize
-        data object Profile : Config {
+        object Profile : Config {
             override val icon: Int
                 get() = R.drawable.nav_profile_icon
             override val title: Int

@@ -130,7 +130,7 @@ class DiaryStoreImpl(
 
 
     private sealed interface Action {
-        data object Setup : Action
+        object Setup : Action
     }
 
 }

@@ -1,11 +1,11 @@
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 android {
     namespace  = "ru.sulgik.dnevnikx"
@@ -38,9 +38,6 @@ android {
             buildConfigField("String", "APP_VERSION", "\"v0.0.1-001\"")
         }
     }
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions.languageVersion = "1.9"
-    }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
@@ -48,7 +45,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
-        languageVersion = "1.9"
+    }
+    kotlin {
+        jvmToolchain(11)
     }
     buildFeatures {
         compose = true
@@ -62,9 +61,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-
-
-
     applicationVariants.all {
         kotlin.sourceSets {
             getByName(name) {
@@ -76,9 +72,11 @@ android {
 
 dependencies {
     coreLibraryDesugaring(libs.desugar.libs)
-//    coreLibraryDesugaring(libs.desugar.minimal)
     implementation(libs.bundles.compose)
     implementation(libs.kotlin.reflect)
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.core)
+    implementation(libs.firebase.crashlytics)
     debugImplementation(libs.bundles.compose.debug)
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.coroutines)

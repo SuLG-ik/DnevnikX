@@ -85,6 +85,7 @@ class AuthComponent(
                 isLoading = state.isLoading || state.isConfirming || isShown ,
                 username = state.username,
                 password = state.password,
+                error = state.error,
                 onEditUsername = this::onEditUsername,
                 onEditPassword = this::onEditPassword,
                 onConfirm = this::onConfirm,

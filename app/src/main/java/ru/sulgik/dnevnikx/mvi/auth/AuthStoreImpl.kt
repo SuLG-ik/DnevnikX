@@ -12,6 +12,7 @@ import ru.sulgik.dnevnikx.mvi.syncDispatch
 import ru.sulgik.dnevnikx.repository.auth.Authorization
 import ru.sulgik.dnevnikx.repository.auth.LocalAuthRepository
 import ru.sulgik.dnevnikx.repository.auth.RemoteAuthRepository
+import ru.sulgik.dnevnikx.repository.data.ErrorResponseException
 
 @OptIn(ExperimentalMviKotlinApi::class)
 @Factory(binds = [AuthStore::class])
@@ -30,27 +31,38 @@ class AuthStoreImpl(
                     return@onIntent
                 dispatch(state.copy(isLoading = true))
                 launch {
-                    val user = remoteAuthRepository.authorize(state.username, state.password)
-                    syncDispatch(
-                        state.copy(
-                            isLoading = false,
-                            authorizedUser = user,
-                            isConfirming = true,
+                    try {
+                        val user = remoteAuthRepository.authorize(state.username, state.password)
+                        syncDispatch(
+                            state.copy(
+                                isLoading = false,
+                                authorizedUser = user,
+                                isConfirming = true,
+                            )
                         )
-                    )
+                    } catch (e: ErrorResponseException) {
+                        syncDispatch(
+                            state.copy(
+                                isLoading = false,
+                                authorizedUser = null,
+                                isConfirming = false,
+                                error = e.error
+                            )
+                        )
+                    }
                 }
             }
             onIntent<AuthStore.Intent.EditUsername> {
                 val state = state
                 if (state.isLoading)
                     return@onIntent
-                dispatch(state.copy(username = it.value.filterNot(Char::isWhitespace)))
+                dispatch(state.copy(username = it.value.filterNot(Char::isWhitespace), error = null))
             }
             onIntent<AuthStore.Intent.EditPassword> {
                 val state = state
                 if (state.isLoading)
                     return@onIntent
-                dispatch(state.copy(password = it.value.filterNot(Char::isWhitespace)))
+                dispatch(state.copy(password = it.value.filterNot(Char::isWhitespace), error = null))
             }
             onIntent<AuthStore.Intent.ResetAuth> {
                 val state = state

@@ -75,7 +75,7 @@ class ProxyComponent(componentContext: DIComponentContext) :
     sealed interface Config : Parcelable {
 
         @Parcelize
-        data object Splash : Config
+        object Splash : Config
 
         @Parcelize
         data class Main(val authScope: AuthScope?) : Config
