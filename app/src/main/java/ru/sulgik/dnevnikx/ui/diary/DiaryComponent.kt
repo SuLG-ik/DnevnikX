@@ -27,8 +27,8 @@ class DiaryComponent(
 ) : BaseAuthorizedComponentContext(componentContext) {
 
 
-    val timeFormatter = get<TimeFormatter>()
-    val store = getStore<DiaryStore>()
+    private val timeFormatter = get<TimeFormatter>()
+    private val store = getStore<DiaryStore>()
 
     private val currentData = LocalDate.now()
 

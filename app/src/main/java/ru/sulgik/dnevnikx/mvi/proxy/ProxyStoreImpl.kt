@@ -12,6 +12,7 @@ import ru.sulgik.dnevnikx.data.AuthScope
 import ru.sulgik.dnevnikx.mvi.directReducer
 import ru.sulgik.dnevnikx.mvi.syncDispatch
 import ru.sulgik.dnevnikx.repository.auth.LocalAuthRepository
+import ru.sulgik.dnevnikx.repository.auth.LocalSessionAccountRepository
 
 @OptIn(ExperimentalMviKotlinApi::class)
 @Factory(binds = [ProxyStore::class])
@@ -19,6 +20,7 @@ class ProxyStoreImpl(
     storeFactory: StoreFactory,
     coroutineDispatcher: CoroutineDispatcher,
     savedState: ProxyStore.State?,
+    sessionAccountRepository: LocalSessionAccountRepository,
     localAuthRepository: LocalAuthRepository,
 ) : ProxyStore,
     Store<ProxyStore.Intent, ProxyStore.State, ProxyStore.Label> by storeFactory.create<_, Action, _, _, _>(
@@ -31,17 +33,18 @@ class ProxyStoreImpl(
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
             onAction<Action.Setup> {
                 launch {
-                    val authorization = localAuthRepository.getAuthorizationOrNull()
-                    if (authorization != null) {
-                        syncDispatch(
-                            ProxyStore.State(
-                                authScope = AuthScope(id = authorization.id),
-                                isLoading = false,
-                            )
-                        )
-                    } else {
+                    val lastSession = sessionAccountRepository.getLastAccountSession()
+                    if (lastSession == null) {
                         syncDispatch(ProxyStore.State(authScope = null, isLoading = false))
+                        return@launch
                     }
+                    val authorization = localAuthRepository.getAuthorization(lastSession.accountId)
+                    syncDispatch(
+                        ProxyStore.State(
+                            authScope = AuthScope(id = authorization.accountId),
+                            isLoading = false,
+                        )
+                    )
                 }
             }
         },

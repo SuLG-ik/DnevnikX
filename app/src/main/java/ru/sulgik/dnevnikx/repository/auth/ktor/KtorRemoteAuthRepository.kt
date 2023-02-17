@@ -1,16 +1,15 @@
-package ru.sulgik.dnevnikx.repository.auth
+package ru.sulgik.dnevnikx.repository.auth.ktor
 
-import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.http.parametersOf
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import ru.sulgik.dnevnikx.repository.auth.RemoteAuthRepository
 import ru.sulgik.dnevnikx.repository.data.UserOutput
 import ru.sulgik.dnevnikx.repository.data.safeBody
 

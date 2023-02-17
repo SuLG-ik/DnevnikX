@@ -41,7 +41,7 @@ class AboutComponent(componentContext: DIComponentContext) :
 
     @Composable
     override fun Content(modifier: Modifier) {
-        AboutUI(
+        AboutScreen(
             aboutData = state,
             onDeveloper = this::onDeveloper,
             onDomain = this::onDomain,

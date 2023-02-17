@@ -3,10 +3,16 @@ package ru.sulgik.dnevnikx.ui.main
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.router.stack.StackNavigation
+import com.arkivanov.decompose.router.stack.bringToFront
+import com.arkivanov.decompose.router.stack.pop
+import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
+import ru.sulgik.dnevnikx.data.Account
 import ru.sulgik.dnevnikx.data.AuthScope
+import ru.sulgik.dnevnikx.mvi.getParameterizedStore
+import ru.sulgik.dnevnikx.mvi.main.MainStore
 import ru.sulgik.dnevnikx.ui.BaseComponentContext
 import ru.sulgik.dnevnikx.ui.Content
 import ru.sulgik.dnevnikx.ui.DIComponentContext
@@ -24,15 +30,30 @@ class MainComponent(
 
     private val childStack = diChildStack(
         source = navigation,
-        initialConfiguration = if (authScope == null) Config.Auth else Config.Application(authScope),
+        initialConfiguration = if (authScope == null) Config.Auth() else Config.Application(authScope),
         key = "MainRouter",
         handleBackButton = true,
         childFactory = this::createChild,
     )
 
+    private val store: MainStore = getParameterizedStore { MainStore.Params(authScope) }
+
     private fun onAuthenticated(authScope: AuthScope) {
+        store.accept(MainStore.Intent.ReAuth(authScope))
         scope.declare(authScope, allowOverride = true)
         navigation.replaceAll(Config.Application(authScope))
+    }
+
+    private fun onAuthenticated(account: Account) {
+        onAuthenticated(AuthScope(account.id))
+    }
+
+    private fun onAuthorizationBack() {
+        navigation.pop()
+    }
+
+    private fun onAddAccount() {
+        navigation.push(Config.Auth(isBackAvailable = true))
     }
 
     private fun createChild(
@@ -40,8 +61,18 @@ class MainComponent(
         componentContext: DIComponentContext,
     ): BaseComponentContext {
         return when (config) {
-            is Config.Auth -> AuthComponent(componentContext, this::onAuthenticated)
-            is Config.Application -> ApplicationComponent(componentContext.withAuth(config.authScope))
+            is Config.Auth -> AuthComponent(
+                componentContext,
+                this::onAuthenticated,
+                isBackAvailable = config.isBackAvailable,
+                onBack = this::onAuthorizationBack,
+            )
+
+            is Config.Application -> ApplicationComponent(
+                componentContext = componentContext.withAuth(scope = config.authScope),
+                onReAuth = this::onAuthenticated,
+                onAddAccount = this::onAddAccount,
+            )
         }
     }
 
@@ -56,7 +87,9 @@ class MainComponent(
     sealed interface Config : Parcelable {
 
         @Parcelize
-        object Auth : Config
+        data class Auth(
+            val isBackAvailable: Boolean = false,
+        ) : Config
 
         @Parcelize
         data class Application(

@@ -15,6 +15,7 @@ import ru.sulgik.dnevnikx.ui.authChildStack
 
 class ProfileHostComponent(
     componentContext: AuthorizedComponentContext,
+    private val onSelectAccount: () -> Unit,
 ) : BaseAuthorizedComponentContext(componentContext) {
 
 
@@ -38,10 +39,11 @@ class ProfileHostComponent(
         return when (config) {
             is Config.About -> AboutComponent(componentContext)
             is Config.Profile -> ProfileComponent(
-                componentContext,
+                componentContext = componentContext,
                 onSchedule = {},
                 onAbout = this::onAbout,
                 onUpdates = {},
+                onSelectAccount = onSelectAccount,
             )
         }
     }

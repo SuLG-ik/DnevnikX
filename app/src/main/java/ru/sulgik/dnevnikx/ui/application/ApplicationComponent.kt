@@ -15,16 +15,24 @@ import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import ru.sulgik.dnevnikx.R
+import ru.sulgik.dnevnikx.data.Account
 import ru.sulgik.dnevnikx.ui.AuthorizedComponentContext
 import ru.sulgik.dnevnikx.ui.BaseAuthorizedComponentContext
 import ru.sulgik.dnevnikx.ui.Content
+import ru.sulgik.dnevnikx.ui.FloatingModalUI
+import ru.sulgik.dnevnikx.ui.ModalUI
 import ru.sulgik.dnevnikx.ui.authChildStack
+import ru.sulgik.dnevnikx.ui.childAuthContext
+import ru.sulgik.dnevnikx.ui.childDIContext
 import ru.sulgik.dnevnikx.ui.diary.DiaryComponent
 import ru.sulgik.dnevnikx.ui.marks.MarksComponent
 import ru.sulgik.dnevnikx.ui.profile.ProfileHostComponent
+import ru.sulgik.dnevnikx.ui.profile.selector.AccountSelectorComponent
 
 class ApplicationComponent(
     componentContext: AuthorizedComponentContext,
+    onReAuth: (Account) -> Unit,
+    onAddAccount: () -> Unit,
 ) : BaseAuthorizedComponentContext(componentContext) {
 
     private val navigation = StackNavigation<Config>()
@@ -36,6 +44,13 @@ class ApplicationComponent(
         childFactory = this::createChild,
     )
 
+    private val accountSelector =
+        AccountSelectorComponent(
+            componentContext = childAuthContext(key = "account_selector"),
+            onAccountSelected = onReAuth,
+            onAddAccount = onAddAccount,
+        )
+
     private fun createChild(
         config: Config,
         componentContext: AuthorizedComponentContext,
@@ -43,7 +58,10 @@ class ApplicationComponent(
         return when (config) {
             Config.Dairy -> DiaryComponent(componentContext)
             Config.Marks -> MarksComponent(componentContext)
-            Config.Profile -> ProfileHostComponent(componentContext)
+            Config.Profile -> ProfileHostComponent(
+                componentContext = componentContext,
+                onSelectAccount = this::onExpandAccountSelector
+            )
         }
     }
 
@@ -51,28 +69,43 @@ class ApplicationComponent(
         navigation.bringToFront(config)
     }
 
+    private fun onSecondaryNavigate(config: Config) {
+        when (config) {
+            is Config.Profile -> onExpandAccountSelector()
+            else -> {}
+        }
+    }
+
+    private fun onExpandAccountSelector() {
+        accountSelector.onAccountSelection()
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(modifier: Modifier) {
-        val childState by childStack.subscribeAsState()
-        Scaffold(
-            bottomBar = {
-                ApplicationBottomNavigation(
-                    childState.active.configuration,
-                    onClick = this::onNavigate,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        ) {
-            Box(
-                modifier = Modifier
-                    .padding(it)
-                    .fillMaxSize()
+        FloatingModalUI(component = accountSelector) {
+            val childState by childStack.subscribeAsState()
+            Scaffold(
+                bottomBar = {
+                    ApplicationBottomNavigation(
+                        Config.navItems,
+                        childState.active.configuration,
+                        onClick = this::onNavigate,
+                        onLongClick = this::onSecondaryNavigate,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             ) {
-                childState.Content(
-                    Modifier.fillMaxSize(),
-                    animation = null,
-                )
+                Box(
+                    modifier = Modifier
+                        .padding(it)
+                        .fillMaxSize()
+                ) {
+                    childState.Content(
+                        Modifier.fillMaxSize(),
+                        animation = null,
+                    )
+                }
             }
         }
     }
@@ -81,6 +114,7 @@ class ApplicationComponent(
 
         val icon: Int
         val title: Int
+        val haptic: Boolean
 
 
         @Parcelize
@@ -89,6 +123,8 @@ class ApplicationComponent(
                 get() = R.drawable.nav_dairy_icon
             override val title: Int
                 get() = R.string.nav_diary_title
+            override val haptic: Boolean
+                get() = false
         }
 
         @Parcelize
@@ -97,6 +133,8 @@ class ApplicationComponent(
                 get() = R.drawable.nav_marks_icon
             override val title: Int
                 get() = R.string.nav_marks_title
+            override val haptic: Boolean
+                get() = false
 
         }
 
@@ -106,6 +144,8 @@ class ApplicationComponent(
                 get() = R.drawable.nav_profile_icon
             override val title: Int
                 get() = R.string.nav_profile_title
+            override val haptic: Boolean
+                get() = true
 
         }
 
