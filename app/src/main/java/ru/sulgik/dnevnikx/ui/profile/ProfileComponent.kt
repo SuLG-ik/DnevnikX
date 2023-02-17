@@ -10,6 +10,7 @@ class ProfileComponent(
     private val onSchedule: () -> Unit,
     private val onUpdates: () -> Unit,
     private val onAbout: () -> Unit,
+    private val onSelectAccount: () -> Unit,
 ) : BaseAuthorizedComponentContext(componentContext) {
 
     @Composable
@@ -18,6 +19,7 @@ class ProfileComponent(
             onSchedule = onSchedule,
             onUpdates = onUpdates,
             onAbout = onAbout,
+            onSelectAccount = onSelectAccount,
             modifier = modifier,
         )
     }

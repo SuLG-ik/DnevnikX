@@ -1,7 +1,6 @@
 package ru.sulgik.dnevnikx.ui.auth
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -11,6 +10,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,9 +19,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +36,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.layout.HorizontalAlignmentLine
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -62,6 +69,7 @@ fun AuthScreen(
     onEditUsername: (String) -> Unit,
     onEditPassword: (String) -> Unit,
     onConfirm: () -> Unit,
+    onBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -91,6 +99,7 @@ fun AuthScreen(
                     onEditUsername = onEditUsername,
                     onEditPassword = onEditPassword,
                     onConfirm = onConfirm,
+                    onBack = onBack,
                     modifier = Modifier
                         .padding(horizontal = 10.dp)
                         .width(300.dp),
@@ -98,7 +107,7 @@ fun AuthScreen(
             }
         }
         Text(
-            message,
+            text = message,
             style = MaterialTheme.typography.labelMedium,
             textAlign = TextAlign.Center,
             modifier = Modifier
@@ -118,6 +127,7 @@ fun AuthInput(
     onEditUsername: (String) -> Unit,
     onEditPassword: (String) -> Unit,
     onConfirm: () -> Unit,
+    onBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -172,8 +182,27 @@ fun AuthInput(
                 .fillMaxWidth()
                 .autofill(AutofillType.Password, onFill = { onEditPassword(it) }),
         )
-        OutlinedButton(onClick = onConfirm) {
-            Text("Продолжить")
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            if (onBack != null) {
+                OutlinedIconButton(
+                    colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
+                    border = ButtonDefaults.outlinedButtonBorder,
+                    onClick = onBack
+                ) {
+                    Icon(Icons.Outlined.ArrowBack, contentDescription = "назад")
+                }
+            }
+            OutlinedButton(onClick = onConfirm) {
+                Text("Продолжить")
+            }
+            if (onBack != null) {
+                Box(
+                    modifier = Modifier.size(48.dp)
+                )
+            }
         }
     }
 }

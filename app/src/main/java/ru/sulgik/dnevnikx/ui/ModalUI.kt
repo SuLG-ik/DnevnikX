@@ -15,7 +15,7 @@ import ru.sulgik.dnevnikx.ui.view.modal.rememberBlurModalBottomSheetState
 
 @Composable
 fun FloatingModalUI(
-    component: ModalComponentContext,
+    component: Modal,
     modifier: Modifier = Modifier,
     showDivider: Boolean = true,
     content: @Composable () -> Unit,
@@ -67,7 +67,7 @@ fun FloatingModalUI(
 
 @Composable
 fun ModalUI(
-    component: ModalComponentContext,
+    component: Modal,
     modifier: Modifier = Modifier,
     showDivider: Boolean = true,
     content: @Composable () -> Unit,

@@ -2,9 +2,11 @@ package ru.sulgik.dnevnikx.ui.profile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,12 +15,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +41,7 @@ fun ProfileScreen(
     onSchedule: () -> Unit,
     onUpdates: () -> Unit,
     onAbout: () -> Unit,
+    onSelectAccount: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -52,6 +59,7 @@ fun ProfileScreen(
                 modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
                 Profile(
+                    onSelectAccount = onSelectAccount,
                     modifier = Modifier
                         .fillMaxWidth()
                 )
@@ -72,6 +80,7 @@ fun ProfileScreen(
 
 @Composable
 fun Profile(
+    onSelectAccount: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -86,7 +95,21 @@ fun Profile(
                 .size(150.dp)
         )
         Spacer(modifier = Modifier.height(15.dp))
-        Text("Имя Фамилия Отчество", style = MaterialTheme.typography.bodyLarge)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onSelectAccount,
+            )
+        ) {
+            Text("Имя Фамилия Отчество", style = MaterialTheme.typography.bodyLarge)
+            Icon(
+                imageVector = Icons.Outlined.ArrowDropDown,
+                contentDescription = "раскрыть",
+                modifier = Modifier.size(20.dp)
+            )
+        }
     }
 }
 

@@ -7,8 +7,12 @@ import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Factory
+import ru.sulgik.dnevnikx.data.Account
+import ru.sulgik.dnevnikx.data.AccountData
 import ru.sulgik.dnevnikx.mvi.directReducer
 import ru.sulgik.dnevnikx.mvi.syncDispatch
+import ru.sulgik.dnevnikx.repository.account.LocalAccountDataRepository
+import ru.sulgik.dnevnikx.repository.account.LocalAccountRepository
 import ru.sulgik.dnevnikx.repository.auth.Authorization
 import ru.sulgik.dnevnikx.repository.auth.LocalAuthRepository
 import ru.sulgik.dnevnikx.repository.auth.RemoteAuthRepository
@@ -21,6 +25,8 @@ class AuthStoreImpl(
     coroutineDispatcher: CoroutineDispatcher,
     remoteAuthRepository: RemoteAuthRepository,
     localAuthRepository: LocalAuthRepository,
+    localAccountRepository: LocalAccountRepository,
+    localAccountDataRepository: LocalAccountDataRepository,
 ) : AuthStore,
     Store<AuthStore.Intent, AuthStore.State, AuthStore.Label> by storeFactory.create<_, Nothing, _, _, _>(
         name = "AuthStoreImpl",
@@ -56,13 +62,23 @@ class AuthStoreImpl(
                 val state = state
                 if (state.isLoading)
                     return@onIntent
-                dispatch(state.copy(username = it.value.filterNot(Char::isWhitespace), error = null))
+                dispatch(
+                    state.copy(
+                        username = it.value.filterNot(Char::isWhitespace),
+                        error = null
+                    )
+                )
             }
             onIntent<AuthStore.Intent.EditPassword> {
                 val state = state
                 if (state.isLoading)
                     return@onIntent
-                dispatch(state.copy(password = it.value.filterNot(Char::isWhitespace), error = null))
+                dispatch(
+                    state.copy(
+                        password = it.value.filterNot(Char::isWhitespace),
+                        error = null
+                    )
+                )
             }
             onIntent<AuthStore.Intent.ResetAuth> {
                 val state = state
@@ -76,10 +92,17 @@ class AuthStoreImpl(
                     return@onIntent
                 dispatch(state.copy(isLoading = true))
                 launch {
-                    localAuthRepository.setAuthorization(
+                    localAccountRepository.addAccount(Account(state.authorizedUser.id))
+                    localAccountDataRepository.setData(
+                        AccountData(
+                            accountId = state.authorizedUser.id,
+                            name = state.authorizedUser.title,
+                        )
+                    )
+                    localAuthRepository.addAuthorization(
                         Authorization(
                             token = state.authorizedUser.token,
-                            id = state.authorizedUser.id,
+                            accountId = state.authorizedUser.id,
                         )
                     )
                     syncDispatch(state.copy(isCompleted = true, isLoading = false))

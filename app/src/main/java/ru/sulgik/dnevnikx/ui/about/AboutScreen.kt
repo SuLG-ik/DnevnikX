@@ -32,7 +32,7 @@ import ru.sulgik.dnevnikx.ui.view.outlined
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutUI(
+fun AboutScreen(
     aboutData: AboutData,
     onDeveloper: () -> Unit,
     onDomain: () -> Unit,

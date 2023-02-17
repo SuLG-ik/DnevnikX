@@ -23,6 +23,8 @@ import ru.sulgik.dnevnikx.ui.childDIContext
 class AuthComponent(
     componentContext: DIComponentContext,
     private val onAuthenticated: (AuthScope) -> Unit,
+    private val isBackAvailable: Boolean = false,
+    private val onBack: () -> Unit = {},
 ) : BaseComponentContext(componentContext) {
 
     private val store = getStore<AuthStore>()
@@ -37,6 +39,10 @@ class AuthComponent(
 
     private fun onConfirmComplete() {
         store.accept(AuthStore.Intent.ConfirmCompleted)
+    }
+
+    private fun onBack() {
+        onBack.invoke()
     }
 
     private val state by store.states(this) {
@@ -65,7 +71,7 @@ class AuthComponent(
     override fun Content(modifier: Modifier) {
         var isShown by rememberSaveable { mutableStateOf(true) }
         LaunchedEffect(key1 = null) {
-            if(isShown) {
+            if (isShown) {
                 isShown = false
             }
         }
@@ -82,13 +88,14 @@ class AuthComponent(
         })
         FloatingModalUI(component = confirmUser, modifier = modifier) {
             AuthScreen(
-                isLoading = state.isLoading || state.isConfirming || isShown ,
+                isLoading = state.isLoading || state.isConfirming || isShown,
                 username = state.username,
                 password = state.password,
                 error = state.error,
                 onEditUsername = this::onEditUsername,
                 onEditPassword = this::onEditPassword,
                 onConfirm = this::onConfirm,
+                onBack = if (isBackAvailable) this::onBack else null,
                 modifier = Modifier.fillMaxSize()
             )
         }
