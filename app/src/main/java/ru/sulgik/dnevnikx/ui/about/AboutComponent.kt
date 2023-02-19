@@ -9,7 +9,11 @@ import ru.sulgik.dnevnikx.platform.UriHandler
 import ru.sulgik.dnevnikx.ui.BaseComponentContext
 import ru.sulgik.dnevnikx.ui.DIComponentContext
 
-class AboutComponent(componentContext: DIComponentContext) :
+class AboutComponent(
+    componentContext: DIComponentContext,
+    val isBackAvailable: Boolean = false,
+    val onBack: () -> Unit = {},
+) :
     BaseComponentContext(componentContext) {
 
 
@@ -39,12 +43,20 @@ class AboutComponent(componentContext: DIComponentContext) :
         uriHandler.open(state.domain.uri)
     }
 
+    private fun onBack() {
+        if (isBackAvailable) {
+            onBack.invoke()
+        }
+    }
+
     @Composable
     override fun Content(modifier: Modifier) {
         AboutScreen(
             aboutData = state,
+            backAvailable = isBackAvailable,
             onDeveloper = this::onDeveloper,
             onDomain = this::onDomain,
+            onBack = this::onBack,
             modifier = modifier
         )
     }

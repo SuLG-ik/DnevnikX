@@ -32,7 +32,7 @@ class AuthStoreImpl(
         name = "AuthStoreImpl",
         initialState = AuthStore.State(),
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
-            onIntent<AuthStore.Intent.Confirm> {
+                onIntent<AuthStore.Intent.Confirm> {
                 if (state.isLoading)
                     return@onIntent
                 dispatch(state.copy(isLoading = true))

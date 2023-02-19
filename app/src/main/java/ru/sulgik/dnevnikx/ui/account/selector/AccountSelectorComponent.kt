@@ -1,4 +1,4 @@
-package ru.sulgik.dnevnikx.ui.profile.selector
+package ru.sulgik.dnevnikx.ui.account.selector
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue

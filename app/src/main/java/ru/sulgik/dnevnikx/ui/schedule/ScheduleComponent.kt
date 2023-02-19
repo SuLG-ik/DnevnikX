@@ -1,4 +1,4 @@
-package ru.sulgik.dnevnikx.ui.diary
+package ru.sulgik.dnevnikx.ui.schedule
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -8,13 +8,12 @@ import com.arkivanov.essenty.parcelable.Parcelize
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
 import org.koin.core.component.get
-import ru.sulgik.dnevnikx.mvi.diary.DiaryStore
 import ru.sulgik.dnevnikx.mvi.getStore
+import ru.sulgik.dnevnikx.mvi.schedule.ScheduleStore
 import ru.sulgik.dnevnikx.mvi.states
 import ru.sulgik.dnevnikx.platform.ComparableRange
 import ru.sulgik.dnevnikx.platform.DatePeriod
 import ru.sulgik.dnevnikx.platform.TimeFormatter
-import ru.sulgik.dnevnikx.platform.UriHandler
 import ru.sulgik.dnevnikx.ui.AuthorizedComponentContext
 import ru.sulgik.dnevnikx.ui.BaseAuthorizedComponentContext
 import ru.sulgik.dnevnikx.ui.ModalUI
@@ -22,13 +21,16 @@ import ru.sulgik.dnevnikx.ui.childDIContext
 import ru.sulgik.dnevnikx.ui.picker.PickerComponent
 import java.time.LocalDate
 
-class DiaryComponent(
+class ScheduleComponent(
     componentContext: AuthorizedComponentContext,
+    private val backAvailable: Boolean = false,
+    private val onBack: () -> Unit = {},
 ) : BaseAuthorizedComponentContext(componentContext) {
 
+    val store = getStore<ScheduleStore>()
 
-    private val store = getStore<DiaryStore>()
     private val timeFormatter = get<TimeFormatter>()
+
 
     private val currentData = LocalDate.now()
 
@@ -38,10 +40,6 @@ class DiaryComponent(
             onContinue = this::onPickerSelected,
             marked = { currentData in it.data }
         )
-
-    private fun onPickerSelected(info: PickerComponent.Info<DatePeriodContainer>) {
-        onSelect(DatePeriod(info.data.start.toKotlinLocalDate(), info.data.end.toKotlinLocalDate()))
-    }
 
     val state by store.states(this) {
         if (it.periods.data?.isOther == true) {
@@ -54,6 +52,17 @@ class DiaryComponent(
         it
     }
 
+    private fun onBack() {
+        if (backAvailable) {
+            onBack.invoke()
+        }
+    }
+
+    private fun onPickerSelected(info: PickerComponent.Info<DatePeriodContainer>) {
+        onSelect(DatePeriod(info.data.start.toKotlinLocalDate(), info.data.end.toKotlinLocalDate()))
+    }
+
+
     private fun DatePeriod.toInfo(): PickerComponent.Info<DatePeriodContainer> {
         return PickerComponent.Info(
             DatePeriodContainer(
@@ -64,33 +73,30 @@ class DiaryComponent(
         )
     }
 
-    private val uriHandler = get<UriHandler>()
-
-    private fun onFile(file: DiaryStore.State.File) {
-        uriHandler.open(file.url)
-    }
-
-    @Composable
-    override fun Content(modifier: Modifier) {
-        ModalUI(component = picker) {
-            DiaryScreen(
-                periods = state.periods,
-                diary = state.diary,
-                onSelect = this::onSelect,
-                onOther = this::onOther,
-                onFile = this::onFile,
-                modifier = modifier
-            )
-        }
-    }
 
     private fun onSelect(period: DatePeriod) {
-        store.accept(DiaryStore.Intent.SelectPeriod(period))
+        store.accept(ScheduleStore.Intent.SelectPeriod(period))
     }
 
 
     private fun onOther() {
-        store.accept(DiaryStore.Intent.SelectOtherPeriod)
+        store.accept(ScheduleStore.Intent.SelectOtherPeriod)
+    }
+
+    @Composable
+    override fun Content(modifier: Modifier) {
+        val state = state
+        ModalUI(component = picker) {
+            ScheduleScreen(
+                state.periods,
+                state.schedule,
+                backAvailable = backAvailable,
+                onSelect = this::onSelect,
+                onOther = this::onOther,
+                onBack = this::onBack,
+                modifier = modifier,
+            )
+        }
     }
 
     @Parcelize
@@ -101,5 +107,3 @@ class DiaryComponent(
 
 
 }
-
-

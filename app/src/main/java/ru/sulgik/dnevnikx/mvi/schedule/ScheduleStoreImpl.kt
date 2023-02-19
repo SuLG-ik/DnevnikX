@@ -1,4 +1,4 @@
-package ru.sulgik.dnevnikx.mvi.diary
+package ru.sulgik.dnevnikx.mvi.schedule
 
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
@@ -15,45 +15,51 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toKotlinLocalDate
 import org.koin.core.annotation.Factory
 import ru.sulgik.dnevnikx.data.AuthScope
+import ru.sulgik.dnevnikx.mvi.diary.getPeriod
 import ru.sulgik.dnevnikx.mvi.directReducer
 import ru.sulgik.dnevnikx.mvi.syncDispatch
 import ru.sulgik.dnevnikx.platform.DatePeriod
-import ru.sulgik.dnevnikx.repository.data.DiaryOutput
-import ru.sulgik.dnevnikx.repository.diary.RemoteDiaryRepository
+import ru.sulgik.dnevnikx.repository.account.RemoteAccountRepository
+import ru.sulgik.dnevnikx.repository.data.GetAccountOutput
+import ru.sulgik.dnevnikx.repository.data.GetScheduleOutput
 import ru.sulgik.dnevnikx.repository.periods.RemotePeriodsRepository
+import ru.sulgik.dnevnikx.repository.schedule.RemoteScheduleRepository
 import java.time.LocalDate
 
-
 @OptIn(ExperimentalMviKotlinApi::class)
-@Factory(binds = [DiaryStore::class])
-class DiaryStoreImpl(
+@Factory(binds = [ScheduleStore::class])
+class ScheduleStoreImpl(
     storeFactory: StoreFactory,
     coroutineDispatcher: CoroutineDispatcher,
-    auth: AuthScope,
+    authScope: AuthScope,
+    remoteAccountRepository: RemoteAccountRepository,
     remotePeriodsRepository: RemotePeriodsRepository,
-    remoteDiaryRepository: RemoteDiaryRepository,
-) : DiaryStore,
-    Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Label> by storeFactory.create<_, Action, _, _, _>(
-        name = "DiaryStoreImpl",
-        initialState = DiaryStore.State(),
-        bootstrapper = coroutineBootstrapper {
+    remoteScheduleRepository: RemoteScheduleRepository,
+) : ScheduleStore,
+    Store<ScheduleStore.Intent, ScheduleStore.State, ScheduleStore.Label> by storeFactory.create<_, Action, _, _, _>(
+        name = "ScheduleStoreImpl",
+        initialState = ScheduleStore.State(),
+        bootstrapper = coroutineBootstrapper(coroutineDispatcher) {
             dispatch(Action.Setup)
         },
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
-            val cache = mutableMapOf<DatePeriod, DiaryStore.State.Diary>()
+            val cache = mutableMapOf<DatePeriod, ScheduleStore.State.Schedule>()
+            var cachedAccount: GetAccountOutput? = null
             onAction<Action.Setup> {
                 launch {
+                    val account = remoteAccountRepository.getAccount(authScope)
+                    cachedAccount = account
                     val periods =
-                        remotePeriodsRepository.getPeriods(auth).periods.flatMap { it.nestedPeriods }
+                        remotePeriodsRepository.getPeriods(authScope).periods.flatMap { it.nestedPeriods }
                     val currentDate = LocalDate.now().toKotlinLocalDate()
                     val currentPeriod = getPeriod(currentDate)
                     val nextPeriod = getPeriod(currentDate.plus(1, DateTimeUnit.WEEK))
                     val previousPeriod = getPeriod(currentDate.minus(1, DateTimeUnit.WEEK))
                     syncDispatch(
-                        DiaryStore.State(
-                            periods = DiaryStore.State.Periods(
+                        ScheduleStore.State(
+                            periods = ScheduleStore.State.Periods(
                                 isLoading = false,
-                                data = DiaryStore.State.PeriodsData(
+                                data = ScheduleStore.State.PeriodsData(
                                     currentPeriod = if (currentPeriod in periods) currentPeriod else null,
                                     nextPeriod = if (nextPeriod in periods) nextPeriod else null,
                                     previousPeriod = if (previousPeriod in periods) previousPeriod else null,
@@ -64,17 +70,21 @@ class DiaryStoreImpl(
                             )
                         )
                     )
-                    val diary = remoteDiaryRepository.getDiary(auth, currentPeriod).toState()
-                    cache[currentPeriod] = diary
+                    val schedule = remoteScheduleRepository.getSchedule(
+                        auth = authScope,
+                        period = currentPeriod,
+                        classGroup = account.student.classGroup.title
+                    ).toState()
+                    cache[currentPeriod] = schedule
                     syncDispatch(
                         state.copy(
-                            diary = diary,
+                            schedule = schedule,
                         )
                     )
                 }
             }
 
-            onIntent<DiaryStore.Intent.SelectOtherPeriod> {
+            onIntent<ScheduleStore.Intent.SelectOtherPeriod> {
                 val state = state
                 if (state.periods.isLoading || state.periods.data == null)
                     return@onIntent
@@ -89,37 +99,43 @@ class DiaryStoreImpl(
                 )
             }
             var selectPeriodJob: Job? = null
-            onIntent<DiaryStore.Intent.SelectPeriod> { intent ->
+            onIntent<ScheduleStore.Intent.SelectPeriod> { intent ->
                 val state = state
                 if (state.periods.isLoading || state.periods.data == null)
                     return@onIntent
                 dispatch(
                     state.copy(
-                        diary = DiaryStore.State.Diary(),
+                        schedule = ScheduleStore.State.Schedule(),
                         periods = state.periods.copy(
                             data = state.periods.data.copy(
                                 selectedPeriod = intent.period,
                                 isOther = false,
                             ),
-                            )
+                        )
                     )
                 )
-                val cachedDiary = cache[intent.period]
-                if (cachedDiary != null) {
+                val cachedSchedule = cache[intent.period]
+                if (cachedSchedule != null) {
                     dispatch(
                         this@onIntent.state.copy(
-                            diary = cachedDiary,
+                            schedule = cachedSchedule,
                         )
                     )
                 }
                 val job = selectPeriodJob
                 selectPeriodJob = launch {
+                    val account = cachedAccount ?: remoteAccountRepository.getAccount(authScope)
+                        .also { cachedAccount = it }
                     job?.cancelAndJoin()
-                    val diary = remoteDiaryRepository.getDiary(auth, intent.period).toState()
-                    cache[intent.period] = diary
+                    val schedule = remoteScheduleRepository.getSchedule(
+                        auth = authScope,
+                        period = intent.period,
+                        classGroup = account.student.classGroup.title
+                    ).toState()
+                    cache[intent.period] = schedule
                     syncDispatch(
                         this@onIntent.state.copy(
-                            diary = diary,
+                            schedule = schedule,
                         )
                     )
                 }
@@ -128,43 +144,53 @@ class DiaryStoreImpl(
         reducer = directReducer(),
     ) {
 
-
     private sealed interface Action {
         object Setup : Action
     }
 
 }
 
-private fun DiaryOutput.toState(): DiaryStore.State.Diary {
-    return DiaryStore.State.Diary(
+private fun String.formatTeacherName(): String {
+    if (isBlank()) {
+        return this
+    }
+    val words = split(" ")
+    if (words.size == 1) {
+        return this
+    }
+    return buildString {
+        append(words[0])
+        append(" ")
+        for (i in 1 until words.size) {
+            append(words[i].first())
+            append(". ")
+        }
+    }
+}
+
+private fun GetScheduleOutput.toState(): ScheduleStore.State.Schedule {
+    return ScheduleStore.State.Schedule(
         isLoading = false,
-        data = DiaryStore.State.DiaryData(
-            diary = diary.map { diaryItem ->
-                DiaryStore.State.DiaryDate(
-                    diaryItem.date,
-                    diaryItem.lessons.map { lesson ->
-                        DiaryStore.State.Lesson(
-                            number = lesson.number,
-                            title = lesson.title,
-                            time = lesson.time,
-                            homework = lesson.homework.map { homework ->
-                                DiaryStore.State.Homework(homework.text)
-                            },
-                            files = lesson.files.map { file ->
-                                DiaryStore.State.File(file.name, file.url)
-                            },
-                            marks = lesson.marks.map { mark ->
-                                DiaryStore.State.Mark(mark.mark, mark.value)
+        schedule = ScheduleStore.State.ScheduleData(
+            schedule.map { item ->
+                ScheduleStore.State.ScheduleDate(
+                    title = item.title,
+                    date = item.date,
+                    lessonGroups = item.lessonGroups.map { lessonGroup ->
+                        ScheduleStore.State.LessonGroup(
+                            number = lessonGroup.number,
+                            lessons = lessonGroup.lessons.map { lesson ->
+                                ScheduleStore.State.Lesson(
+                                    title = lesson.title,
+                                    time = lesson.time,
+                                    teacher = lesson.teacher.formatTeacherName(),
+                                    group = lesson.group
+                                )
                             }
                         )
                     }
                 )
-            }
+            },
         )
     )
-}
-
-fun getPeriod(date: kotlinx.datetime.LocalDate): DatePeriod {
-    val start = date.minus((date.dayOfWeek.value - 1).toLong(), DateTimeUnit.DAY)
-    return DatePeriod(start, start.plus(6, DateTimeUnit.DAY))
 }

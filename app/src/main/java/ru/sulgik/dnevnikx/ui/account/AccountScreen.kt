@@ -1,13 +1,14 @@
-package ru.sulgik.dnevnikx.ui.profile
+package ru.sulgik.dnevnikx.ui.account
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,12 +34,16 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ru.sulgik.dnevnikx.R
+import ru.sulgik.dnevnikx.mvi.account.AccountStore
 import ru.sulgik.dnevnikx.ui.view.outlined
+import ru.sulgik.dnevnikx.utils.defaultPlaceholder
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(
+fun AccountScreen(
+    accountData: AccountStore.State.AccountData,
+    actionsData: AccountStore.State.ActionsData,
     onSchedule: () -> Unit,
     onUpdates: () -> Unit,
     onAbout: () -> Unit,
@@ -52,26 +58,43 @@ fun ProfileScreen(
         },
         modifier = modifier,
     ) {
-        BoxWithConstraints(
+        Box(
             modifier = Modifier.padding(it)
         ) {
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
             ) {
-                Profile(
-                    onSelectAccount = onSelectAccount,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
+                if (accountData.account != null) {
+                    Profile(
+                        account = accountData.account,
+                        onSelectAccount = onSelectAccount,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                } else {
+                    ProfilePlaceholder(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                }
                 Spacer(
                     modifier = Modifier.height(20.dp)
                 )
-                ProfileActions(
-                    onSchedule = onSchedule,
-                    onUpdates = onUpdates,
-                    onAbout = onAbout,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                if (!actionsData.isLoading && actionsData.actions != null)
+                    ProfileActions(
+                        actions = actionsData.actions,
+                        onSchedule = onSchedule,
+                        onUpdates = onUpdates,
+                        onAbout = onAbout,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                else {
+                    ProfileActionsPlaceholder(
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
     }
@@ -80,6 +103,7 @@ fun ProfileScreen(
 
 @Composable
 fun Profile(
+    account: AccountStore.State.Account,
     onSelectAccount: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -103,7 +127,7 @@ fun Profile(
                 onClick = onSelectAccount,
             )
         ) {
-            Text("Имя Фамилия Отчество", style = MaterialTheme.typography.bodyLarge)
+            Text(account.name, style = MaterialTheme.typography.bodyLarge)
             Icon(
                 imageVector = Icons.Outlined.ArrowDropDown,
                 contentDescription = "раскрыть",
@@ -114,7 +138,27 @@ fun Profile(
 }
 
 @Composable
+fun ProfilePlaceholder(
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier,
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .size(150.dp)
+                .defaultPlaceholder()
+        )
+        Spacer(modifier = Modifier.height(15.dp))
+        Text("Имя Фамилия Отчество", style = MaterialTheme.typography.bodyLarge)
+    }
+}
+
+@Composable
 fun ProfileActions(
+    actions: AccountStore.State.Actions,
     onSchedule: () -> Unit,
     onUpdates: () -> Unit,
     onAbout: () -> Unit,
@@ -124,23 +168,25 @@ fun ProfileActions(
         modifier = modifier.padding(horizontal = 10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        ProfileAction(
-            text = "Расписание",
-            subtext = "Подробное описание уроков",
-            icon = painterResource(id = R.drawable.timetable),
-            onClick = onSchedule,
-            modifier = Modifier.fillMaxWidth()
-        )
-        ProfileAction(
-            text = "Обновления",
-            subtext = "Изменения в журнале",
-            icon = painterResource(id = R.drawable.updates),
-            onClick = onUpdates,
-            modifier = Modifier.fillMaxWidth()
-        )
+        if (actions.isScheduleAvailable)
+            ProfileAction(
+                text = "Расписание",
+                subtext = "Подробное описание уроков",
+                icon = painterResource(id = R.drawable.timetable),
+                onClick = onSchedule,
+                modifier = Modifier.fillMaxWidth()
+            )
+        if (actions.isUpdatesAvailable)
+            ProfileAction(
+                text = "Обновления",
+                subtext = "Изменения в журнале",
+                icon = painterResource(id = R.drawable.updates),
+                onClick = onUpdates,
+                modifier = Modifier.fillMaxWidth()
+            )
         ProfileAction(
             text = "О приложении",
-            subtext = "DnevnikX v0.1",
+            subtext = actions.aboutData.applicationVersion,
             icon = painterResource(id = R.drawable.info),
             onClick = onAbout,
             modifier = Modifier.fillMaxWidth()
@@ -148,7 +194,20 @@ fun ProfileActions(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProfileActionsPlaceholder(
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.padding(horizontal = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        ProfileActionPlaceholder(modifier = Modifier.fillMaxWidth())
+        ProfileActionPlaceholder(modifier = Modifier.fillMaxWidth())
+        ProfileActionPlaceholder(modifier = Modifier.fillMaxWidth())
+    }
+}
+
 @Composable
 fun ProfileAction(
     text: String,
@@ -157,7 +216,7 @@ fun ProfileAction(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    androidx.compose.material3.ListItem(
+    ListItem(
         leadingContent = {
             Image(
                 icon, contentDescription = null, modifier = Modifier.size(40.dp),
@@ -170,5 +229,29 @@ fun ProfileAction(
         }, modifier = modifier
             .outlined()
             .clickable(onClick = onClick)
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProfileActionPlaceholder(
+    modifier: Modifier = Modifier,
+) {
+    ListItem(
+        leadingContent = { Box(modifier = Modifier.size(40.dp)) },
+        headlineText = {
+            Text(
+                text = "Название блока",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.defaultPlaceholder(),
+            )
+        }, supportingText = {
+            Text(
+                text = "Длинное описание блока",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.defaultPlaceholder()
+            )
+        }, modifier = modifier
+            .outlined()
     )
 }

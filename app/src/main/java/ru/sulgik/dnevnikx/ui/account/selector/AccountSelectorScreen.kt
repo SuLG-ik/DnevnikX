@@ -1,4 +1,4 @@
-package ru.sulgik.dnevnikx.ui.profile.selector
+package ru.sulgik.dnevnikx.ui.account.selector
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border

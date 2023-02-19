@@ -11,8 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -34,8 +38,10 @@ import ru.sulgik.dnevnikx.ui.view.outlined
 @Composable
 fun AboutScreen(
     aboutData: AboutData,
+    backAvailable: Boolean,
     onDeveloper: () -> Unit,
     onDomain: () -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -44,7 +50,16 @@ fun AboutScreen(
                 Text(
                     "О приложении",
                 )
-            })
+            },
+                navigationIcon = if (backAvailable) {
+                    {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.Outlined.ArrowBack, contentDescription = "назад")
+                        }
+                    }
+                } else {
+                    {}
+                })
         },
         modifier = modifier,
     ) {

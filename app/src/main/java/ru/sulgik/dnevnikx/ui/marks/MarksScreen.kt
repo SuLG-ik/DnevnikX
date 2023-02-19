@@ -150,7 +150,7 @@ fun Lesson(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             lesson.marks.forEach { mark ->
-                Mark(mark = mark, onClick = onMark, modifier = Modifier.weight(1f, fill = true))
+                Mark(mark = mark, onClick = onMark)
             }
         }
     }
