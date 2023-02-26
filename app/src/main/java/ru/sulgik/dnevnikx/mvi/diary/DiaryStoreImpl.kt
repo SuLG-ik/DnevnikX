@@ -20,7 +20,7 @@ import ru.sulgik.dnevnikx.mvi.syncDispatch
 import ru.sulgik.dnevnikx.platform.DatePeriod
 import ru.sulgik.dnevnikx.repository.data.DiaryOutput
 import ru.sulgik.dnevnikx.repository.diary.RemoteDiaryRepository
-import ru.sulgik.dnevnikx.repository.periods.RemotePeriodsRepository
+import ru.sulgik.dnevnikx.repository.periods.CachedPeriodsRepository
 import java.time.LocalDate
 
 
@@ -30,7 +30,7 @@ class DiaryStoreImpl(
     storeFactory: StoreFactory,
     coroutineDispatcher: CoroutineDispatcher,
     auth: AuthScope,
-    remotePeriodsRepository: RemotePeriodsRepository,
+    cachedPeriodsRepository: CachedPeriodsRepository,
     remoteDiaryRepository: RemoteDiaryRepository,
 ) : DiaryStore,
     Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Label> by storeFactory.create<_, Action, _, _, _>(
@@ -44,7 +44,7 @@ class DiaryStoreImpl(
             onAction<Action.Setup> {
                 launch {
                     val periods =
-                        remotePeriodsRepository.getPeriods(auth).periods.flatMap { it.nestedPeriods }
+                        cachedPeriodsRepository.getPeriodsFast(auth).periods.flatMap { it.nestedPeriods }
                     val currentDate = LocalDate.now().toKotlinLocalDate()
                     val currentPeriod = getPeriod(currentDate)
                     val nextPeriod = getPeriod(currentDate.plus(1, DateTimeUnit.WEEK))
@@ -101,7 +101,7 @@ class DiaryStoreImpl(
                                 selectedPeriod = intent.period,
                                 isOther = false,
                             ),
-                            )
+                        )
                     )
                 )
                 val cachedDiary = cache[intent.period]
@@ -141,8 +141,14 @@ private fun DiaryOutput.toState(): DiaryStore.State.Diary {
         data = DiaryStore.State.DiaryData(
             diary = diary.map { diaryItem ->
                 DiaryStore.State.DiaryDate(
-                    diaryItem.date,
-                    diaryItem.lessons.map { lesson ->
+                    date = diaryItem.date,
+                    alert = diaryItem.alert?.let {
+                        DiaryStore.State.DiaryAlert(
+                            isOverload = it.alert == "holiday",
+                            message = it.message,
+                        )
+                    },
+                    lessons = diaryItem.lessons.map { lesson ->
                         DiaryStore.State.Lesson(
                             number = lesson.number,
                             title = lesson.title,
@@ -155,7 +161,7 @@ private fun DiaryOutput.toState(): DiaryStore.State.Diary {
                             },
                             marks = lesson.marks.map { mark ->
                                 DiaryStore.State.Mark(mark.mark, mark.value)
-                            }
+                            },
                         )
                     }
                 )

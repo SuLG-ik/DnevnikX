@@ -2,6 +2,7 @@ package ru.sulgik.dnevnikx.repository.account.room
 
 import androidx.room.Embedded
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 
@@ -13,7 +14,17 @@ class AccountAndData(
     ) val data: AccountDataEntity?,
 )
 
-@Entity
+
+@Entity(
+    foreignKeys = [
+        ForeignKey(
+            entity = AccountEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["accountId"],
+            onDelete = ForeignKey.CASCADE,
+        )
+    ]
+)
 class AccountDataEntity(
     @PrimaryKey
     val accountId: String,

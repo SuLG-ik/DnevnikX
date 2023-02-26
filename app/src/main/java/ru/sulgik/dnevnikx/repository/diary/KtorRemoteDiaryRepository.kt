@@ -4,14 +4,16 @@ import io.ktor.client.request.parameter
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.toJavaLocalDate
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 import org.koin.core.annotation.Single
 import ru.sulgik.dnevnikx.data.AuthScope
-import ru.sulgik.dnevnikx.repository.Client
 import ru.sulgik.dnevnikx.platform.DatePeriod
-import ru.sulgik.dnevnikx.repository.data.DiaryOutput
 import ru.sulgik.dnevnikx.platform.TimePeriod
+import ru.sulgik.dnevnikx.repository.Client
+import ru.sulgik.dnevnikx.repository.data.DiaryOutput
 import ru.sulgik.dnevnikx.repository.data.safeBody
 import ru.sulgik.dnevnikx.utils.CustomLocalDateSerializer
 
@@ -36,6 +38,16 @@ class KtorRemoteDiaryRepository(
             student.days.map { item ->
                 DiaryOutput.Item(
                     item.key,
+                    item.value.let {
+                        if (it.alert == null && it.message == null) {
+                            null
+                        } else {
+                            DiaryOutput.Alert(
+                                it.alert ?: "",
+                                it.message ?: ""
+                            )
+                        }
+                    },
                     item.value.items.map { lesson ->
                         DiaryOutput.Lesson(
                             number = lesson.value.number,
@@ -68,7 +80,11 @@ private data class GetDiaryBody(
     )
 
     @Serializable
-    data class Day(
+    @OptIn(ExperimentalSerializationApi::class)
+    data class Day constructor(
+        val alert: String? = null,
+        @JsonNames("holiday_name", "message")
+        val message: String? = null,
         val items: Map<String, Lesson>,
     )
 

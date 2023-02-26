@@ -1,4 +1,4 @@
-package ru.sulgik.dnevnikx.repository.periods
+package ru.sulgik.dnevnikx.repository.periods.ktor
 
 import io.ktor.client.request.parameter
 import kotlinx.datetime.LocalDate
@@ -6,10 +6,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
 import ru.sulgik.dnevnikx.data.AuthScope
-import ru.sulgik.dnevnikx.repository.Client
 import ru.sulgik.dnevnikx.platform.DatePeriod
+import ru.sulgik.dnevnikx.repository.Client
 import ru.sulgik.dnevnikx.repository.data.GetPeriodsOutput
 import ru.sulgik.dnevnikx.repository.data.safeBody
+import ru.sulgik.dnevnikx.repository.periods.RemotePeriodsRepository
 import ru.sulgik.dnevnikx.utils.CustomLocalDateSerializer
 
 @Single
@@ -36,6 +37,7 @@ class KtorRemotePeriodsRepository(
     }
 
 }
+
 
 @Serializable
 private class GetPeriodResponse(

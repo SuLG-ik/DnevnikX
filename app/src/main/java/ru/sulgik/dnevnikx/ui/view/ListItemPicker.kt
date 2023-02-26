@@ -1,6 +1,5 @@
 package ru.sulgik.dnevnikx.ui.view
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationResult
 import androidx.compose.animation.core.AnimationVector1D
@@ -13,12 +12,10 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -90,16 +87,12 @@ fun <T> ListItemPicker(
         }
 
     val coercedAnimatedOffset = animatedOffset.value % halfNumbersColumnHeightPx
-    Log.d(
-        "pisoska",
-        "coersing ${maxOf(minimumAlpha, coercedAnimatedOffset / halfNumbersColumnHeightPx)}"
-    )
 
     val indexOfElement =
         getItemIndexForOffset(list, value, animatedOffset.value, halfNumbersColumnHeightPx)
 
     var dividersWidth by remember { mutableStateOf(0.dp) }
-    var dividersHeight = with(LocalDensity.current) {
+    val dividersHeight = with(LocalDensity.current) {
         textStyle.fontSize.toDp() + 10.dp
     }
 
@@ -318,16 +311,16 @@ fun <T> ListItemPicker(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Label(text: String, marked: Boolean, modifier: Modifier) {
-        Text(
-            text = text,
-            textAlign = TextAlign.Center,
-            color = if (marked) MaterialTheme.colorScheme.primary else Color.Unspecified,
-            modifier = modifier.pointerInput(Unit) {
-                detectTapGestures(onLongPress = {
-                    // FIXME: Empty to disable text selection
-                })
-            },
-        )
+    Text(
+        text = text,
+        textAlign = TextAlign.Center,
+        color = if (marked) MaterialTheme.colorScheme.primary else Color.Unspecified,
+        modifier = modifier.pointerInput(Unit) {
+            detectTapGestures(onLongPress = {
+                // FIXME: Empty to disable text selection
+            })
+        },
+    )
 }
 
 private suspend fun Animatable<Float, AnimationVector1D>.fling(

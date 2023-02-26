@@ -1,15 +1,15 @@
 [versions]
 agp = "7.4.1"
 kotlin = "1.8.10"
-compose-compiler = "1.4.2"
-compose = "1.4.0-beta01"
-compose-material3 = "1.1.0-alpha06"
+compose-compiler = "1.4.3"
+compose = "1.4.0-beta02"
+compose-material3 = "1.1.0-alpha07"
 ksp = "1.8.10-1.0.9"
-lifecycle = "2.6.0-beta01"
+lifecycle = "2.6.0-rc01"
 ktor = "2.2.3"
 coroutines = "1.6.4"
-android-core = "1.9.0"
-android-activity = "1.7.0-beta01"
+android-core = "1.10.0-beta01"
+android-activity = "1.7.0-beta02"
 android-splash = "1.0.0"
 mvi = "3.1.0"
 decompose = "1.0.0"
@@ -83,6 +83,7 @@ koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "
 koin-compiler = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koin-annotations" }
 room-core = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 junit = { module = "junit:junit", version.ref = "junit" }
 junit-android = { module = "androidx.test.ext:junit-ktx", version.ref = "junit-android" }

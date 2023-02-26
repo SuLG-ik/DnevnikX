@@ -17,7 +17,7 @@ import ru.sulgik.dnevnikx.mvi.syncDispatch
 import ru.sulgik.dnevnikx.repository.data.GetPeriodsOutput
 import ru.sulgik.dnevnikx.repository.data.MarksOutput
 import ru.sulgik.dnevnikx.repository.marks.RemoteMarksRepository
-import ru.sulgik.dnevnikx.repository.periods.RemotePeriodsRepository
+import ru.sulgik.dnevnikx.repository.periods.CachedPeriodsRepository
 
 
 @OptIn(ExperimentalMviKotlinApi::class)
@@ -26,7 +26,7 @@ class MarksStoreImpl(
     storeFactory: StoreFactory,
     coroutineDispatcher: CoroutineDispatcher,
     auth: AuthScope,
-    remotePeriodsRepository: RemotePeriodsRepository,
+    cachedPeriodsRepository: CachedPeriodsRepository,
     remoteMarksRepository: RemoteMarksRepository,
 ) : MarksStore,
     Store<MarksStore.Intent, MarksStore.State, MarksStore.Label> by storeFactory.create<_, Action, _, _, _>(
@@ -39,7 +39,7 @@ class MarksStoreImpl(
             val cache = mutableMapOf<MarksStore.State.Period, MarksStore.State.Marks>()
             onAction<Action.Setup> {
                 launch {
-                    val periods = remotePeriodsRepository.getPeriods(auth).toState()
+                    val periods = cachedPeriodsRepository.getPeriodsFast(auth).toState()
                     val currentDate = java.time.LocalDate.now().toKotlinLocalDate()
                     val currentPeriod =
                         periods.firstOrNull { currentDate in it.period } ?: periods.first()

@@ -44,13 +44,6 @@ fun FloatingModalUI(
             !modalState.isVisible && sheet.isVisible -> {
                 sheet.hide()
             }
-
-            else -> {
-                Log.d(
-                    "ModalUI",
-                    "State for $component does not affect to sheet state (modalState = ${modalState.isVisible}, sheet = ${sheet.isVisible}/${sheet.currentValue}) "
-                )
-            }
         }
     })
     ExtendedModalBottomSheet(

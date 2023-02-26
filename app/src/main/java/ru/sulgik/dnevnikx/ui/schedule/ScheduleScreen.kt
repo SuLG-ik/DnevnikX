@@ -277,7 +277,7 @@ fun LessonPlaceholder(modifier: Modifier = Modifier) {
         modifier = modifier
     ) {
         Text(
-            text = "00:00",
+            text = "00:00 - 00:00",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.defaultPlaceholder(),
         )

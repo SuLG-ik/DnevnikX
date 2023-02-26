@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,11 +31,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.datetime.LocalDate
@@ -50,7 +51,6 @@ import ru.sulgik.dnevnikx.ui.view.outlined
 import ru.sulgik.dnevnikx.utils.defaultPlaceholder
 import java.time.DayOfWeek.*
 import java.time.Month.*
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -141,15 +141,47 @@ fun DiaryDate(
             style = MaterialTheme.typography.labelLarge,
         )
         Spacer(modifier = Modifier.height(15.dp))
-        Column(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            diary.lessons.forEach {
-                DiaryLesson(lesson = it, onFile = onFile)
+        if (diary.alert != null) {
+            DiaryAlert(
+                alert = diary.alert,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        if (diary.alert == null || !diary.alert.isOverload) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                diary.lessons.forEach {
+                    DiaryLesson(lesson = it, onFile = onFile)
+                }
             }
         }
     }
 }
+
+@Composable
+fun DiaryAlert(alert: DiaryStore.State.DiaryAlert, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.primary) {
+            Icon(
+                painter = painterResource(id = R.drawable.diary_alert),
+                contentDescription = "сообщение",
+                modifier = Modifier.size(25.dp)
+            )
+            Text(
+                text = alert.message,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+
+    }
+}
+
 
 @Composable
 fun DiaryDatePlaceholder(
@@ -158,7 +190,7 @@ fun DiaryDatePlaceholder(
     Column(
         modifier = modifier
             .outlined()
-            .padding(10.dp)
+            .padding(15.dp)
     ) {
         Text(
             text = "Понедельник, 1 января",
@@ -195,7 +227,10 @@ fun DiaryLesson(
                 .fillMaxWidth()
                 .weight(1f, fill = false)
         ) {
-            Text(text = LocalTimeFormatter.current.format(lesson.time), style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = LocalTimeFormatter.current.format(lesson.time),
+                style = MaterialTheme.typography.bodyMedium
+            )
             Text(
                 text = lesson.title,
                 style = MaterialTheme.typography.bodyLarge,
@@ -400,7 +435,7 @@ fun PeriodSelector(
 }
 
 @Composable
-fun RowScope.NoData(modifier: Modifier = Modifier) {
+fun NoData(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center,
@@ -415,7 +450,7 @@ fun RowScope.NoData(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun RowScope.CurrentPeriods(
+fun CurrentPeriods(
     period: DiaryStore.State.PeriodsData,
     onSelect: (DatePeriod) -> Unit,
     onOther: () -> Unit,
@@ -423,35 +458,35 @@ fun RowScope.CurrentPeriods(
     if (period.previousPeriod != null) {
         Period(
             period = "Предыдущая",
-            onSelect = { onSelect(period.previousPeriod) },
-            selected = period.previousPeriod == period.selectedPeriod
+            selected = period.previousPeriod == period.selectedPeriod,
+            onSelect = { onSelect(period.previousPeriod) }
         )
     }
     if (period.currentPeriod != null) {
         Period(
             period = "Текущая неделя",
-            onSelect = { onSelect(period.currentPeriod) },
             selected = period.currentPeriod == period.selectedPeriod,
+            onSelect = { onSelect(period.currentPeriod) },
         )
     }
     if (period.nextPeriod != null) {
         Period(
             period = "Следующая",
-            onSelect = { onSelect(period.nextPeriod) },
-            selected = period.nextPeriod == period.selectedPeriod
+            selected = period.nextPeriod == period.selectedPeriod,
+            onSelect = { onSelect(period.nextPeriod) }
         )
     }
     val isOther =
         period.currentPeriod != period.selectedPeriod && period.nextPeriod != period.selectedPeriod && period.previousPeriod != period.selectedPeriod && period.currentPeriod != null
     Period(
         period = if (isOther) LocalTimeFormatter.current.format(period.selectedPeriod) else "Выбрать",
-        onSelect = onOther,
-        selected = isOther
+        selected = isOther,
+        onSelect = onOther
     )
 }
 
 @Composable
-fun RowScope.Period(
+fun Period(
     period: String,
     selected: Boolean,
     onSelect: () -> Unit,
@@ -491,7 +526,7 @@ fun RowScope.Period(
 
 
 @Composable
-fun RowScope.PeriodPlaceholder(modifier: Modifier = Modifier) {
+fun PeriodPlaceholder(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .outlined()

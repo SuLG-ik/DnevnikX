@@ -7,16 +7,21 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
 }
+
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
 android {
-    namespace  = "ru.sulgik.dnevnikx"
+    namespace = "ru.sulgik.dnevnikx"
     compileSdk = 33
 
     defaultConfig {
         applicationId = "ru.sulgik.dnevnikx"
         minSdk = 21
         targetSdk = 33
-        versionCode = 2
-        versionName = "0.1.0"
+        versionCode = 3
+        versionName = "0.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -32,10 +37,10 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("debug")
-            buildConfigField("String", "APP_VERSION", "\"v0.1.0\"")
+            buildConfigField("String", "APP_VERSION", "\"v0.1.1\"")
         }
         debug {
-            buildConfigField("String", "APP_VERSION", "\"v0.1.0-001\"")
+            buildConfigField("String", "APP_VERSION", "\"v0.1.1-002\"")
         }
     }
     compileOptions {
@@ -68,6 +73,10 @@ android {
             }
         }
     }
+    sourceSets {
+        // Adds exported schema location as test app assets.
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    }
 }
 
 dependencies {
@@ -96,6 +105,8 @@ dependencies {
     implementation(libs.bundles.room)
     ksp(libs.room.compiler)
     testImplementation(libs.junit)
+
     androidTestImplementation(libs.junit.android)
+    androidTestImplementation(libs.room.testing)
     androidTestImplementation(libs.bundles.compose.test)
 }

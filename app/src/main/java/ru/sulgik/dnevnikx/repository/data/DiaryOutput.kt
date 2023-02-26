@@ -8,7 +8,13 @@ data class DiaryOutput(
 ) {
     data class Item(
         val date: LocalDate,
+        val alert: Alert?,
         val lessons: List<Lesson>,
+    )
+
+    data class Alert(
+        val alert: String,
+        val message: String,
     )
 
     data class Lesson(

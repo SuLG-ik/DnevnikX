@@ -296,8 +296,8 @@ fun PeriodSelector(
                 periods.data.periods.forEach {
                     Period(
                         period = it.title,
-                        onSelect = { onSelect(it) },
                         selected = it == periods.data.selectedPeriod,
+                        onSelect = { onSelect(it) },
                     )
                 }
             }

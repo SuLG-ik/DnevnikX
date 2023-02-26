@@ -22,7 +22,7 @@ import ru.sulgik.dnevnikx.platform.DatePeriod
 import ru.sulgik.dnevnikx.repository.account.RemoteAccountRepository
 import ru.sulgik.dnevnikx.repository.data.GetAccountOutput
 import ru.sulgik.dnevnikx.repository.data.GetScheduleOutput
-import ru.sulgik.dnevnikx.repository.periods.RemotePeriodsRepository
+import ru.sulgik.dnevnikx.repository.periods.CachedPeriodsRepository
 import ru.sulgik.dnevnikx.repository.schedule.RemoteScheduleRepository
 import java.time.LocalDate
 
@@ -33,7 +33,7 @@ class ScheduleStoreImpl(
     coroutineDispatcher: CoroutineDispatcher,
     authScope: AuthScope,
     remoteAccountRepository: RemoteAccountRepository,
-    remotePeriodsRepository: RemotePeriodsRepository,
+    cachedPeriodsRepository: CachedPeriodsRepository,
     remoteScheduleRepository: RemoteScheduleRepository,
 ) : ScheduleStore,
     Store<ScheduleStore.Intent, ScheduleStore.State, ScheduleStore.Label> by storeFactory.create<_, Action, _, _, _>(
@@ -50,7 +50,7 @@ class ScheduleStoreImpl(
                     val account = remoteAccountRepository.getAccount(authScope)
                     cachedAccount = account
                     val periods =
-                        remotePeriodsRepository.getPeriods(authScope).periods.flatMap { it.nestedPeriods }
+                        cachedPeriodsRepository.getPeriodsFast(authScope).periods.flatMap { it.nestedPeriods }
                     val currentDate = LocalDate.now().toKotlinLocalDate()
                     val currentPeriod = getPeriod(currentDate)
                     val nextPeriod = getPeriod(currentDate.plus(1, DateTimeUnit.WEEK))

@@ -34,7 +34,7 @@ class AndroidTimeFormatter : TimeFormatter {
     }
 
     override fun format(value: TimePeriod): String {
-        return "${format(value.start)}:${format(value.end)}"
+        return "${format(value.start)} - ${format(value.end)}"
     }
 
 }

@@ -42,7 +42,13 @@ interface DiaryStore : Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Lab
 
         data class DiaryDate(
             val date: LocalDate,
+            val alert: DiaryAlert?,
             val lessons: List<Lesson>,
+        )
+
+        data class DiaryAlert(
+            val isOverload: Boolean,
+            val message: String,
         )
 
         data class Lesson(

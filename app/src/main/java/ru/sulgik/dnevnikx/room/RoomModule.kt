@@ -1,4 +1,4 @@
-package ru.sulgik.dnevnikx.repository
+package ru.sulgik.dnevnikx.room
 
 import android.content.Context
 import androidx.room.Room
@@ -7,6 +7,8 @@ import org.koin.core.annotation.Single
 import ru.sulgik.dnevnikx.repository.account.room.AccountDao
 import ru.sulgik.dnevnikx.repository.account.room.AccountDataDao
 import ru.sulgik.dnevnikx.repository.auth.room.AuthDao
+import ru.sulgik.dnevnikx.repository.periods.room.PeriodDao
+import ru.sulgik.dnevnikx.room.migrations.migrations
 
 @Module
 class RoomModule {
@@ -18,21 +20,30 @@ class RoomModule {
         return Room.databaseBuilder(
             context = context,
             klass = DnevnikXDatabase::class.java,
-            name = "dnevnikx"
-        ).build()
+            name = "dnevnikx",
+        )
+            .addMigrations(*migrations)
+            .build()
     }
 
     @Single
     fun bindsAccountDao(database: DnevnikXDatabase): AccountDao {
         return database.accountDao
     }
+
     @Single
     fun bindsAccountDataDao(database: DnevnikXDatabase): AccountDataDao {
         return database.accountDataDao
     }
+
     @Single
     fun bindsAuthDao(database: DnevnikXDatabase): AuthDao {
         return database.authDao
+    }
+
+    @Single
+    fun bindsPeriodDao(database: DnevnikXDatabase): PeriodDao {
+        return database.periodDao
     }
 
 }
