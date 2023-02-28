@@ -1,5 +1,6 @@
 package ru.sulgik.dnevnikx.repository.periods.room
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -54,6 +55,7 @@ data class NestedPeriodEntity(
     var start: LocalDate,
     var end: LocalDate,
 ) {
+    @ColumnInfo(index = true)
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0
 }

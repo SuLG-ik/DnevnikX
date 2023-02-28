@@ -1,4 +1,4 @@
-package ru.sulgik.dnevnikx.repository.diary
+package ru.sulgik.dnevnikx.repository.diary.ktor
 
 import io.ktor.client.request.parameter
 import kotlinx.datetime.LocalDate
@@ -15,6 +15,7 @@ import ru.sulgik.dnevnikx.platform.TimePeriod
 import ru.sulgik.dnevnikx.repository.Client
 import ru.sulgik.dnevnikx.repository.data.DiaryOutput
 import ru.sulgik.dnevnikx.repository.data.safeBody
+import ru.sulgik.dnevnikx.repository.diary.RemoteDiaryRepository
 import ru.sulgik.dnevnikx.utils.CustomLocalDateSerializer
 
 @Single
@@ -69,6 +70,7 @@ class KtorRemoteDiaryRepository(
         )
     }
 }
+
 
 @Serializable
 private data class GetDiaryBody(
