@@ -1,12 +1,18 @@
 package ru.sulgik.dnevnikx.repository.account.room
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(
+    indices = [
+        Index(
+            value = ["id"],
+            unique = true,
+        )
+    ]
+)
 class AccountEntity(
-    @ColumnInfo(index = true)
     @PrimaryKey
     var id: String,
 )

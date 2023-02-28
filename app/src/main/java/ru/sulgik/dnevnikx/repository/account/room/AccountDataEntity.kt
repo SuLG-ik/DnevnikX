@@ -3,6 +3,7 @@ package ru.sulgik.dnevnikx.repository.account.room
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 
@@ -22,6 +23,12 @@ class AccountAndData(
             parentColumns = ["id"],
             childColumns = ["accountId"],
             onDelete = ForeignKey.CASCADE,
+        )
+    ],
+    indices = [
+        Index(
+            value = ["accountId"],
+            unique = true,
         )
     ]
 )

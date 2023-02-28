@@ -23,7 +23,12 @@ class BaseMviModule {
 
     @Single
     fun bindStoreFactory(): StoreFactory {
-        return StrictStoreFactory(LoggingStoreFactory(DefaultStoreFactory(), logFormatter = DefaultLogFormatter(1024)))
+        return StrictStoreFactory(
+            LoggingStoreFactory(
+                DefaultStoreFactory(),
+                logFormatter = DefaultLogFormatter(Int.MAX_VALUE)
+            )
+        )
     }
 
 }

@@ -1,9 +1,9 @@
 package ru.sulgik.dnevnikx.repository.periods.room
 
-import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import kotlinx.datetime.LocalDate
@@ -16,6 +16,16 @@ import ru.sulgik.dnevnikx.repository.account.room.AccountEntity
             parentColumns = ["id"],
             childColumns = ["accountId"],
             onDelete = ForeignKey.CASCADE,
+        )
+    ],
+    indices = [
+        Index(
+            value = ["id"],
+            unique = true,
+        ),
+        Index(
+            value = ["accountId"],
+            unique = false,
         )
     ]
 )
@@ -48,6 +58,16 @@ class HostPeriodWithNested(
             childColumns = ["periodId"],
             onDelete = ForeignKey.CASCADE,
         )
+    ],
+    indices = [
+        Index(
+            value = ["id"],
+            unique = true,
+        ),
+        Index(
+            value = ["periodId"],
+            unique = false,
+        )
     ]
 )
 data class NestedPeriodEntity(
@@ -55,7 +75,6 @@ data class NestedPeriodEntity(
     var start: LocalDate,
     var end: LocalDate,
 ) {
-    @ColumnInfo(index = true)
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0
 }

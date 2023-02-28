@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "c5fd1897a1d90dcba43ecd4ad8b5711f",
+    "identityHash": "2c9b21be4d9545cbfc84a35e5a10b3d8",
     "entities": [
       {
         "tableName": "AccountEntity",
@@ -24,12 +24,12 @@
         "indices": [
           {
             "name": "index_AccountEntity_id",
-            "unique": false,
+            "unique": true,
             "columnNames": [
               "id"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_AccountEntity_id` ON `${TABLE_NAME}` (`id`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_AccountEntity_id` ON `${TABLE_NAME}` (`id`)"
           }
         ],
         "foreignKeys": []
@@ -57,7 +57,17 @@
             "accountId"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_AccountDataEntity_accountId",
+            "unique": true,
+            "columnNames": [
+              "accountId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_AccountDataEntity_accountId` ON `${TABLE_NAME}` (`accountId`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "AccountEntity",
@@ -142,12 +152,21 @@
         "indices": [
           {
             "name": "index_HostPeriodEntity_id",
-            "unique": false,
+            "unique": true,
             "columnNames": [
               "id"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_HostPeriodEntity_id` ON `${TABLE_NAME}` (`id`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_HostPeriodEntity_id` ON `${TABLE_NAME}` (`id`)"
+          },
+          {
+            "name": "index_HostPeriodEntity_accountId",
+            "unique": false,
+            "columnNames": [
+              "accountId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_HostPeriodEntity_accountId` ON `${TABLE_NAME}` (`accountId`)"
           }
         ],
         "foreignKeys": [
@@ -202,12 +221,21 @@
         "indices": [
           {
             "name": "index_NestedPeriodEntity_id",
-            "unique": false,
+            "unique": true,
             "columnNames": [
               "id"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_NestedPeriodEntity_id` ON `${TABLE_NAME}` (`id`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_NestedPeriodEntity_id` ON `${TABLE_NAME}` (`id`)"
+          },
+          {
+            "name": "index_NestedPeriodEntity_periodId",
+            "unique": false,
+            "columnNames": [
+              "periodId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_NestedPeriodEntity_periodId` ON `${TABLE_NAME}` (`periodId`)"
           }
         ],
         "foreignKeys": [
@@ -274,12 +302,21 @@
         "indices": [
           {
             "name": "index_DiaryDateEntity_id",
-            "unique": false,
+            "unique": true,
             "columnNames": [
               "id"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_DiaryDateEntity_id` ON `${TABLE_NAME}` (`id`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_DiaryDateEntity_id` ON `${TABLE_NAME}` (`id`)"
+          },
+          {
+            "name": "index_DiaryDateEntity_accountId",
+            "unique": false,
+            "columnNames": [
+              "accountId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_DiaryDateEntity_accountId` ON `${TABLE_NAME}` (`accountId`)"
           }
         ],
         "foreignKeys": [
@@ -346,12 +383,21 @@
         "indices": [
           {
             "name": "index_DiaryDateLessonEntity_id",
-            "unique": false,
+            "unique": true,
             "columnNames": [
               "id"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_DiaryDateLessonEntity_id` ON `${TABLE_NAME}` (`id`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_DiaryDateLessonEntity_id` ON `${TABLE_NAME}` (`id`)"
+          },
+          {
+            "name": "index_DiaryDateLessonEntity_diaryDateId",
+            "unique": false,
+            "columnNames": [
+              "diaryDateId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_DiaryDateLessonEntity_diaryDateId` ON `${TABLE_NAME}` (`diaryDateId`)"
           }
         ],
         "foreignKeys": [
@@ -406,12 +452,21 @@
         "indices": [
           {
             "name": "index_LessonFileEntity_id",
-            "unique": false,
+            "unique": true,
             "columnNames": [
               "id"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_LessonFileEntity_id` ON `${TABLE_NAME}` (`id`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_LessonFileEntity_id` ON `${TABLE_NAME}` (`id`)"
+          },
+          {
+            "name": "index_LessonFileEntity_lessonId",
+            "unique": false,
+            "columnNames": [
+              "lessonId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LessonFileEntity_lessonId` ON `${TABLE_NAME}` (`lessonId`)"
           }
         ],
         "foreignKeys": [
@@ -460,12 +515,21 @@
         "indices": [
           {
             "name": "index_LessonHomeworkEntity_id",
-            "unique": false,
+            "unique": true,
             "columnNames": [
               "id"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_LessonHomeworkEntity_id` ON `${TABLE_NAME}` (`id`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_LessonHomeworkEntity_id` ON `${TABLE_NAME}` (`id`)"
+          },
+          {
+            "name": "index_LessonHomeworkEntity_lessonId",
+            "unique": false,
+            "columnNames": [
+              "lessonId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LessonHomeworkEntity_lessonId` ON `${TABLE_NAME}` (`lessonId`)"
           }
         ],
         "foreignKeys": [
@@ -520,12 +584,21 @@
         "indices": [
           {
             "name": "index_LessonMarkEntity_id",
-            "unique": false,
+            "unique": true,
             "columnNames": [
               "id"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_LessonMarkEntity_id` ON `${TABLE_NAME}` (`id`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_LessonMarkEntity_id` ON `${TABLE_NAME}` (`id`)"
+          },
+          {
+            "name": "index_LessonMarkEntity_lessonId",
+            "unique": false,
+            "columnNames": [
+              "lessonId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LessonMarkEntity_lessonId` ON `${TABLE_NAME}` (`lessonId`)"
           }
         ],
         "foreignKeys": [
@@ -546,7 +619,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c5fd1897a1d90dcba43ecd4ad8b5711f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2c9b21be4d9545cbfc84a35e5a10b3d8')"
     ]
   }
 }

@@ -40,7 +40,7 @@ class KtorRemoteDiaryRepository(
                 DiaryOutput.Item(
                     item.key,
                     item.value.let {
-                        if (it.alert == null && it.message == null) {
+                        if ((it.alert == null || it.alert == "today") && it.message == null) {
                             null
                         } else {
                             DiaryOutput.Alert(

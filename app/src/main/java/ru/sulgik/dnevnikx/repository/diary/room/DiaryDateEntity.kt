@@ -1,9 +1,9 @@
 package ru.sulgik.dnevnikx.repository.diary.room
 
-import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import kotlinx.datetime.LocalDate
@@ -19,6 +19,16 @@ import ru.sulgik.dnevnikx.repository.account.room.AccountEntity
             childColumns = ["accountId"],
             onDelete = ForeignKey.CASCADE,
         )
+    ],
+    indices = [
+        Index(
+            value = ["id"],
+            unique = true,
+        ),
+        Index(
+            value = ["accountId"],
+            unique = false,
+        )
     ]
 )
 class DiaryDateEntity(
@@ -28,7 +38,6 @@ class DiaryDateEntity(
     val date: LocalDate,
     val accountId: String,
 ) {
-    @ColumnInfo(index = true)
     @PrimaryKey
     var id: Long = 0
 }
@@ -74,6 +83,16 @@ class DiaryWithLesson(
             childColumns = ["diaryDateId"],
             onDelete = ForeignKey.CASCADE,
         )
+    ],
+    indices = [
+        Index(
+            value = ["id"],
+            unique = true,
+        ),
+        Index(
+            value = ["diaryDateId"],
+            unique = false,
+        )
     ]
 )
 class DiaryDateLessonEntity(
@@ -83,7 +102,6 @@ class DiaryDateLessonEntity(
 ) {
     var diaryDateId: Long = 0
 
-    @ColumnInfo(index = true)
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0
 }
@@ -96,12 +114,21 @@ class DiaryDateLessonEntity(
             childColumns = ["lessonId"],
             onDelete = ForeignKey.CASCADE,
         )
+    ],
+    indices = [
+        Index(
+            value = ["id"],
+            unique = true,
+        ),
+        Index(
+            value = ["lessonId"],
+            unique = false,
+        )
     ]
 )
 class LessonHomeworkEntity(
     val text: String,
 ) {
-    @ColumnInfo(index = true)
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0
     var lessonId: Long = 0
@@ -114,6 +141,16 @@ class LessonHomeworkEntity(
             parentColumns = ["id"],
             childColumns = ["lessonId"],
             onDelete = ForeignKey.CASCADE,
+        )
+    ],
+    indices = [
+        Index(
+            value = ["id"],
+            unique = true,
+        ),
+        Index(
+            value = ["lessonId"],
+            unique = false,
         )
     ]
 )
@@ -121,7 +158,6 @@ class LessonFileEntity(
     val name: String,
     val url: String,
 ) {
-    @ColumnInfo(index = true)
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0
     var lessonId: Long = 0
@@ -135,13 +171,22 @@ class LessonFileEntity(
             childColumns = ["lessonId"],
             onDelete = ForeignKey.CASCADE,
         )
+    ],
+    indices = [
+        Index(
+            value = ["id"],
+            unique = true,
+        ),
+        Index(
+            value = ["lessonId"],
+            unique = false,
+        )
     ]
 )
 class LessonMarkEntity(
     val value: Int,
     val mark: String,
 ) {
-    @ColumnInfo(index = true)
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0
     var lessonId: Long = 0
