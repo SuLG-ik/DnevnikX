@@ -8,4 +8,6 @@ interface LocalDiaryRepository {
 
     suspend fun getDiary(auth: AuthScope, period: DatePeriod): DiaryOutput?
 
+    suspend fun saveDiary(auth: AuthScope, diary: DiaryOutput)
+
 }

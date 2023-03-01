@@ -1,6 +1,5 @@
 package ru.sulgik.dnevnikx.room
 
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
@@ -29,8 +28,7 @@ import ru.sulgik.dnevnikx.repository.periods.room.PeriodDao
         HostPeriodEntity::class, NestedPeriodEntity::class,
         DiaryDateEntity::class, DiaryDateLessonEntity::class, LessonFileEntity::class, LessonHomeworkEntity::class, LessonMarkEntity::class,
     ],
-    version = 4,
-    autoMigrations = [AutoMigration(1, 2), AutoMigration(2, 3), AutoMigration(3, 4)]
+    version = 1,
 )
 @TypeConverters(Converters::class)
 abstract class DnevnikXDatabase : RoomDatabase() {

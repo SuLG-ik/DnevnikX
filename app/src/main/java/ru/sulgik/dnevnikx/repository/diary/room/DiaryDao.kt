@@ -13,8 +13,12 @@ interface DiaryDao {
     @Query("SELECT * FROM DiaryDateEntity WHERE accountId = :accountId AND date BETWEEN :start AND :end")
     fun getDiary(accountId: String, start: LocalDate, end: LocalDate): List<DiaryDateWithLessons>
 
+    @Transaction
+    @Query("DELETE FROM DiaryDateEntity WHERE accountId = :accountId AND date IN (:dates)")
+    fun deleteDiary(accountId: String, dates: List<LocalDate>)
+
     @Insert
-    fun saveDiary(dates: List<DiaryDateEntity>)
+    fun saveDiary(dates: List<DiaryDateEntity>): List<Long>
 
     @Insert
     fun saveLessons(lessons: List<DiaryDateLessonEntity>): List<Long>
@@ -32,14 +36,21 @@ interface DiaryDao {
     fun saveDiary(
         accountId: String,
         date: List<DiaryDateEntity>,
-        lessons: List<DiaryDateLessonWithMarksHomeworkFiles>,
+        lessons: List<List<DiaryDateLessonWithMarksHomeworkFiles>>,
     ) {
-        saveDiary(date)
-        val lessonIds = saveLessons(lessons.map { it.lesson })
+        deleteDiary(accountId, date.map { it.date })
+        val datesIndexes = saveDiary(date)
+        val lessonIds = saveLessons(lessons.flatMapIndexed { index, it ->
+            it.map { dateLessonWithMarksHomeworkFiles ->
+                dateLessonWithMarksHomeworkFiles.lesson.diaryDateId = datesIndexes[index]
+                dateLessonWithMarksHomeworkFiles.lesson
+            }
+        })
+        val flattenLessons = lessons.flatten()
         val marks = mutableListOf<LessonMarkEntity>()
         val homework = mutableListOf<LessonHomeworkEntity>()
         val files = mutableListOf<LessonFileEntity>()
-        lessons.forEachIndexed { index, item ->
+        flattenLessons.forEachIndexed { index, item ->
             val lessonId = lessonIds[index]
             marks.addAll(item.marks.onEach { it.lessonId = lessonId })
             homework.addAll(item.homeworks.onEach { it.lessonId = lessonId })

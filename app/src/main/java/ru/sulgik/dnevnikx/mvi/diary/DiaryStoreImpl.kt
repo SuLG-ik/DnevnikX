@@ -19,7 +19,7 @@ import ru.sulgik.dnevnikx.mvi.directReducer
 import ru.sulgik.dnevnikx.mvi.syncDispatch
 import ru.sulgik.dnevnikx.platform.DatePeriod
 import ru.sulgik.dnevnikx.repository.data.DiaryOutput
-import ru.sulgik.dnevnikx.repository.diary.RemoteDiaryRepository
+import ru.sulgik.dnevnikx.repository.diary.CachedDiaryRepository
 import ru.sulgik.dnevnikx.repository.periods.CachedPeriodsRepository
 import java.time.LocalDate
 
@@ -31,7 +31,7 @@ class DiaryStoreImpl(
     coroutineDispatcher: CoroutineDispatcher,
     auth: AuthScope,
     cachedPeriodsRepository: CachedPeriodsRepository,
-    remoteDiaryRepository: RemoteDiaryRepository,
+    cachedDiaryRepository: CachedDiaryRepository,
 ) : DiaryStore,
     Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Label> by storeFactory.create<_, Action, _, _, _>(
         name = "DiaryStoreImpl",
@@ -41,8 +41,9 @@ class DiaryStoreImpl(
         },
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
             val cache = mutableMapOf<DatePeriod, DiaryStore.State.Diary>()
+            var selectPeriodJob: Job? = null
             onAction<Action.Setup> {
-                launch {
+                selectPeriodJob = launch {
                     val periods =
                         cachedPeriodsRepository.getPeriodsFast(auth).periods.flatMap { it.nestedPeriods }
                     val currentDate = LocalDate.now().toKotlinLocalDate()
@@ -64,7 +65,14 @@ class DiaryStoreImpl(
                             )
                         )
                     )
-                    val diary = remoteDiaryRepository.getDiary(auth, currentPeriod).toState()
+                    var diary = cachedDiaryRepository.getDiaryFast(auth, currentPeriod).toState()
+                    cache[currentPeriod] = diary
+                    syncDispatch(
+                        state.copy(
+                            diary = diary,
+                        )
+                    )
+                    diary = cachedDiaryRepository.getDiaryActual(auth, currentPeriod).toState()
                     cache[currentPeriod] = diary
                     syncDispatch(
                         state.copy(
@@ -88,7 +96,6 @@ class DiaryStoreImpl(
                     )
                 )
             }
-            var selectPeriodJob: Job? = null
             onIntent<DiaryStore.Intent.SelectPeriod> { intent ->
                 val state = state
                 if (state.periods.isLoading || state.periods.data == null)
@@ -115,7 +122,14 @@ class DiaryStoreImpl(
                 val job = selectPeriodJob
                 selectPeriodJob = launch {
                     job?.cancelAndJoin()
-                    val diary = remoteDiaryRepository.getDiary(auth, intent.period).toState()
+                    var diary = cachedDiaryRepository.getDiaryFast(auth, intent.period).toState()
+                    cache[intent.period] = diary
+                    syncDispatch(
+                        this@onIntent.state.copy(
+                            diary = diary,
+                        )
+                    )
+                    diary = cachedDiaryRepository.getDiaryActual(auth, intent.period).toState()
                     cache[intent.period] = diary
                     syncDispatch(
                         this@onIntent.state.copy(

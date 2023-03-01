@@ -32,13 +32,12 @@ import ru.sulgik.dnevnikx.repository.account.room.AccountEntity
     ]
 )
 class DiaryDateEntity(
-    val title: String,
     @Embedded
     val alert: DiaryDateAlert?,
     val date: LocalDate,
     val accountId: String,
 ) {
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var id: Long = 0
 }
 
@@ -96,7 +95,7 @@ class DiaryWithLesson(
     ]
 )
 class DiaryDateLessonEntity(
-    val number: Int,
+    val number: String,
     val title: String,
     @Embedded val time: TimePeriod,
 ) {
