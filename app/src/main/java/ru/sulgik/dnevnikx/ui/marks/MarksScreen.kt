@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.datetime.LocalDate
 import ru.sulgik.dnevnikx.R
 import ru.sulgik.dnevnikx.mvi.marks.MarksStore
 import ru.sulgik.dnevnikx.platform.LocalTimeFormatter
@@ -150,7 +151,7 @@ fun Lesson(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             lesson.marks.forEach { mark ->
-                Mark(mark = mark, onClick = onMark)
+                MarkWithMessage(mark = mark, onClick = onMark)
             }
         }
     }
@@ -199,11 +200,32 @@ fun LessonPlaceholder(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
-fun Mark(
+private fun MarkWithMessage(
     mark: MarksStore.State.Mark,
     onClick: (MarksStore.State.Mark) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    MarkWithMessage(
+        mark = mark.mark,
+        value = mark.value,
+        date = mark.date,
+        message = mark.message,
+        onClick = { onClick(mark) },
+        modifier = modifier,
+    )
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MarkWithMessage(
+    mark: String,
+    value: Int,
+    date: LocalDate,
+    message: String?,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -211,12 +233,12 @@ fun Mark(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                enabled = mark.message != null, onClick = { onClick(mark) })
+                enabled = message != null, onClick = { onClick() })
             .padding(5.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         BadgedBox(badge = {
-            if (mark.message != null) {
+            if (message != null) {
                 Badge {
                     Icon(
                         painter = painterResource(id = R.drawable.mark_message_badge),
@@ -227,21 +249,21 @@ fun Mark(
             }
         }) {
             Text(
-                text = mark.mark,
+                text = mark,
                 style = MaterialTheme.typography.bodyLarge,
                 fontSize = 24.sp,
-                color = mark.value.markColor()
+                color = value.markColor()
             )
         }
         Text(
-            text = LocalTimeFormatter.current.format(mark.date),
+            text = LocalTimeFormatter.current.format(date),
             style = MaterialTheme.typography.bodySmall,
             fontSize = 16.sp,
             color = LocalContentColor.current.copy(alpha = 0.5f)
         )
     }
-
 }
+
 
 @Composable
 fun MarkPlaceholder(

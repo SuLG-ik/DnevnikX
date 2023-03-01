@@ -9,6 +9,8 @@ import kotlinx.datetime.toJavaLocalTime
 import ru.sulgik.dnevnikx.platform.DatePeriod
 import ru.sulgik.dnevnikx.platform.TimeFormatter
 import ru.sulgik.dnevnikx.platform.TimePeriod
+import java.time.DayOfWeek
+import java.time.Month
 import java.time.format.DateTimeFormatter
 
 class AndroidTimeFormatter : TimeFormatter {
@@ -19,6 +21,39 @@ class AndroidTimeFormatter : TimeFormatter {
 
     override fun format(value: LocalDate): String {
         return localDateFormatter.format(value.toJavaLocalDate())
+    }
+
+    override fun formatLiteral(value: LocalDate): String {
+        return "${value.formatWeek()}, ${value.dayOfMonth} ${value.formatMonth()}"
+    }
+
+    private fun LocalDate.formatMonth(): String {
+        return when (month) {
+            Month.JANUARY -> "января"
+            Month.FEBRUARY -> "февраля"
+            Month.MARCH -> "марта"
+            Month.APRIL -> "апреля"
+            Month.MAY -> "мая"
+            Month.JUNE -> "июня"
+            Month.JULY -> "июля"
+            Month.AUGUST -> "августа"
+            Month.SEPTEMBER -> "сентября"
+            Month.OCTOBER -> "октября"
+            Month.NOVEMBER -> "ноября"
+            Month.DECEMBER -> "декабря"
+        }
+    }
+
+    private fun LocalDate.formatWeek(): String {
+        return when (dayOfWeek) {
+            DayOfWeek.MONDAY -> "Понедельник"
+            DayOfWeek.TUESDAY -> "Вторник"
+            DayOfWeek.WEDNESDAY -> "Среда"
+            DayOfWeek.THURSDAY -> "Четверг"
+            DayOfWeek.FRIDAY -> "Пятница"
+            DayOfWeek.SATURDAY -> "Суббота"
+            DayOfWeek.SUNDAY -> "Воскресенье"
+        }
     }
 
     override fun format(value: LocalTime): String {

@@ -40,7 +40,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.datetime.LocalDate
 import ru.sulgik.dnevnikx.R
 import ru.sulgik.dnevnikx.mvi.diary.DiaryStore
 import ru.sulgik.dnevnikx.platform.DatePeriod
@@ -59,7 +58,7 @@ fun DiaryScreen(
     diary: DiaryStore.State.Diary,
     onSelect: (DatePeriod) -> Unit,
     onOther: () -> Unit,
-    onFile: (DiaryStore.State.File) -> Unit,
+    onLesson: (date: DiaryStore.State.DiaryDate, lesson: DiaryStore.State.Lesson) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -111,7 +110,7 @@ fun DiaryScreen(
                             diary.data.diary.forEach { diary ->
                                 DiaryDate(
                                     diary = diary,
-                                    onFile = onFile,
+                                    onLesson = onLesson,
                                     modifier = Modifier
                                         .padding(horizontal = 10.dp)
                                         .fillMaxWidth()
@@ -128,7 +127,7 @@ fun DiaryScreen(
 @Composable
 fun DiaryDate(
     diary: DiaryStore.State.DiaryDate,
-    onFile: (DiaryStore.State.File) -> Unit,
+    onLesson: (date: DiaryStore.State.DiaryDate, lesson: DiaryStore.State.Lesson) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -137,7 +136,7 @@ fun DiaryDate(
             .padding(15.dp)
     ) {
         Text(
-            text = diary.date.format(),
+            text = LocalTimeFormatter.current.formatLiteral(diary.date),
             style = MaterialTheme.typography.labelLarge,
         )
         Spacer(modifier = Modifier.height(15.dp))
@@ -152,7 +151,7 @@ fun DiaryDate(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 diary.lessons.forEach {
-                    DiaryLesson(lesson = it, onFile = onFile)
+                    DiaryLesson(lesson = it, onLesson = { lesson -> onLesson(diary, lesson) })
                 }
             }
         }
@@ -210,11 +209,15 @@ fun DiaryDatePlaceholder(
 @Composable
 fun DiaryLesson(
     lesson: DiaryStore.State.Lesson,
-    onFile: (DiaryStore.State.File) -> Unit,
+    onLesson: (lesson: DiaryStore.State.Lesson) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null,
+            onClick = { onLesson(lesson) }
+        ),
     ) {
         Text(
             text = lesson.number,
@@ -241,7 +244,6 @@ fun DiaryLesson(
             lesson.files.forEach {
                 File(
                     text = it.name,
-                    onClick = { onFile(it) }
                 )
             }
         }
@@ -301,15 +303,10 @@ fun Homework(
 @Composable
 fun File(
     text: String,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier.clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            onClick = onClick
-        ), verticalAlignment = Alignment.CenterVertically
+        modifier = modifier, verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             painter = painterResource(id = R.drawable.diary_download),
@@ -363,38 +360,7 @@ fun DiaryLessonPlaceholder(
 }
 
 
-private fun LocalDate.format(): String {
-    return "${formatWeek()}, $dayOfMonth ${formatMonth()}"
-}
 
-private fun LocalDate.formatMonth(): String {
-    return when (month) {
-        JANUARY -> "января"
-        FEBRUARY -> "февраля"
-        MARCH -> "марта"
-        APRIL -> "апреля"
-        MAY -> "мая"
-        JUNE -> "июня"
-        JULY -> "июля"
-        AUGUST -> "августа"
-        SEPTEMBER -> "сентября"
-        OCTOBER -> "октября"
-        NOVEMBER -> "ноября"
-        DECEMBER -> "декабря"
-    }
-}
-
-private fun LocalDate.formatWeek(): String {
-    return when (dayOfWeek) {
-        MONDAY -> "Понедельник"
-        TUESDAY -> "Вторник"
-        WEDNESDAY -> "Среда"
-        THURSDAY -> "Четверг"
-        FRIDAY -> "Пятница"
-        SATURDAY -> "Суббота"
-        SUNDAY -> "Воскресенье"
-    }
-}
 
 @Composable
 fun PeriodSelector(

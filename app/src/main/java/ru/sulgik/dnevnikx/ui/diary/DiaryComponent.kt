@@ -14,7 +14,6 @@ import ru.sulgik.dnevnikx.mvi.states
 import ru.sulgik.dnevnikx.platform.ComparableRange
 import ru.sulgik.dnevnikx.platform.DatePeriod
 import ru.sulgik.dnevnikx.platform.TimeFormatter
-import ru.sulgik.dnevnikx.platform.UriHandler
 import ru.sulgik.dnevnikx.ui.AuthorizedComponentContext
 import ru.sulgik.dnevnikx.ui.BaseAuthorizedComponentContext
 import ru.sulgik.dnevnikx.ui.ModalUI
@@ -38,6 +37,10 @@ class DiaryComponent(
             onContinue = this::onPickerSelected,
             marked = { currentData in it.data }
         )
+
+    private val lessonInfo = DiaryLessonInfoComponent(
+        componentContext = childDIContext(key = "lesson_info"),
+    )
 
     private fun onPickerSelected(info: PickerComponent.Info<DatePeriodContainer>) {
         onSelect(DatePeriod(info.data.start.toKotlinLocalDate(), info.data.end.toKotlinLocalDate()))
@@ -64,23 +67,23 @@ class DiaryComponent(
         )
     }
 
-    private val uriHandler = get<UriHandler>()
-
-    private fun onFile(file: DiaryStore.State.File) {
-        uriHandler.open(file.url)
+    private fun onLesson(date: DiaryStore.State.DiaryDate, lesson: DiaryStore.State.Lesson) {
+        lessonInfo.showLesson(date.date, lesson)
     }
 
     @Composable
     override fun Content(modifier: Modifier) {
         ModalUI(component = picker) {
-            DiaryScreen(
-                periods = state.periods,
-                diary = state.diary,
-                onSelect = this::onSelect,
-                onOther = this::onOther,
-                onFile = this::onFile,
-                modifier = modifier
-            )
+            ModalUI(component = lessonInfo) {
+                DiaryScreen(
+                    periods = state.periods,
+                    diary = state.diary,
+                    onSelect = this::onSelect,
+                    onOther = this::onOther,
+                    onLesson = this::onLesson,
+                    modifier = modifier
+                )
+            }
         }
     }
 

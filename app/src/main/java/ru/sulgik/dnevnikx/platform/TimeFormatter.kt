@@ -9,6 +9,8 @@ interface TimeFormatter {
 
     fun format(value: LocalDate): String
 
+    fun formatLiteral(value: LocalDate): String
+
     fun format(value: LocalTime): String
 
     fun format(value: LocalDateTime): String
