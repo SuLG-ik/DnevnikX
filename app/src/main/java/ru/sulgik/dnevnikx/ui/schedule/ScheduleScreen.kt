@@ -40,6 +40,7 @@ import kotlinx.datetime.LocalDate
 import ru.sulgik.dnevnikx.mvi.schedule.ScheduleStore
 import ru.sulgik.dnevnikx.platform.DatePeriod
 import ru.sulgik.dnevnikx.platform.LocalTimeFormatter
+import ru.sulgik.dnevnikx.ui.view.RefreshableBox
 import ru.sulgik.dnevnikx.ui.view.outlined
 import ru.sulgik.dnevnikx.utils.defaultPlaceholder
 import java.time.DayOfWeek.*
@@ -54,6 +55,7 @@ fun ScheduleScreen(
     onSelect: (DatePeriod) -> Unit,
     onOther: () -> Unit,
     onBack: () -> Unit,
+    onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -92,39 +94,41 @@ fun ScheduleScreen(
         Box(
             modifier = Modifier.padding(paddingValues)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(
-                        state = scrollState,
-                        enabled = !schedule.isLoading,
-                    ),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                content = {
-                    when {
-                        schedule.isLoading -> {
-                            repeat(3) {
-                                ScheduleDatePlaceholder(
-                                    modifier = Modifier
-                                        .padding(horizontal = 10.dp)
-                                        .fillMaxWidth(),
-                                )
+            RefreshableBox(refreshing = schedule.isRefreshing, onRefresh = onRefresh) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(
+                            state = scrollState,
+                            enabled = !schedule.isLoading,
+                        ),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    content = {
+                        when {
+                            schedule.isLoading -> {
+                                repeat(3) {
+                                    ScheduleDatePlaceholder(
+                                        modifier = Modifier
+                                            .padding(horizontal = 10.dp)
+                                            .fillMaxWidth(),
+                                    )
+                                }
                             }
-                        }
 
-                        schedule.schedule != null -> {
-                            schedule.schedule.schedule.forEach { diary ->
-                                ScheduleDate(
-                                    diary = diary,
-                                    modifier = Modifier
-                                        .padding(horizontal = 10.dp)
-                                        .fillMaxWidth()
-                                )
+                            schedule.schedule != null -> {
+                                schedule.schedule.schedule.forEach { diary ->
+                                    ScheduleDate(
+                                        diary = diary,
+                                        modifier = Modifier
+                                            .padding(horizontal = 10.dp)
+                                            .fillMaxWidth()
+                                    )
+                                }
                             }
                         }
                     }
-                }
-            )
+                )
+            }
         }
     }
 }
@@ -285,7 +289,7 @@ fun LessonPlaceholder(modifier: Modifier = Modifier) {
             text = "Математика",
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.defaultPlaceholder(),
-            )
+        )
         Text(
             text = "Иванов И. И.",
             style = MaterialTheme.typography.bodyMedium,

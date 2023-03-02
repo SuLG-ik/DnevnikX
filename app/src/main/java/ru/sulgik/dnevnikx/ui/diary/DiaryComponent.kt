@@ -71,6 +71,10 @@ class DiaryComponent(
         lessonInfo.showLesson(date.date, lesson)
     }
 
+    private fun onRefresh() {
+        store.accept(DiaryStore.Intent.RefreshDiary)
+    }
+
     @Composable
     override fun Content(modifier: Modifier) {
         ModalUI(component = picker) {
@@ -81,6 +85,7 @@ class DiaryComponent(
                     onSelect = this::onSelect,
                     onOther = this::onOther,
                     onLesson = this::onLesson,
+                    onRefresh = this::onRefresh,
                     modifier = modifier
                 )
             }

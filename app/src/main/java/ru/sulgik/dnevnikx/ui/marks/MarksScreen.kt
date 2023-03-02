@@ -43,6 +43,7 @@ import ru.sulgik.dnevnikx.platform.LocalTimeFormatter
 import ru.sulgik.dnevnikx.ui.diary.NoData
 import ru.sulgik.dnevnikx.ui.diary.Period
 import ru.sulgik.dnevnikx.ui.diary.PeriodPlaceholder
+import ru.sulgik.dnevnikx.ui.view.RefreshableBox
 import ru.sulgik.dnevnikx.ui.view.outlined
 import ru.sulgik.dnevnikx.utils.defaultPlaceholder
 
@@ -53,6 +54,7 @@ fun MarksScreen(
     marks: MarksStore.State.Marks,
     onSelect: (MarksStore.State.Period) -> Unit,
     onMark: (Pair<MarksStore.State.Lesson, MarksStore.State.Mark>) -> Unit,
+    onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -79,35 +81,37 @@ fun MarksScreen(
                     scrollState.animateScrollTo(0)
                 }
             })
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(
-                        state = scrollState,
-                        enabled = !marks.isLoading,
-                    ),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                when {
-                    marks.isLoading -> {
-                        repeat(6) {
-                            LessonPlaceholder(
-                                modifier = Modifier
-                                    .padding(horizontal = 10.dp)
-                                    .fillMaxWidth(),
-                            )
+            RefreshableBox(refreshing = marks.isRefreshing, onRefresh = onRefresh) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(
+                            state = scrollState,
+                            enabled = !marks.isLoading,
+                        ),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    when {
+                        marks.isLoading -> {
+                            repeat(6) {
+                                LessonPlaceholder(
+                                    modifier = Modifier
+                                        .padding(horizontal = 10.dp)
+                                        .fillMaxWidth(),
+                                )
+                            }
                         }
-                    }
 
-                    marks.data != null -> {
-                        marks.data.lessons.forEach { lesson ->
-                            Lesson(
-                                lesson = lesson,
-                                onMark = { mark -> onMark(lesson to mark) },
-                                modifier = Modifier
-                                    .padding(horizontal = 10.dp)
-                                    .fillMaxWidth()
-                            )
+                        marks.data != null -> {
+                            marks.data.lessons.forEach { lesson ->
+                                Lesson(
+                                    lesson = lesson,
+                                    onMark = { mark -> onMark(lesson to mark) },
+                                    modifier = Modifier
+                                        .padding(horizontal = 10.dp)
+                                        .fillMaxWidth()
+                                )
+                            }
                         }
                     }
                 }

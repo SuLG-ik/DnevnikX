@@ -46,6 +46,7 @@ import ru.sulgik.dnevnikx.platform.DatePeriod
 import ru.sulgik.dnevnikx.platform.LocalTimeFormatter
 import ru.sulgik.dnevnikx.ui.marks.markColor
 import ru.sulgik.dnevnikx.ui.view.MiddleEllipsisText
+import ru.sulgik.dnevnikx.ui.view.RefreshableBox
 import ru.sulgik.dnevnikx.ui.view.outlined
 import ru.sulgik.dnevnikx.utils.defaultPlaceholder
 import java.time.DayOfWeek.*
@@ -59,6 +60,7 @@ fun DiaryScreen(
     onSelect: (DatePeriod) -> Unit,
     onOther: () -> Unit,
     onLesson: (date: DiaryStore.State.DiaryDate, lesson: DiaryStore.State.Lesson) -> Unit,
+    onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -83,7 +85,9 @@ fun DiaryScreen(
                 scrollState.animateScrollTo(0)
             }
         })
-        Box(
+        RefreshableBox(
+            refreshing = diary.isRefreshing,
+            onRefresh = onRefresh,
             modifier = Modifier.padding(paddingValues)
         ) {
             Column(
@@ -358,8 +362,6 @@ fun DiaryLessonPlaceholder(
         )
     }
 }
-
-
 
 
 @Composable

@@ -10,6 +10,7 @@ interface DiaryStore : Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Lab
     sealed interface Intent {
         data class SelectPeriod(val period: DatePeriod) : Intent
         object SelectOtherPeriod : Intent
+        object RefreshDiary : Intent
     }
 
     data class State(
@@ -33,6 +34,7 @@ interface DiaryStore : Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Lab
 
         data class Diary(
             val isLoading: Boolean = true,
+            val isRefreshing: Boolean = false,
             val data: DiaryData? = null,
         )
 

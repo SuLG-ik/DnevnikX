@@ -54,7 +54,8 @@ class MarksStoreImpl(
                             )
                         )
                     )
-                    val marks = remoteMarksRepository.getMarks(auth, currentPeriod.period).toState(this@onAction.state.marks)
+                    val marks = remoteMarksRepository.getMarks(auth, currentPeriod.period)
+                        .toState(this@onAction.state.marks)
                     cache[currentPeriod] = marks
                     syncDispatch(
                         state.copy(
@@ -115,6 +116,37 @@ class MarksStoreImpl(
                     )
                 )
             }
+            onIntent<MarksStore.Intent.RefreshMarks> {
+                val state = state
+                if (state.periods.isLoading || state.periods.data == null || state.marks.isLoading || state.marks.isRefreshing)
+                    return@onIntent
+                val period = state.periods.data.selectedPeriod
+                dispatch(
+                    state.copy(
+                        marks = state.marks.copy(
+                            isRefreshing = true
+                        ),
+                        periods = state.periods.copy(
+                            isLoading = false,
+                            data = state.periods.data.copy(
+                                selectedPeriod = period
+                            )
+                        )
+                    )
+                )
+                val job = selectPeriodJob
+                selectPeriodJob = launch {
+                    job?.cancelAndJoin()
+                    val marks = remoteMarksRepository.getMarks(auth, period.period)
+                        .toState(this@onIntent.state.marks)
+                    cache[period] = marks
+                    syncDispatch(
+                        this@onIntent.state.copy(
+                            marks = marks,
+                        )
+                    )
+                }
+            }
         },
         reducer = directReducer(),
     ) {
@@ -134,9 +166,13 @@ private fun GetPeriodsOutput.toState(): List<MarksStore.State.Period> {
     }
 }
 
-private fun MarksOutput.toState(state: MarksStore.State.Marks): MarksStore.State.Marks {
+private fun MarksOutput.toState(
+    state: MarksStore.State.Marks,
+    isRefreshing: Boolean = false,
+): MarksStore.State.Marks {
     return state.copy(
         isLoading = false,
+        isRefreshing = isRefreshing,
         data = state.data?.copy(
             lessons = lessons.map { lesson ->
                 MarksStore.State.Lesson(

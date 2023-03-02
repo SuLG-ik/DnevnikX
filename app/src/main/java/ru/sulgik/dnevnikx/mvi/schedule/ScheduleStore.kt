@@ -10,6 +10,7 @@ interface ScheduleStore: Store<ScheduleStore.Intent, ScheduleStore.State, Schedu
     sealed interface Intent {
         data class SelectPeriod(val period: DatePeriod) : Intent
         object SelectOtherPeriod : Intent
+        object RefreshSchedule : Intent
     }
 
     data class State(
@@ -33,6 +34,7 @@ interface ScheduleStore: Store<ScheduleStore.Intent, ScheduleStore.State, Schedu
 
         data class Schedule(
             val isLoading: Boolean = true,
+            val isRefreshing: Boolean = false,
             val schedule: ScheduleData? = null,
         )
 

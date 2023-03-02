@@ -138,6 +138,31 @@ class DiaryStoreImpl(
                     )
                 }
             }
+            onIntent<DiaryStore.Intent.RefreshDiary> { intent ->
+                val state = state
+                if (state.periods.isLoading || state.periods.data == null || state.diary.isRefreshing || state.diary.isLoading)
+                    return@onIntent
+                val selectedPeriod = state.periods.data.selectedPeriod
+                val job = selectPeriodJob
+                dispatch(
+                    state.copy(
+                        diary = state.diary.copy(
+                            isRefreshing = true
+                        )
+                    )
+                )
+                selectPeriodJob = launch {
+                    job?.cancelAndJoin()
+                    val diary = cachedDiaryRepository.getDiaryActual(auth, selectedPeriod).toState()
+                    cache[selectedPeriod] = diary
+                    syncDispatch(
+                        this@onIntent.state.copy(
+                            diary = diary,
+                            isRefreshing = false,
+                        )
+                    )
+                }
+            }
         },
         reducer = directReducer(),
     ) {

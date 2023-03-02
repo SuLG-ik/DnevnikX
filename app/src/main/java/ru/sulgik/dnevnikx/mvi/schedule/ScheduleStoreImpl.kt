@@ -140,6 +140,36 @@ class ScheduleStoreImpl(
                     )
                 }
             }
+            onIntent<ScheduleStore.Intent.RefreshSchedule> { intent ->
+                val state = state
+                if (state.periods.isLoading || state.periods.data == null || state.schedule.isLoading || state.schedule.isRefreshing)
+                    return@onIntent
+                dispatch(
+                    state.copy(
+                        schedule = state.schedule.copy(
+                            isRefreshing = true,
+                        ),
+                    )
+                )
+                val period = state.periods.data.selectedPeriod
+                val job = selectPeriodJob
+                selectPeriodJob = launch {
+                    val account = cachedAccount ?: remoteAccountRepository.getAccount(authScope)
+                        .also { cachedAccount = it }
+                    job?.cancelAndJoin()
+                    val schedule = remoteScheduleRepository.getSchedule(
+                        auth = authScope,
+                        period = period,
+                        classGroup = account.student.classGroup.title
+                    ).toState()
+                    cache[period] = schedule
+                    syncDispatch(
+                        this@onIntent.state.copy(
+                            schedule = schedule,
+                        )
+                    )
+                }
+            }
         },
         reducer = directReducer(),
     ) {

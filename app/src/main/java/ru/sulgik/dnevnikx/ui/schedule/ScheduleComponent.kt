@@ -83,6 +83,10 @@ class ScheduleComponent(
         store.accept(ScheduleStore.Intent.SelectOtherPeriod)
     }
 
+    private fun onRefresh() {
+        store.accept(ScheduleStore.Intent.RefreshSchedule)
+    }
+
     @Composable
     override fun Content(modifier: Modifier) {
         val state = state
@@ -94,6 +98,7 @@ class ScheduleComponent(
                 onSelect = this::onSelect,
                 onOther = this::onOther,
                 onBack = this::onBack,
+                onRefresh = this::onRefresh,
                 modifier = modifier,
             )
         }

@@ -35,6 +35,10 @@ class MarksComponent(
         store.accept(MarksStore.Intent.SelectMark(mark))
     }
 
+    private fun onRefresh() {
+        store.accept(MarksStore.Intent.RefreshMarks)
+    }
+
     @Composable
     override fun Content(modifier: Modifier) {
         ModalUI(component = markInfo, modifier) {
@@ -43,6 +47,7 @@ class MarksComponent(
                 marks = state.marks,
                 onSelect = this::onSelect,
                 onMark = this::onMark,
+                onRefresh = this::onRefresh,
                 modifier = Modifier.fillMaxSize(),
             )
         }

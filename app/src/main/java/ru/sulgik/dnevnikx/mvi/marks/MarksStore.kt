@@ -9,6 +9,7 @@ interface MarksStore : Store<MarksStore.Intent, MarksStore.State, MarksStore.Lab
     sealed interface Intent {
         data class SelectPeriod(val period: State.Period) : Intent
         data class SelectMark(val mark: Pair<State.Lesson, State.Mark>) : Intent
+        object RefreshMarks : Intent
     }
 
     data class State(
@@ -33,6 +34,7 @@ interface MarksStore : Store<MarksStore.Intent, MarksStore.State, MarksStore.Lab
 
         data class Marks(
             val isLoading: Boolean = true,
+            val isRefreshing: Boolean = false,
             val data: MarksData? = null,
         )
 
