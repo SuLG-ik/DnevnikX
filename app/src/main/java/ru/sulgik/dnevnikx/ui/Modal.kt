@@ -14,7 +14,7 @@ import com.arkivanov.essenty.statekeeper.consume
 @Parcelize
 data class ModalState(val isVisible: Boolean) : Parcelable
 
-abstract interface Modal {
+interface Modal {
 
     val modalState: ModalState
 
@@ -28,6 +28,7 @@ abstract interface Modal {
 abstract class ModalComponentContext(
     componentContext: DIComponentContext,
     private val initialState: ModalState = ModalState(false),
+    private val onHide: () -> Unit = {},
 ) : BaseComponentContext(componentContext), Modal {
 
     private val _modalState by lazy {
@@ -40,6 +41,9 @@ abstract class ModalComponentContext(
     override var modalState: ModalState by _modalState
 
     override fun updateState(isVisible: Boolean) {
+        if (!isVisible && modalState.isVisible) {
+            onHide()
+        }
         modalState = ModalState(isVisible)
     }
 
@@ -48,6 +52,7 @@ abstract class ModalComponentContext(
 abstract class AuthorizedModalComponentContext(
     componentContext: AuthorizedComponentContext,
     private val initialState: ModalState = ModalState(false),
+    private val onHide: () -> Unit = {},
 ) : BaseAuthorizedComponentContext(componentContext), Modal {
 
     private val _modalState by lazy {
@@ -60,6 +65,9 @@ abstract class AuthorizedModalComponentContext(
     override var modalState: ModalState by _modalState
 
     override fun updateState(isVisible: Boolean) {
+        if (!isVisible && modalState.isVisible) {
+            onHide()
+        }
         modalState = ModalState(isVisible)
     }
 

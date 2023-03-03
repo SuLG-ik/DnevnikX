@@ -1,4 +1,4 @@
-package ru.sulgik.dnevnikx.repository.marks
+package ru.sulgik.dnevnikx.repository.marks.ktor
 
 import io.ktor.client.request.parameter
 import kotlinx.datetime.LocalDate
@@ -7,10 +7,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
 import ru.sulgik.dnevnikx.data.AuthScope
-import ru.sulgik.dnevnikx.repository.Client
 import ru.sulgik.dnevnikx.platform.DatePeriod
+import ru.sulgik.dnevnikx.repository.Client
 import ru.sulgik.dnevnikx.repository.data.MarksOutput
 import ru.sulgik.dnevnikx.repository.data.safeBody
+import ru.sulgik.dnevnikx.repository.marks.RemoteMarksRepository
 import ru.sulgik.dnevnikx.utils.CustomLocalDateSerializer
 
 @Single

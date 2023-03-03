@@ -6,7 +6,6 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigationSource
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
-import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.lifecycle.Lifecycle
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
@@ -42,15 +41,13 @@ private class DefaultAuthorizedComponentContext(
         params: ParametersDefinition?,
     ): T {
         return componentContext.getStore(clazz) {
-                if (params == null)
-                    parametersOf(authScope)
-                else
-                    parametersOf(authScope, *params().values.toTypedArray())
-            }
+            if (params == null)
+                parametersOf(authScope)
+            else
+                parametersOf(authScope, *params().values.toTypedArray())
+        }
     }
 }
-
-
 
 
 private class DefaultDIComponentContext(

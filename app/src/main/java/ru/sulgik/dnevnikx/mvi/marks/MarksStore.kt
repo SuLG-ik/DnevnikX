@@ -7,8 +7,13 @@ import ru.sulgik.dnevnikx.platform.DatePeriod
 interface MarksStore : Store<MarksStore.Intent, MarksStore.State, MarksStore.Label> {
 
     sealed interface Intent {
+
         data class SelectPeriod(val period: State.Period) : Intent
+
         data class SelectMark(val mark: Pair<State.Lesson, State.Mark>) : Intent
+
+        object HideMark : Intent
+
         object RefreshMarks : Intent
     }
 

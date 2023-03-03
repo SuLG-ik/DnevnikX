@@ -22,7 +22,8 @@ import ru.sulgik.dnevnikx.ui.ModalComponentContext
 
 class MarkInfoComponent(
     componentContext: DIComponentContext,
-) : ModalComponentContext(componentContext) {
+    onHide: () -> Unit,
+) : ModalComponentContext(componentContext, onHide = onHide) {
 
     private var currentMark by mutableStateOf<Pair<MarksStore.State.Lesson, MarksStore.State.Mark>?>(
         null

@@ -65,14 +65,15 @@ class DiaryStoreImpl(
                             )
                         )
                     )
-                    var diary = cachedDiaryRepository.getDiaryFast(auth, currentPeriod).toState()
+                    var diary =
+                        cachedDiaryRepository.getDiaryFast(auth, currentPeriod).toState(state)
                     cache[currentPeriod] = diary
                     syncDispatch(
                         state.copy(
                             diary = diary,
                         )
                     )
-                    diary = cachedDiaryRepository.getDiaryActual(auth, currentPeriod).toState()
+                    diary = cachedDiaryRepository.getDiaryActual(auth, currentPeriod).toState(state)
                     cache[currentPeriod] = diary
                     syncDispatch(
                         state.copy(
@@ -91,6 +92,39 @@ class DiaryStoreImpl(
                         periods = state.periods.copy(
                             data = state.periods.data.copy(
                                 isOther = true
+                            )
+                        )
+                    )
+                )
+            }
+            onIntent<DiaryStore.Intent.HideLessonInfo> {
+                val state = state
+                if (state.diary.data == null) {
+                    return@onIntent
+                }
+                dispatch(
+                    state.copy(
+                        diary = state.diary.copy(
+                            data = state.diary.data.copy(
+                                selectedLesson = null,
+                            )
+                        )
+                    )
+                )
+            }
+            onIntent<DiaryStore.Intent.ShowLessonInfo> { intent ->
+                val state = state
+                if (state.diary.data == null) {
+                    return@onIntent
+                }
+                dispatch(
+                    state.copy(
+                        diary = state.diary.copy(
+                            data = state.diary.data.copy(
+                                selectedLesson = DiaryStore.State.SelectedLesson(
+                                    date = intent.date,
+                                    lesson = intent.lesson
+                                ),
                             )
                         )
                     )
@@ -122,14 +156,16 @@ class DiaryStoreImpl(
                 val job = selectPeriodJob
                 selectPeriodJob = launch {
                     job?.cancelAndJoin()
-                    var diary = cachedDiaryRepository.getDiaryFast(auth, intent.period).toState()
+                    var diary = cachedDiaryRepository.getDiaryFast(auth, intent.period)
+                        .toState(this@onIntent.state)
                     cache[intent.period] = diary
                     syncDispatch(
                         this@onIntent.state.copy(
                             diary = diary,
                         )
                     )
-                    diary = cachedDiaryRepository.getDiaryActual(auth, intent.period).toState()
+                    diary = cachedDiaryRepository.getDiaryActual(auth, intent.period)
+                        .toState(this@onIntent.state)
                     cache[intent.period] = diary
                     syncDispatch(
                         this@onIntent.state.copy(
@@ -153,7 +189,8 @@ class DiaryStoreImpl(
                 )
                 selectPeriodJob = launch {
                     job?.cancelAndJoin()
-                    val diary = cachedDiaryRepository.getDiaryActual(auth, selectedPeriod).toState()
+                    val diary = cachedDiaryRepository.getDiaryActual(auth, selectedPeriod)
+                        .toState(this@onIntent.state)
                     cache[selectedPeriod] = diary
                     syncDispatch(
                         this@onIntent.state.copy(
@@ -174,10 +211,11 @@ class DiaryStoreImpl(
 
 }
 
-private fun DiaryOutput.toState(): DiaryStore.State.Diary {
+private fun DiaryOutput.toState(state: DiaryStore.State): DiaryStore.State.Diary {
     return DiaryStore.State.Diary(
         isLoading = false,
         data = DiaryStore.State.DiaryData(
+            selectedLesson = state.diary.data?.selectedLesson,
             diary = diary.map { diaryItem ->
                 DiaryStore.State.DiaryDate(
                     date = diaryItem.date,

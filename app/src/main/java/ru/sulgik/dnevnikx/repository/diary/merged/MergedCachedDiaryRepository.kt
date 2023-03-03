@@ -21,7 +21,7 @@ class MergedCachedDiaryRepository(
         try {
             localDiaryRepository.saveDiary(auth, remotePeriods)
         } catch (e: Exception) {
-            Napier.e("Save remote periods to local error", e)
+            Napier.e("Save remote diary to local error", e)
         }
         return remotePeriods
     }
@@ -31,7 +31,7 @@ class MergedCachedDiaryRepository(
         try {
             localDiaryRepository.saveDiary(auth, remotePeriods)
         } catch (e: Exception) {
-            Napier.e("Save remote periods to local error", e)
+            Napier.e("Save remote diary to local error", e)
         }
         return remotePeriods
     }

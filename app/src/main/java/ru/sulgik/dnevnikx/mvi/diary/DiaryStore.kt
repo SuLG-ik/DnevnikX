@@ -10,6 +10,11 @@ interface DiaryStore : Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Lab
     sealed interface Intent {
         data class SelectPeriod(val period: DatePeriod) : Intent
         object SelectOtherPeriod : Intent
+        object HideLessonInfo : Intent
+        data class ShowLessonInfo(
+            val date: State.DiaryDate, val lesson: State.Lesson,
+        ) : Intent
+
         object RefreshDiary : Intent
     }
 
@@ -39,7 +44,12 @@ interface DiaryStore : Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Lab
         )
 
         data class DiaryData(
+            val selectedLesson: SelectedLesson?,
             val diary: List<DiaryDate>,
+        )
+
+        data class SelectedLesson(
+            val date: DiaryDate, val lesson: Lesson,
         )
 
         data class DiaryDate(

@@ -16,7 +16,7 @@ import ru.sulgik.dnevnikx.mvi.directReducer
 import ru.sulgik.dnevnikx.mvi.syncDispatch
 import ru.sulgik.dnevnikx.repository.data.GetPeriodsOutput
 import ru.sulgik.dnevnikx.repository.data.MarksOutput
-import ru.sulgik.dnevnikx.repository.marks.RemoteMarksRepository
+import ru.sulgik.dnevnikx.repository.marks.CachedMarksRepository
 import ru.sulgik.dnevnikx.repository.periods.CachedPeriodsRepository
 
 
@@ -27,7 +27,7 @@ class MarksStoreImpl(
     coroutineDispatcher: CoroutineDispatcher,
     auth: AuthScope,
     cachedPeriodsRepository: CachedPeriodsRepository,
-    remoteMarksRepository: RemoteMarksRepository,
+    cachedMarksRepository: CachedMarksRepository,
 ) : MarksStore,
     Store<MarksStore.Intent, MarksStore.State, MarksStore.Label> by storeFactory.create<_, Action, _, _, _>(
         name = "MarksStoreImpl",
@@ -54,7 +54,15 @@ class MarksStoreImpl(
                             )
                         )
                     )
-                    val marks = remoteMarksRepository.getMarks(auth, currentPeriod.period)
+                    var marks = cachedMarksRepository.getMarksFast(auth, currentPeriod.period)
+                        .toState(this@onAction.state.marks)
+                    cache[currentPeriod] = marks
+                    syncDispatch(
+                        state.copy(
+                            marks = marks,
+                        )
+                    )
+                    marks = cachedMarksRepository.getMarksActual(auth, currentPeriod.period)
                         .toState(this@onAction.state.marks)
                     cache[currentPeriod] = marks
                     syncDispatch(
@@ -91,7 +99,15 @@ class MarksStoreImpl(
                 val job = selectPeriodJob
                 selectPeriodJob = launch {
                     job?.cancelAndJoin()
-                    val marks = remoteMarksRepository.getMarks(auth, it.period.period)
+                    var marks = cachedMarksRepository.getMarksFast(auth, it.period.period)
+                        .toState(this@onIntent.state.marks)
+                    cache[it.period] = marks
+                    syncDispatch(
+                        this@onIntent.state.copy(
+                            marks = marks,
+                        )
+                    )
+                    marks = cachedMarksRepository.getMarksActual(auth, it.period.period)
                         .toState(this@onIntent.state.marks)
                     cache[it.period] = marks
                     syncDispatch(
@@ -100,6 +116,21 @@ class MarksStoreImpl(
                         )
                     )
                 }
+            }
+            onIntent<MarksStore.Intent.HideMark> {
+                val state = state
+                if (state.marks.data == null) {
+                    return@onIntent
+                }
+                dispatch(
+                    state.copy(
+                        marks = state.marks.copy(
+                            data = state.marks.data.copy(
+                                selectedMark = null,
+                            )
+                        )
+                    )
+                )
             }
             onIntent<MarksStore.Intent.SelectMark> {
                 val state = state
@@ -137,7 +168,7 @@ class MarksStoreImpl(
                 val job = selectPeriodJob
                 selectPeriodJob = launch {
                     job?.cancelAndJoin()
-                    val marks = remoteMarksRepository.getMarks(auth, period.period)
+                    val marks = cachedMarksRepository.getMarksActual(auth, period.period)
                         .toState(this@onIntent.state.marks)
                     cache[period] = marks
                     syncDispatch(

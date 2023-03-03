@@ -18,7 +18,9 @@ class MarksComponent(
 
     private val store = getStore<MarksStore>()
 
-    private val markInfo = MarkInfoComponent(childDIContext("mark_info"))
+    private val markInfo = MarkInfoComponent(childDIContext("mark_info"), onHide = {
+        store.accept(MarksStore.Intent.HideMark)
+    })
 
     private val state by store.states(this) {
         if (it.marks.data?.selectedMark != null) {

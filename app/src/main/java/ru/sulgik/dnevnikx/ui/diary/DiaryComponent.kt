@@ -40,6 +40,9 @@ class DiaryComponent(
 
     private val lessonInfo = DiaryLessonInfoComponent(
         componentContext = childDIContext(key = "lesson_info"),
+        onHide = {
+            store.accept(DiaryStore.Intent.HideLessonInfo)
+        }
     )
 
     private fun onPickerSelected(info: PickerComponent.Info<DatePeriodContainer>) {
@@ -47,14 +50,24 @@ class DiaryComponent(
     }
 
     val state by store.states(this) {
-        if (it.periods.data?.isOther == true) {
-            picker.setData(it.periods.data.periods.map { period ->
+        onStateUpdated(it)
+        it
+    }
+
+    private fun onStateUpdated(state: DiaryStore.State) {
+        if (state.periods.data?.isOther == true) {
+            picker.setData(state.periods.data.periods.map { period ->
                 period.toInfo()
-            }, it.periods.data.selectedPeriod.toInfo())
+            }, state.periods.data.selectedPeriod.toInfo())
         } else {
             picker.setData(null)
         }
-        it
+        val selectedLesson = state.diary.data?.selectedLesson
+        if (selectedLesson != null) {
+            lessonInfo.showLesson(selectedLesson.date.date, selectedLesson.lesson)
+        } else {
+            lessonInfo.updateState(false)
+        }
     }
 
     private fun DatePeriod.toInfo(): PickerComponent.Info<DatePeriodContainer> {
@@ -68,7 +81,7 @@ class DiaryComponent(
     }
 
     private fun onLesson(date: DiaryStore.State.DiaryDate, lesson: DiaryStore.State.Lesson) {
-        lessonInfo.showLesson(date.date, lesson)
+        store.accept(DiaryStore.Intent.ShowLessonInfo(date = date, lesson = lesson))
     }
 
     private fun onRefresh() {

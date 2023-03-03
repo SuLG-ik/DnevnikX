@@ -8,6 +8,7 @@ import ru.sulgik.dnevnikx.repository.account.room.AccountDao
 import ru.sulgik.dnevnikx.repository.account.room.AccountDataDao
 import ru.sulgik.dnevnikx.repository.auth.room.AuthDao
 import ru.sulgik.dnevnikx.repository.diary.room.DiaryDao
+import ru.sulgik.dnevnikx.repository.marks.room.MarksDao
 import ru.sulgik.dnevnikx.repository.periods.room.PeriodDao
 import ru.sulgik.dnevnikx.room.migrations.migrations
 
@@ -50,6 +51,12 @@ class RoomModule {
     @Single
     fun bindsDiaryDao(database: DnevnikXDatabase): DiaryDao {
         return database.diaryDao
+    }
+
+
+    @Single
+    fun bindsMarksDao(database: DnevnikXDatabase): MarksDao {
+        return database.marksDao
     }
 
 }

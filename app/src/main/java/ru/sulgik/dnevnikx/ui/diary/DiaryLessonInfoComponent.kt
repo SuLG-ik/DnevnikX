@@ -37,7 +37,8 @@ import ru.sulgik.dnevnikx.ui.marks.markColor
 
 class DiaryLessonInfoComponent(
     componentContext: DIComponentContext,
-) : ModalComponentContext(componentContext) {
+    onHide: () -> Unit,
+) : ModalComponentContext(componentContext, onHide = onHide) {
 
 
     private val uriHandler = get<UriHandler>()
