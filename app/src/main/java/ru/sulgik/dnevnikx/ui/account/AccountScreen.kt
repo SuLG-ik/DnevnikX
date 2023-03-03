@@ -127,6 +127,9 @@ fun Profile(
                 onClick = onSelectAccount,
             )
         ) {
+            Box(
+                modifier = Modifier.size(20.dp)
+            )
             Text(account.name, style = MaterialTheme.typography.bodyLarge)
             Icon(
                 imageVector = Icons.Outlined.ArrowDropDown,
