@@ -44,7 +44,8 @@ class AccountStoreImpl(
                                 isLoading = false,
                                 actions = AccountStore.State.Actions(
                                     isScheduleAvailable = true,
-                                    isUpdatesAvailable = true,
+                                    isUpdatesAvailable = false,
+                                    isFinalMarksAvailable = true,
                                     AccountStore.State.AboutData(
                                         "DnevnikX ${BuildConfig.APP_VERSION}"
                                     ),

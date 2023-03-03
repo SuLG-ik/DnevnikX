@@ -13,6 +13,7 @@ class AccountComponent(
     componentContext: AuthorizedComponentContext,
     private val onSchedule: () -> Unit,
     private val onUpdates: () -> Unit,
+    private val onFinalMarks: () -> Unit,
     private val onAbout: () -> Unit,
     private val onSelectAccount: () -> Unit,
 ) : BaseAuthorizedComponentContext(componentContext) {
@@ -30,6 +31,7 @@ class AccountComponent(
             onSchedule = onSchedule,
             onUpdates = onUpdates,
             onAbout = onAbout,
+            onFinalMarks = onFinalMarks,
             onSelectAccount = onSelectAccount,
             modifier = modifier,
         )

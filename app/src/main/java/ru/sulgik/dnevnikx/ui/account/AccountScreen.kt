@@ -46,6 +46,7 @@ fun AccountScreen(
     actionsData: AccountStore.State.ActionsData,
     onSchedule: () -> Unit,
     onUpdates: () -> Unit,
+    onFinalMarks: () -> Unit,
     onAbout: () -> Unit,
     onSelectAccount: () -> Unit,
     modifier: Modifier = Modifier,
@@ -87,6 +88,7 @@ fun AccountScreen(
                         actions = actionsData.actions,
                         onSchedule = onSchedule,
                         onUpdates = onUpdates,
+                        onFinalMarks = onFinalMarks,
                         onAbout = onAbout,
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -161,6 +163,7 @@ fun ProfileActions(
     actions: AccountStore.State.Actions,
     onSchedule: () -> Unit,
     onUpdates: () -> Unit,
+    onFinalMarks: () -> Unit,
     onAbout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -182,6 +185,14 @@ fun ProfileActions(
                 subtext = "Изменения в журнале",
                 icon = painterResource(id = R.drawable.updates),
                 onClick = onUpdates,
+                modifier = Modifier.fillMaxWidth()
+            )
+        if (actions.isFinalMarksAvailable)
+            ProfileAction(
+                text = "Итоговые оценки",
+                subtext = "Сравнительная таблица по периодам",
+                icon = painterResource(id = R.drawable.final_marks),
+                onClick = onFinalMarks,
                 modifier = Modifier.fillMaxWidth()
             )
         ProfileAction(

@@ -41,6 +41,10 @@ class ProfileHostComponent(
         /* TODO */
     }
 
+    private fun onFinalMarks() {
+        /* TODO */
+    }
+
     private fun onBack() {
         navigation.pop()
     }
@@ -61,6 +65,7 @@ class ProfileHostComponent(
                 onSchedule = this::onSchedule,
                 onAbout = this::onAbout,
                 onUpdates = this::onUpdates,
+                onFinalMarks = this::onFinalMarks,
                 onSelectAccount = onSelectAccount,
             )
 

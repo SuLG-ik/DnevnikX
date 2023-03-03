@@ -18,6 +18,7 @@ interface AccountStore : Store<AccountStore.Intent, AccountStore.State, AccountS
         data class Actions(
             val isScheduleAvailable: Boolean,
             val isUpdatesAvailable: Boolean,
+            val isFinalMarksAvailable: Boolean,
             val aboutData: AboutData,
         )
 
