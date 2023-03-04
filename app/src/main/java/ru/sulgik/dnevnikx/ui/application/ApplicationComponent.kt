@@ -20,12 +20,12 @@ import ru.sulgik.dnevnikx.ui.AuthorizedComponentContext
 import ru.sulgik.dnevnikx.ui.BaseAuthorizedComponentContext
 import ru.sulgik.dnevnikx.ui.Content
 import ru.sulgik.dnevnikx.ui.FloatingModalUI
+import ru.sulgik.dnevnikx.ui.account.ProfileHostComponent
+import ru.sulgik.dnevnikx.ui.account.selector.AccountSelectorComponent
 import ru.sulgik.dnevnikx.ui.authChildStack
 import ru.sulgik.dnevnikx.ui.childAuthContext
 import ru.sulgik.dnevnikx.ui.diary.DiaryComponent
 import ru.sulgik.dnevnikx.ui.marks.MarksComponent
-import ru.sulgik.dnevnikx.ui.account.ProfileHostComponent
-import ru.sulgik.dnevnikx.ui.account.selector.AccountSelectorComponent
 
 class ApplicationComponent(
     componentContext: AuthorizedComponentContext,
@@ -92,12 +92,12 @@ class ApplicationComponent(
                         onLongClick = this::onSecondaryNavigate,
                         modifier = Modifier.fillMaxWidth()
                     )
-                }
+                },
+                modifier = modifier
             ) {
                 Box(
                     modifier = Modifier
                         .padding(it)
-                        .fillMaxSize()
                 ) {
                     childState.Content(
                         Modifier.fillMaxSize(),

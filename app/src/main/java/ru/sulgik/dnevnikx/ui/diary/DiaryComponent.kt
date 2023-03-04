@@ -35,7 +35,8 @@ class DiaryComponent(
         PickerComponent(
             componentContext = childDIContext(key = "period_picker"),
             onContinue = this::onPickerSelected,
-            marked = { currentData in it.data }
+            marked = { currentData in it.data },
+            onHide = { store.accept(DiaryStore.Intent.HidePeriodSelector) }
         )
 
     private val lessonInfo = DiaryLessonInfoComponent(
@@ -106,7 +107,7 @@ class DiaryComponent(
     }
 
     private fun onSelect(period: DatePeriod) {
-        store.accept(DiaryStore.Intent.SelectPeriod(period))
+        store.accept(DiaryStore.Intent.SelectPeriodSelector(period))
     }
 
 

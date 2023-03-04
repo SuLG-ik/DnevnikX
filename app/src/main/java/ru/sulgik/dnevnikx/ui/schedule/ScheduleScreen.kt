@@ -19,12 +19,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -41,6 +39,7 @@ import ru.sulgik.dnevnikx.mvi.schedule.ScheduleStore
 import ru.sulgik.dnevnikx.platform.DatePeriod
 import ru.sulgik.dnevnikx.platform.LocalTimeFormatter
 import ru.sulgik.dnevnikx.ui.view.RefreshableBox
+import ru.sulgik.dnevnikx.ui.view.optionalBackNavigationIcon
 import ru.sulgik.dnevnikx.ui.view.outlined
 import ru.sulgik.dnevnikx.utils.defaultPlaceholder
 import java.time.DayOfWeek.*
@@ -62,15 +61,7 @@ fun ScheduleScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Расписание") },
-                navigationIcon = if (backAvailable) {
-                    {
-                        IconButton(onClick = onBack) {
-                            Icon(Icons.Outlined.ArrowBack, contentDescription = "назад")
-                        }
-                    }
-                } else {
-                    {}
-                }
+                navigationIcon = optionalBackNavigationIcon(backAvailable, onBack),
             )
         },
         modifier = modifier,

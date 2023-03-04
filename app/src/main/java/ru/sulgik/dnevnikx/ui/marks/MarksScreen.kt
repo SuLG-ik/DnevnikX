@@ -150,7 +150,7 @@ fun Lesson(
                     color = lesson.averageValue.markColor()
                 )
         }
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
@@ -232,6 +232,26 @@ fun MarkWithMessage(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    MarkWithMessage(
+        mark = mark,
+        value = value,
+        subtitle = LocalTimeFormatter.current.format(date),
+        message = message,
+        onClick = onClick,
+        modifier = modifier,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MarkWithMessage(
+    mark: String,
+    value: Int,
+    subtitle: String,
+    message: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier
             .clickable(
@@ -260,10 +280,10 @@ fun MarkWithMessage(
             )
         }
         Text(
-            text = LocalTimeFormatter.current.format(date),
+            text = subtitle,
             style = MaterialTheme.typography.bodySmall,
             fontSize = 16.sp,
-            color = LocalContentColor.current.copy(alpha = 0.5f)
+            color = LocalContentColor.current.copy(alpha = 0.5f),
         )
     }
 }
