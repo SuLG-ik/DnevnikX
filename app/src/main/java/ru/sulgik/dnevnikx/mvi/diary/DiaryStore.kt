@@ -8,7 +8,8 @@ import ru.sulgik.dnevnikx.platform.TimePeriod
 interface DiaryStore : Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Label> {
 
     sealed interface Intent {
-        data class SelectPeriod(val period: DatePeriod) : Intent
+        data class SelectPeriodSelector(val period: DatePeriod) : Intent
+        object HidePeriodSelector : Intent
         object SelectOtherPeriod : Intent
         object HideLessonInfo : Intent
         data class ShowLessonInfo(

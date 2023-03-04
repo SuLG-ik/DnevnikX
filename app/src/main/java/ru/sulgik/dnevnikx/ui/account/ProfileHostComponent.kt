@@ -13,6 +13,7 @@ import ru.sulgik.dnevnikx.ui.BaseComponentContext
 import ru.sulgik.dnevnikx.ui.Content
 import ru.sulgik.dnevnikx.ui.about.AboutComponent
 import ru.sulgik.dnevnikx.ui.authChildStack
+import ru.sulgik.dnevnikx.ui.finalmarks.FinalMarksComponent
 import ru.sulgik.dnevnikx.ui.schedule.ScheduleComponent
 
 class ProfileHostComponent(
@@ -42,7 +43,7 @@ class ProfileHostComponent(
     }
 
     private fun onFinalMarks() {
-        /* TODO */
+        navigation.bringToFront(Config.FinalMarks)
     }
 
     private fun onBack() {
@@ -74,12 +75,18 @@ class ProfileHostComponent(
                 backAvailable = true,
                 onBack = this::onBack,
             )
+
+            Config.FinalMarks -> FinalMarksComponent(
+                componentContext = componentContext,
+                backAvailable = true,
+                onBack = this::onBack,
+            )
         }
     }
 
     @Composable
     override fun Content(modifier: Modifier) {
-        childStack.Content(modifier = modifier)
+        childStack.Content(modifier = modifier, animation = null)
     }
 
     private sealed interface Config : Parcelable {
@@ -92,6 +99,9 @@ class ProfileHostComponent(
 
         @Parcelize
         object Schedule : Config
+
+        @Parcelize
+        object FinalMarks : Config
 
     }
 

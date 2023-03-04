@@ -1,31 +1,25 @@
 package ru.sulgik.dnevnikx.ui.picker
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import ru.sulgik.dnevnikx.ui.DIComponentContext
 import ru.sulgik.dnevnikx.ui.ModalComponentContext
-import java.time.LocalDate
 
 class PickerComponent<T : Parcelable>(
     componentContext: DIComponentContext,
     private val onContinue: (Info<T>) -> Unit,
     private val marked: (Info<T>) -> Boolean = { false },
-) : ModalComponentContext(componentContext) {
+    onHide: () -> Unit = { },
+) : ModalComponentContext(componentContext, onHide = onHide) {
 
     private var dataState by mutableStateOf<Data<T>?>(null)
+
 
     fun setData(data: List<Info<T>>?, selectedData: Info<T>? = null) {
         if (data == null) {

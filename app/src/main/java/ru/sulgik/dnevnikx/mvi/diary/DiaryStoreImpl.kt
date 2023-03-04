@@ -112,6 +112,21 @@ class DiaryStoreImpl(
                     )
                 )
             }
+            onIntent<DiaryStore.Intent.HidePeriodSelector> {
+                val state = state
+                if (state.periods.data == null) {
+                    return@onIntent
+                }
+                dispatch(
+                    state.copy(
+                        periods = state.periods.copy(
+                            data = state.periods.data.copy(
+                                isOther = false,
+                            )
+                        )
+                    )
+                )
+            }
             onIntent<DiaryStore.Intent.ShowLessonInfo> { intent ->
                 val state = state
                 if (state.diary.data == null) {
@@ -130,7 +145,7 @@ class DiaryStoreImpl(
                     )
                 )
             }
-            onIntent<DiaryStore.Intent.SelectPeriod> { intent ->
+            onIntent<DiaryStore.Intent.SelectPeriodSelector> { intent ->
                 val state = state
                 if (state.periods.isLoading || state.periods.data == null)
                     return@onIntent

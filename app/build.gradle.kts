@@ -20,8 +20,8 @@ android {
         applicationId = "ru.sulgik.dnevnikx"
         minSdk = 21
         targetSdk = 33
-        versionCode = 5
-        versionName = "0.2.1"
+        versionCode = 6
+        versionName = "0.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -37,10 +37,10 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("debug")
-            buildConfigField("String", "APP_VERSION", "\"v0.2.1\"")
+            buildConfigField("String", "APP_VERSION", "\"v0.3.0\"")
         }
         debug {
-            buildConfigField("String", "APP_VERSION", "\"v0.2.2-004\"")
+            buildConfigField("String", "APP_VERSION", "\"v0.3.1-001\"")
         }
     }
     compileOptions {
