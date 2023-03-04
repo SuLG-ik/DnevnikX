@@ -18,6 +18,7 @@ interface FinalMarksDao {
     @Insert
     suspend fun saveLessons(lessons: List<FinalMarksLessonEntity>): List<Long>
 
+    @Transaction
     @Query("SELECT * FROM FinalMarksLessonEntity WHERE accountId = :accountId")
     suspend fun getLessons(accountId: String): List<FinalMarksLessonWithMarks>
 
