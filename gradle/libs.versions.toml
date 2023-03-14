@@ -1,15 +1,15 @@
 [versions]
-agp = "7.4.1"
+agp = "7.4.2"
 kotlin = "1.8.10"
 compose-compiler = "1.4.3"
-compose = "1.4.0-beta02"
-compose-material3 = "1.1.0-alpha07"
+compose = "1.4.0-rc01"
+compose-material3 = "1.1.0-alpha08"
 ksp = "1.8.10-1.0.9"
-lifecycle = "2.6.0-rc01"
-ktor = "2.2.3"
-coroutines = "1.6.4"
-android-core = "1.10.0-beta01"
-android-activity = "1.7.0-beta02"
+lifecycle = "2.6.0"
+ktor = "2.2.4"
+coroutines = "1.7.0-Beta"
+android-core = "1.10.0-rc01"
+android-activity = "1.7.0-rc01"
 android-splash = "1.0.0"
 mvi = "3.1.0"
 decompose = "1.0.0"
@@ -22,8 +22,8 @@ junit = "4.13.2"
 junit-android = "1.1.5"
 napier = "2.6.1"
 datastore = "1.1.0-alpha01"
-material = "1.8.0-rc01"
-accompanist = "0.29.1-alpha"
+material = "1.8.0"
+accompanist = "0.29.2-rc"
 datetime = "0.4.0"
 desugar = "2.0.2"
 serialization = "1.5.0"
@@ -31,7 +31,9 @@ firebase-crashlytics = "18.3.5"
 firebase-crashlytics-plugin = "2.9.2"
 firebase-analytics = "21.2.0"
 firebase-core = "21.1.1"
+firebase-messaging = "23.1.2"
 google-services = "4.3.15"
+sqlcipher = "4.5.3"
 
 [libraries]
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
@@ -100,6 +102,8 @@ desugar-minimal = { module = "com.android.tools:desugar_jdk_libs_minimal", versi
 firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx", version.ref = "firebase-analytics" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ktx", version.ref = "firebase-crashlytics" }
 firebase-core = { module = "com.google.firebase:firebase-core", version.ref = "firebase-core" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging-ktx", version.ref = "firebase-messaging" }
+sqlcipher = { module = "net.zetetic:android-database-sqlcipher", version.ref = "sqlcipher" }
 
 [bundles]
 compose = ["compose-ui", "compose-ui-graphics", "compose-runtime", "compose-material", "compose-material3", "compose-animation"]
@@ -114,7 +118,8 @@ decompose = ["decompose-core", "decompose-compose"]
 essenty = ["essenty-lifecycle", "essenty-parcelable", "essenty-instance"]
 koin = ["koin-core", "koin-android", "koin-annotations"]
 room = ["room-core", "room-ktx"]
-desugar = ["desugar-libs", "desugar-minimal"]
+firebase = ["firebase-analytics", "firebase-crashlytics", "firebase-core"]
+module-mvi = ["napier", "mvi-core", "mvi-main", "mvi-coroutines", "mvi-rx", "koin-core", "koin-annotations"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

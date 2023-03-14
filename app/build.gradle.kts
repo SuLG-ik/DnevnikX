@@ -21,7 +21,7 @@ android {
         minSdk = 21
         targetSdk = 33
         versionCode = 6
-        versionName = "0.3.0"
+        versionName = "0.3.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -37,7 +37,7 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("debug")
-            buildConfigField("String", "APP_VERSION", "\"v0.3.0\"")
+            buildConfigField("String", "APP_VERSION", "\"v0.3.1-alpha01\"")
         }
         debug {
             buildConfigField("String", "APP_VERSION", "\"v0.3.1-001\"")
@@ -80,32 +80,24 @@ android {
 }
 
 dependencies {
+    implementation(projects.ui.core)
+    implementation(projects.koin.main)
+    implementation(projects.main.component)
+    implementation(projects.core.common)
+    implementation(projects.core.components)
+
+    implementation(libs.bundles.decompose)
     coreLibraryDesugaring(libs.desugar.libs)
     implementation(libs.bundles.compose)
-    implementation(libs.kotlin.reflect)
-    implementation(libs.firebase.analytics)
-    implementation(libs.firebase.core)
-    implementation(libs.firebase.crashlytics)
-    debugImplementation(libs.bundles.compose.debug)
-    implementation(libs.bundles.lifecycle)
-    implementation(libs.bundles.coroutines)
-    implementation(libs.bundles.decompose)
-    implementation(libs.bundles.android)
-    implementation(libs.bundles.essenty)
-    implementation(libs.bundles.koin)
     implementation(libs.napier)
-    implementation(libs.kotlinx.datetime)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.datastore)
+    implementation(libs.bundles.firebase)
+    implementation(libs.bundles.android)
+    implementation(libs.bundles.koin)
+    implementation(libs.activity.core)
     implementation(libs.material)
-    implementation(libs.accompanist.placeholder)
-    ksp(libs.koin.compiler)
-    implementation(libs.bundles.mvi)
-    implementation(libs.bundles.ktor)
-    implementation(libs.bundles.room)
-    ksp(libs.room.compiler)
+    implementation(libs.activity.compose)
+    debugImplementation(libs.bundles.compose.debug)
     testImplementation(libs.junit)
-
     androidTestImplementation(libs.junit.android)
     androidTestImplementation(libs.room.testing)
     androidTestImplementation(libs.bundles.compose.test)

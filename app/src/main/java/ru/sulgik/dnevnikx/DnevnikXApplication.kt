@@ -1,14 +1,15 @@
 package ru.sulgik.dnevnikx
 
 import android.app.Application
+import ru.sulgik.koin.main.setupKoin
 
-class DnevnikXApplication: Application() {
+class DnevnikXApplication : Application() {
 
 
     override fun onCreate() {
         super.onCreate()
         setupNapier()
-        setupDI()
+        setupKoin()
     }
 
 }
