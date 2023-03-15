@@ -37,6 +37,10 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/application" />
             <option value="$PROJECT_DIR$/application/component" />
+            <option value="$PROJECT_DIR$/application/mvi" />
+            <option value="$PROJECT_DIR$/application/mvi-impl" />
+            <option value="$PROJECT_DIR$/application/settings" />
+            <option value="$PROJECT_DIR$/application/settings-serializer" />
             <option value="$PROJECT_DIR$/application/ui" />
             <option value="$PROJECT_DIR$/auth" />
             <option value="$PROJECT_DIR$/auth/component" />
@@ -60,6 +64,13 @@
             <option value="$PROJECT_DIR$/diary/mvi" />
             <option value="$PROJECT_DIR$/diary/mvi-impl" />
             <option value="$PROJECT_DIR$/diary/ui" />
+            <option value="$PROJECT_DIR$/experimentalsettings" />
+            <option value="$PROJECT_DIR$/experimentalsettings/component" />
+            <option value="$PROJECT_DIR$/experimentalsettings/domain" />
+            <option value="$PROJECT_DIR$/experimentalsettings/domain-builtin" />
+            <option value="$PROJECT_DIR$/experimentalsettings/mvi" />
+            <option value="$PROJECT_DIR$/experimentalsettings/mvi-impl" />
+            <option value="$PROJECT_DIR$/experimentalsettings/ui" />
             <option value="$PROJECT_DIR$/finalmarks" />
             <option value="$PROJECT_DIR$/finalmarks/component" />
             <option value="$PROJECT_DIR$/finalmarks/domain" />
@@ -73,6 +84,7 @@
             <option value="$PROJECT_DIR$/koin/domain" />
             <option value="$PROJECT_DIR$/koin/main" />
             <option value="$PROJECT_DIR$/koin/mvi" />
+            <option value="$PROJECT_DIR$/koin/settings" />
             <option value="$PROJECT_DIR$/ktor" />
             <option value="$PROJECT_DIR$/ktor/main" />
             <option value="$PROJECT_DIR$/main" />
@@ -113,6 +125,9 @@
             <option value="$PROJECT_DIR$/schedule/mvi-impl" />
             <option value="$PROJECT_DIR$/schedule/ui" />
             <option value="$PROJECT_DIR$/settings" />
+            <option value="$PROJECT_DIR$/settings/core" />
+            <option value="$PROJECT_DIR$/settings/provider" />
+            <option value="$PROJECT_DIR$/settings/provider-datastore" />
             <option value="$PROJECT_DIR$/settings/ui" />
             <option value="$PROJECT_DIR$/splash" />
             <option value="$PROJECT_DIR$/splash/component" />

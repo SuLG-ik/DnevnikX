@@ -2,6 +2,7 @@ package ru.sulgik.application.component
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.router.stack.StackNavigation
@@ -10,6 +11,7 @@ import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import ru.sulgik.account.host.component.AccountHostComponent
 import ru.sulgik.account.selector.component.AccountSelectorComponent
+import ru.sulgik.application.mvi.ApplicationStore
 import ru.sulgik.application.ui.ApplicationScreen
 import ru.sulgik.application.ui.NavigationConfig
 import ru.sulgik.auth.core.AuthScope
@@ -17,11 +19,14 @@ import ru.sulgik.core.AuthorizedComponentContext
 import ru.sulgik.core.BaseAuthorizedComponentContext
 import ru.sulgik.core.authChildStack
 import ru.sulgik.core.childAuthContext
+import ru.sulgik.core.getStore
 import ru.sulgik.core.states
 import ru.sulgik.diary.component.DiaryComponent
 import ru.sulgik.marks.component.MarksComponent
 import ru.sulgik.modal.ui.FloatingModalUI
 import ru.sulgik.ui.component.Content
+import ru.sulgik.ui.component.DefaultAnimation
+import ru.sulgik.ui.component.LocalNestedChildrenStackAnimator
 
 class ApplicationComponent(
     componentContext: AuthorizedComponentContext,
@@ -30,6 +35,9 @@ class ApplicationComponent(
 ) : BaseAuthorizedComponentContext(componentContext) {
 
     private val navigation = StackNavigation<Config>()
+
+    private val store: ApplicationStore = getStore()
+    private val applicationState by store.states(this)
 
     private val childStack by authChildStack(
         source = navigation,
@@ -100,10 +108,15 @@ class ApplicationComponent(
                 onSecondaryNavigate = this::onSecondaryNavigate,
                 modifier = modifier,
             ) {
-                state.Content(
-                    modifier = Modifier.fillMaxSize(),
-                    animation = null,
-                )
+                CompositionLocalProvider(
+                    LocalNestedChildrenStackAnimator provides
+                            if (applicationState.applicationConfig.isNestedScreenTransactionEnabled) DefaultAnimation else null
+                ) {
+                    state.Content(
+                        modifier = Modifier.fillMaxSize(),
+                        animation = null,
+                    )
+                }
             }
         }
     }

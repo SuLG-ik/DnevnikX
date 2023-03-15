@@ -36,6 +36,9 @@ android {
 dependencies {
     implementation(projects.koin.mvi)
     implementation(projects.koin.domain)
+    implementation(projects.koin.settings)
+
+    implementation(projects.settings.providerDatastore)
     implementation(projects.ktor.main)
     implementation(projects.auth.ktor)
     implementation(projects.mvi.main)

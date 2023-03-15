@@ -35,14 +35,20 @@ include(":main:mvi-impl")
 include(":main:component")
 
 include(":settings:ui")
+include(":settings:core")
+include(":settings:provider")
+include(":settings:provider-datastore")
 
 include(":ui:core")
 
 include(":ui:component")
 
 include(":application:ui")
-
 include(":application:component")
+include(":application:settings")
+include(":application:settings-serializer")
+include(":application:mvi")
+include(":application:mvi-impl")
 
 include(":diary:mvi")
 include(":diary:mvi-impl")
@@ -85,6 +91,13 @@ include(":about:domain")
 include(":about:domain-builtin")
 include(":about:ui")
 include(":about:component")
+
+include(":experimentalsettings:mvi")
+include(":experimentalsettings:mvi-impl")
+include(":experimentalsettings:domain")
+include(":experimentalsettings:domain-builtin")
+include(":experimentalsettings:ui")
+include(":experimentalsettings:component")
 
 include(":periods:domain")
 include(":periods:domain-room")
@@ -130,10 +143,11 @@ include(":picker:component")
 include(":room:auth")
 
 include(":room:main")
-include(":koin:main")
 
+include(":koin:main")
 include(":koin:domain")
 include(":koin:mvi")
+include(":koin:settings")
 
 include(":ktor:main")
 include(":mvi:main")

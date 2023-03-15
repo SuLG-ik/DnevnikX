@@ -55,6 +55,7 @@ dependencies {
     implementation(projects.marks.component)
     implementation(projects.accountHost.component)
     implementation(projects.accountSelector.component)
+    implementation(projects.application.mvi)
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.bundles.android)

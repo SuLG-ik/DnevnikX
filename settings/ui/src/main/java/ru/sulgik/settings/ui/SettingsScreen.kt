@@ -21,63 +21,69 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableCollection
 import ru.sulgik.ui.core.ExtendedTheme
+import ru.sulgik.ui.core.optionalBackNavigationIcon
 import ru.sulgik.ui.core.outlined
 
-class SettingsScreenState(
+data class SettingsScreenState(
     val title: String,
-    val blocks: List<SettingsScreenBlock>,
+    val blocks: ImmutableCollection<SettingsScreenBlock>,
 )
 
-class SettingsScreenBlock(
+data class SettingsScreenBlock(
     val title: String,
-    val items: List<SettingsScreenItem>,
+    val items: ImmutableCollection<SettingsScreenItem>,
 )
 
-sealed class SettingsScreenItem(
-    val title: AnnotatedString,
-    val overlineTitle: AnnotatedString?,
-    val supportingTitle: AnnotatedString?,
-    val icon: Painter? = null,
-) {
-    class Switch(
-        title: AnnotatedString,
+sealed interface SettingsScreenItem {
+
+
+    val title: AnnotatedString
+    val overlineTitle: AnnotatedString?
+    val supportingTitle: AnnotatedString?
+    val icon: Painter?
+
+    data class Switch(
+        override val title: AnnotatedString,
         val currentState: Boolean,
         val onToggle: (Boolean) -> Unit,
-        icon: Painter? = null,
-        overlineTitle: AnnotatedString? = null,
-        supportingTitle: AnnotatedString? = null,
-    ) : SettingsScreenItem(
-        title = title,
-        overlineTitle = overlineTitle,
-        supportingTitle = supportingTitle,
-        icon = icon,
-    )
+        override val icon: Painter? = null,
+        override val overlineTitle: AnnotatedString? = null,
+        override val supportingTitle: AnnotatedString? = null,
+    ) : SettingsScreenItem
 
-    class Button(
-        title: AnnotatedString,
+    data class Button(
+        override val title: AnnotatedString,
         val onClick: () -> Unit,
-        icon: Painter? = null,
-        overlineTitle: AnnotatedString? = null,
-        supportingTitle: AnnotatedString? = null,
-    ) : SettingsScreenItem(
-        title = title,
-        overlineTitle = overlineTitle,
-        supportingTitle = supportingTitle,
-        icon = icon,
-    )
+        override val icon: Painter? = null,
+        override val overlineTitle: AnnotatedString? = null,
+        override val supportingTitle: AnnotatedString? = null,
+    ) : SettingsScreenItem
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(state: SettingsScreenState, modifier: Modifier = Modifier) {
+fun SettingsScreen(
+    state: SettingsScreenState,
+    backAvailable: Boolean,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val savedState by rememberUpdatedState(newValue = state)
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text(state.title) })
+            CenterAlignedTopAppBar(
+                title = { Text(state.title) },
+                navigationIcon = optionalBackNavigationIcon(backAvailable, onBack)
+            )
         },
         modifier = modifier,
     ) {
@@ -91,7 +97,7 @@ fun SettingsScreen(state: SettingsScreenState, modifier: Modifier = Modifier) {
                     .padding(ExtendedTheme.dimensions.mainContentPadding),
                 verticalArrangement = Arrangement.spacedBy(ExtendedTheme.dimensions.contentSpaceBetween),
             ) {
-                state.blocks.forEach { block ->
+                savedState.blocks.forEach { block ->
                     block.Content()
                 }
             }

@@ -1,7 +1,9 @@
 package ru.sulgik.about.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,13 +35,14 @@ import androidx.compose.ui.unit.dp
 import ru.sulgik.about.mvi.AboutStore
 import ru.sulgik.ui.core.outlined
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun AboutScreen(
     aboutData: AboutStore.State.AboutData,
     backAvailable: Boolean,
     onDeveloper: () -> Unit,
     onDomain: () -> Unit,
+    onExperimentalSettings: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -73,7 +76,12 @@ fun AboutScreen(
             ) {
                 AboutAppBlock(
                     data = aboutData.application,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .combinedClickable(
+                            onLongClick = onExperimentalSettings,
+                            onClick = {}
+                        ),
                 )
                 Text(
                     "Полезная информация",

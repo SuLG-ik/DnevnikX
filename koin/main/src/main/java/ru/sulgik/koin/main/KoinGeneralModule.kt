@@ -7,8 +7,10 @@ import ru.sulgik.common.AndroidModule
 import ru.sulgik.dnevnikx.BaseMviModule
 import ru.sulgik.koin.domain.KoinDomainModule
 import ru.sulgik.koin.mvi.KoinMVIModule
+import ru.sulgik.koin.settings.KoinSettingsModule
 import ru.sulgik.room.auth.AuthDatabaseModule
 import ru.sulgik.room.main.MainDatabaseModule
+import ru.sulgik.settings.settings.datastore.SettingsProviderModule
 
 class KoinGeneralModule {
 
@@ -22,6 +24,8 @@ class KoinGeneralModule {
             AndroidModule().module,
             BaseMviModule().module,
             AuthClientKtorModule().module,
+            SettingsProviderModule().module,
+            KoinSettingsModule().module,
         )
     }
 

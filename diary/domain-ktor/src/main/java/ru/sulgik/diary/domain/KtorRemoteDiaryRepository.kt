@@ -44,7 +44,7 @@ class KtorRemoteDiaryRepository(
                         } else {
                             DiaryOutput.Alert(
                                 it.alert ?: "",
-                                it.message ?: ""
+                                it.message ?: if (it.alert == "vacation") "Выходной" else ""
                             )
                         }
                     },

@@ -43,6 +43,8 @@ dependencies {
     implementation(projects.account.mviImpl)
     implementation(projects.accountSelector.mviImpl)
     implementation(projects.main.mviImpl)
+    implementation(projects.application.mviImpl)
+    implementation(projects.experimentalsettings.mviImpl)
 
     implementation(libs.koin.core)
     implementation(libs.bundles.android)

@@ -21,7 +21,6 @@ interface MainStore :
     data class State(
         val authScope: AuthScope?,
     )
-
     sealed interface Label
 
 

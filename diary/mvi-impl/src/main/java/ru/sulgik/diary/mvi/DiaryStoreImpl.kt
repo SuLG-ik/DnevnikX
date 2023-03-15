@@ -21,6 +21,7 @@ import ru.sulgik.core.syncDispatch
 import ru.sulgik.diary.domain.CachedDiaryRepository
 import ru.sulgik.diary.domain.data.DiaryOutput
 import ru.sulgik.periods.domain.CachedPeriodsRepository
+import ru.sulgik.periods.domain.data.GetPeriodsOutput
 import java.time.LocalDate
 
 
@@ -43,32 +44,32 @@ class DiaryStoreImpl(
             var selectPeriodJob: Job? = null
             onAction<Action.Setup> {
                 selectPeriodJob = launch {
-                    val periods =
-                        cachedPeriodsRepository.getPeriodsFast(auth).periods.flatMap { it.nestedPeriods }
-                    val currentDate = LocalDate.now().toKotlinLocalDate()
-                    val currentPeriod = getPeriod(currentDate)
-                    val nextPeriod = getPeriod(currentDate.plus(1, DateTimeUnit.WEEK))
-                    val previousPeriod = getPeriod(currentDate.minus(1, DateTimeUnit.WEEK))
+                    var periods =
+                        cachedPeriodsRepository.getPeriodsFast(auth).periods.toState()
                     syncDispatch(
                         DiaryStore.State(
                             periods = DiaryStore.State.Periods(
                                 isLoading = false,
-                                data = DiaryStore.State.PeriodsData(
-                                    currentPeriod = if (currentPeriod in periods) currentPeriod else null,
-                                    nextPeriod = if (nextPeriod in periods) nextPeriod else null,
-                                    previousPeriod = if (previousPeriod in periods) previousPeriod else null,
-                                    selectedPeriod = currentPeriod,
-                                    periods = periods,
-                                    isOther = false,
-                                ),
+                                data = periods,
                             )
                         )
                     )
                     val diary =
-                        cachedDiaryRepository.getDiaryActual(auth, currentPeriod).withState(state)
+                        cachedDiaryRepository.getDiaryActual(auth, periods.selectedPeriod)
+                            .withState(state)
                     syncDispatch(
                         state.copy(
                             diary = diary,
+                        )
+                    )
+                    periods =
+                        cachedPeriodsRepository.getPeriodsActual(auth).periods.toState()
+                    syncDispatch(
+                        state.copy(
+                            periods = DiaryStore.State.Periods(
+                                isLoading = false,
+                                data = periods,
+                            )
                         )
                     )
                 }
@@ -208,6 +209,22 @@ class DiaryStoreImpl(
 
 }
 
+private fun List<GetPeriodsOutput.Period>.toState(): DiaryStore.State.PeriodsData {
+    val periods = flatMap { it.nestedPeriods }
+    val currentDate = LocalDate.now().toKotlinLocalDate()
+    val currentPeriod = getPeriod(currentDate)
+    val nextPeriod = getPeriod(currentDate.plus(1, DateTimeUnit.WEEK))
+    val previousPeriod = getPeriod(currentDate.minus(1, DateTimeUnit.WEEK))
+    return DiaryStore.State.PeriodsData(
+        currentPeriod = if (currentPeriod in periods) currentPeriod else null,
+        nextPeriod = if (nextPeriod in periods) nextPeriod else null,
+        previousPeriod = if (previousPeriod in periods) previousPeriod else null,
+        selectedPeriod = currentPeriod,
+        periods = periods,
+        isOther = false,
+    )
+}
+
 private fun Map<DatePeriod, DiaryStore.State.DiaryData>?.orFill(
     period: DatePeriod,
     isRefreshing: Boolean = false,
@@ -243,7 +260,7 @@ private fun DiaryOutput.toState(): DiaryStore.State.DiaryData {
                 date = diaryItem.date,
                 alert = diaryItem.alert?.let {
                     DiaryStore.State.DiaryAlert(
-                        isOverload = it.alert == "holiday",
+                        isOverload = it.alert == "holiday" || it.alert == "vacation",
                         message = it.message,
                     )
                 },

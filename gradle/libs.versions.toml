@@ -34,6 +34,7 @@ firebase-core = "21.1.1"
 firebase-messaging = "23.1.2"
 google-services = "4.3.15"
 sqlcipher = "4.5.3"
+kotlinx-collections = "0.3.5"
 
 [libraries]
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
@@ -97,6 +98,7 @@ accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-
 accompanist-placeholder = { module = "com.google.accompanist:accompanist-placeholder", version.ref = "accompanist" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+kotlinx-collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections" }
 desugar-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar" }
 desugar-minimal = { module = "com.android.tools:desugar_jdk_libs_minimal", version.ref = "desugar" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx", version.ref = "firebase-analytics" }
@@ -106,7 +108,7 @@ firebase-messaging = { module = "com.google.firebase:firebase-messaging-ktx", ve
 sqlcipher = { module = "net.zetetic:android-database-sqlcipher", version.ref = "sqlcipher" }
 
 [bundles]
-compose = ["compose-ui", "compose-ui-graphics", "compose-runtime", "compose-material", "compose-material3", "compose-animation"]
+compose = ["compose-ui", "compose-ui-graphics", "compose-runtime", "compose-material", "compose-material3", "compose-animation", "kotlinx-collections"]
 compose-debug = ["compose-tooling", "compose-test-manifest"]
 compose-test = ["compose-test"]
 lifecycle = ["lifecycle-core", "lifecycle-viewmodel", "lifecycle-viewmodel-saved-state"]

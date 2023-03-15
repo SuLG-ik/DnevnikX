@@ -4,8 +4,10 @@ import org.koin.dsl.module
 import ru.sulgik.about.mvi.AboutMVIModule
 import ru.sulgik.account.mvi.AccountMVIModule
 import ru.sulgik.account.selector.mvi.AccountSelectorMVIModule
+import ru.sulgik.application.mvi.ApplicationMVIModule
 import ru.sulgik.auth.mvi.AuthMVIModule
 import ru.sulgik.diary.mvi.DiaryMVIModule
+import ru.sulgik.experimentalsettings.mvi.ExperimentalSettingsMVIModule
 import ru.sulgik.finalmarks.mvi.FinalMarksMVIModule
 import ru.sulgik.main.mvi.MainMVIModule
 import ru.sulgik.marks.mvi.MarksMVIModule
@@ -23,6 +25,8 @@ class KoinMVIModule {
         includes(AccountMVIModule().module)
         includes(AccountSelectorMVIModule().module)
         includes(MainMVIModule().module)
+        includes(ApplicationMVIModule().module)
+        includes(ExperimentalSettingsMVIModule().module)
     }
 
 }

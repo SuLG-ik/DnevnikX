@@ -2,6 +2,7 @@ package ru.sulgik.account.host.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.stackAnimation
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.pop
@@ -13,9 +14,11 @@ import ru.sulgik.core.AuthorizedComponentContext
 import ru.sulgik.core.BaseAuthorizedComponentContext
 import ru.sulgik.core.BaseComponentContext
 import ru.sulgik.core.authChildStack
+import ru.sulgik.experimentalsettings.component.ExperimentalSettingsComponent
 import ru.sulgik.finalmarks.component.FinalMarksComponent
 import ru.sulgik.schedule.component.ScheduleComponent
 import ru.sulgik.ui.component.Content
+import ru.sulgik.ui.component.LocalNestedChildrenStackAnimator
 
 class AccountHostComponent(
     componentContext: AuthorizedComponentContext,
@@ -59,7 +62,8 @@ class AccountHostComponent(
             is Config.About -> AboutComponent(
                 componentContext,
                 isBackAvailable = true,
-                onBack = this::onBack
+                onBack = this::onBack,
+                onExperimentalSettings = this::onExperimentalSettings,
             )
 
             is Config.Profile -> AccountComponent(
@@ -82,12 +86,25 @@ class AccountHostComponent(
                 backAvailable = true,
                 onBack = this::onBack,
             )
+
+            Config.ExperimentalSettings -> ExperimentalSettingsComponent(
+                componentContext = componentContext,
+                isBackAvailable = true,
+                onBack = this::onBack,
+            )
         }
+    }
+
+    private fun onExperimentalSettings() {
+        navigation.bringToFront(Config.ExperimentalSettings)
     }
 
     @Composable
     override fun Content(modifier: Modifier) {
-        childStack.Content(modifier = modifier, animation = null)
+        childStack.Content(
+            modifier = modifier,
+            animation = LocalNestedChildrenStackAnimator.current?.let { stackAnimation(it) }
+        )
     }
 
     private sealed interface Config : Parcelable {
@@ -103,6 +120,9 @@ class AccountHostComponent(
 
         @Parcelize
         object FinalMarks : Config
+
+        @Parcelize
+        object ExperimentalSettings : Config
 
     }
 

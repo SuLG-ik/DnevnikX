@@ -50,6 +50,7 @@ dependencies {
     implementation(projects.finalmarks.component)
     implementation(projects.about.component)
     implementation(projects.schedule.component)
+    implementation(projects.experimentalsettings.component)
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.bundles.android)

@@ -16,6 +16,7 @@ class AboutComponent(
     componentContext: DIComponentContext,
     val isBackAvailable: Boolean = false,
     val onBack: () -> Unit = {},
+    val onExperimentalSettings: () -> Unit = {},
 ) :
     BaseComponentContext(componentContext) {
 
@@ -40,6 +41,10 @@ class AboutComponent(
         }
     }
 
+    private fun onExperimentalSettings() {
+        onExperimentalSettings.invoke()
+    }
+
     @Composable
     override fun Content(modifier: Modifier) {
         val aboutData = state.data
@@ -49,6 +54,7 @@ class AboutComponent(
                 backAvailable = isBackAvailable,
                 onDeveloper = this::onDeveloper,
                 onDomain = this::onDomain,
+                onExperimentalSettings = this::onExperimentalSettings,
                 onBack = this::onBack,
                 modifier = modifier
             )
