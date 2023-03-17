@@ -8,6 +8,7 @@ interface ExperimentalSettingsStore :
     sealed interface Intent {
 
         class ToggleNestedScreenTransition(val value: Boolean) : Intent
+        class ToggleDiaryPager(val value: Boolean) : Intent
 
     }
 
@@ -18,10 +19,15 @@ interface ExperimentalSettingsStore :
 
         data class SettingsData(
             val ui: UISettings,
+            val diary: DiarySettings,
         )
 
         data class UISettings(
             val isNestedScreenTransitionEnabled: Boolean = false,
+        )
+
+        data class DiarySettings(
+            val isPagerEnabled: Boolean = false,
         )
 
     }

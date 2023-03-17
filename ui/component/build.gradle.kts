@@ -14,7 +14,7 @@ android {
     }
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -41,6 +41,7 @@ android {
 
 dependencies {
     implementation(projects.core.components)
+    implementation(projects.ui.analytics)
     api(libs.bundles.decompose)
     implementation(libs.essenty.parcelable)
     implementation(libs.bundles.android)

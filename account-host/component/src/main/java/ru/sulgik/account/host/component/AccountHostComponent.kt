@@ -6,7 +6,6 @@ import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.stackA
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.pop
-import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import ru.sulgik.about.component.AboutComponent
 import ru.sulgik.account.component.AccountComponent
@@ -19,6 +18,7 @@ import ru.sulgik.finalmarks.component.FinalMarksComponent
 import ru.sulgik.schedule.component.ScheduleComponent
 import ru.sulgik.ui.component.Content
 import ru.sulgik.ui.component.LocalNestedChildrenStackAnimator
+import ru.sulgik.ui.component.NamedConfig
 
 class AccountHostComponent(
     componentContext: AuthorizedComponentContext,
@@ -101,28 +101,41 @@ class AccountHostComponent(
 
     @Composable
     override fun Content(modifier: Modifier) {
-        childStack.Content(
-            modifier = modifier,
-            animation = LocalNestedChildrenStackAnimator.current?.let { stackAnimation(it) }
-        )
+        val animator = LocalNestedChildrenStackAnimator.current
+        childStack.Content(modifier = modifier, animation = stackAnimation { _, _, _ -> animator })
     }
 
-    private sealed interface Config : Parcelable {
+    private sealed interface Config : NamedConfig {
 
         @Parcelize
-        object Profile : Config
+        object Profile : Config {
+            override val screenName: String
+                get() = "profile"
+        }
 
         @Parcelize
-        object About : Config
+        object About : Config {
+            override val screenName: String
+                get() = "about"
+        }
 
         @Parcelize
-        object Schedule : Config
+        object Schedule : Config {
+            override val screenName: String
+                get() = "schedule"
+        }
 
         @Parcelize
-        object FinalMarks : Config
+        object FinalMarks : Config {
+            override val screenName: String
+                get() = "final_marks"
+        }
 
         @Parcelize
-        object ExperimentalSettings : Config
+        object ExperimentalSettings : Config {
+            override val screenName: String
+                get() = "experimental_settings"
+        }
 
     }
 

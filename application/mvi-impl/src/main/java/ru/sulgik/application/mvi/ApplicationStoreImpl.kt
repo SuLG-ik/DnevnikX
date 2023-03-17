@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.core.annotation.Factory
-import ru.sulgik.application.settings.NestedScreenTransactionSetting
+import ru.sulgik.application.settings.NestedScreenTransitionSetting
 import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.core.directReducer
 import ru.sulgik.settings.provider.SettingsProvider
@@ -34,7 +34,7 @@ class ApplicationStoreImpl(
         },
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
             onAction<Action.Setup> {
-                settingsProvider.getSettingFlow<NestedScreenTransactionSetting>(authScope)
+                settingsProvider.getSettingFlow<NestedScreenTransitionSetting>(authScope)
                     .distinctUntilChanged().onEach {
                         dispatch(state.copy(state.applicationConfig.copy(it.enabled)))
                     }.flowOn(Dispatchers.Main).launchIn(this)

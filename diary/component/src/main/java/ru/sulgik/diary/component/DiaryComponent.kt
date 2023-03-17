@@ -16,6 +16,7 @@ import ru.sulgik.core.BaseAuthorizedComponentContext
 import ru.sulgik.core.childDIContext
 import ru.sulgik.core.getStore
 import ru.sulgik.core.states
+import ru.sulgik.diary.mvi.DiarySettingsStore
 import ru.sulgik.diary.mvi.DiaryStore
 import ru.sulgik.diary.ui.DiaryScreen
 import ru.sulgik.modal.ui.ModalUI
@@ -29,6 +30,7 @@ class DiaryComponent(
 
 
     private val store = getStore<DiaryStore>()
+    private val settingsStore = getStore<DiarySettingsStore>()
     private val timeFormatter = get<TimeFormatter>()
 
     private val currentData = LocalDate.now()
@@ -61,6 +63,8 @@ class DiaryComponent(
         onStateUpdated(it)
         it
     }
+
+    val settingsState by settingsStore.states(this)
 
     private fun onStateUpdated(state: DiaryStore.State) {
         val periodsData = state.periods.data
@@ -104,6 +108,7 @@ class DiaryComponent(
                 DiaryScreen(
                     periods = state.periods,
                     diary = state.diary,
+                    settings = settingsState.settings,
                     onSelect = this::onSelect,
                     onOther = this::onOther,
                     onLesson = this::onLesson,

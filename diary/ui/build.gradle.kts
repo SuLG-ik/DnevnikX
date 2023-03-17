@@ -14,7 +14,7 @@ android {
     }
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.kotlinx.datetime)
     implementation(libs.bundles.android)
     testImplementation(libs.junit)
+    implementation(libs.kotlinx.collections)
     androidTestImplementation(libs.junit.android)
     androidTestImplementation(libs.room.testing)
 }

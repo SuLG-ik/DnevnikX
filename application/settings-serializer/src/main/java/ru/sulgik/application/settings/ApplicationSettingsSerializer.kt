@@ -1,10 +1,13 @@
 package ru.sulgik.application.settings
 
-import ru.sulgik.settings.core.booleanSettingSerializer
+import ru.sulgik.settings.core.BooleanSingleSettingSerializer
+import kotlin.reflect.typeOf
 
-val ApplicationSettingsSerializer = booleanSettingSerializer(
-    name = "application_nested_screen_transition",
-    defaultValue = NestedScreenTransactionSetting(false),
-    constructor = ::NestedScreenTransactionSetting,
-    deconstructor = NestedScreenTransactionSetting::enabled,
-)
+object ApplicationSettingsSerializer :
+    BooleanSingleSettingSerializer<NestedScreenTransitionSetting>(
+        name = "application_nested_screen_transition",
+        defaultValue = NestedScreenTransitionSetting(false),
+        constructor = ::NestedScreenTransitionSetting,
+        deconstructor = NestedScreenTransitionSetting::enabled,
+        type = typeOf<NestedScreenTransitionSetting>(),
+    )

@@ -37,6 +37,10 @@ class ExperimentalSettingsComponent(
         store.accept(ExperimentalSettingsStore.Intent.ToggleNestedScreenTransition(value))
     }
 
+    private fun onToggleDiaryPager(value: Boolean) {
+        store.accept(ExperimentalSettingsStore.Intent.ToggleDiaryPager(value))
+    }
+
     @Composable
     override fun Content(modifier: Modifier) {
         val settingsData = state.settings
@@ -56,6 +60,18 @@ class ExperimentalSettingsComponent(
                                     onToggle = this::onToggleNestedScreenTransition,
                                 )
                             )
+                        ),
+                        SettingsScreenBlock(
+                            title = "Дневник",
+                            items = persistentListOf(
+                                SettingsScreenItem.Switch(
+                                    overlineTitle = AnnotatedString("Может вызвать лаги и баги"),
+                                    title = AnnotatedString("Пейджер дневника"),
+                                    supportingTitle = AnnotatedString("Свайпы влево вправо в дневнике"),
+                                    currentState = settingsData.diary.isPagerEnabled,
+                                    onToggle = this::onToggleDiaryPager,
+                                )
+                            )
                         )
                     ),
                 ),
@@ -64,5 +80,4 @@ class ExperimentalSettingsComponent(
                 modifier = modifier,
             )
     }
-
 }

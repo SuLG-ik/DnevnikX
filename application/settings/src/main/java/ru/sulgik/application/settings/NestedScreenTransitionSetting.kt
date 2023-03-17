@@ -1,5 +1,5 @@
 package ru.sulgik.application.settings
 
-data class NestedScreenTransactionSetting(
+data class NestedScreenTransitionSetting(
     val enabled: Boolean,
 )

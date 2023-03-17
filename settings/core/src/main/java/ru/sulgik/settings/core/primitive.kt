@@ -4,7 +4,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
 
-private class PrimitiveSettingSerializer<Setting : Any, Serial : Any>(
+open class PrimitiveSettingSerializer<Setting : Any, Serial : Any>(
     name: String,
     defaultValue: Setting,
     private val constructor: (Serial) -> Setting,
@@ -89,3 +89,19 @@ inline fun <reified T : Any> booleanSettingSerializer(
         type = typeOf<T>()
     )
 }
+
+
+abstract class BooleanSingleSettingSerializer<T : Any>(
+    name: String,
+    defaultValue: T,
+    constructor: (Boolean) -> T,
+    deconstructor: (T) -> Boolean,
+    type: KType,
+) : PrimitiveSettingSerializer<T, Boolean>(
+    name = name,
+    defaultValue = defaultValue,
+    constructor = constructor,
+    deconstructor = deconstructor,
+    type = type,
+    kind = SettingsKind.BOOLEAN,
+)

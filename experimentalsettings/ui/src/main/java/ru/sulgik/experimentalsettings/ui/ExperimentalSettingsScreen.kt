@@ -9,7 +9,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -21,6 +23,7 @@ import ru.sulgik.ui.core.optionalBackNavigationIcon
 @Composable
 fun ExperimentalSettingsScreen(
     settingsData: ExperimentalSettingsStore.State.SettingsData,
+    onToggleNestedScreenTransition: (Boolean) -> Unit,
     backAvailable: Boolean,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -44,8 +47,42 @@ fun ExperimentalSettingsScreen(
                     .padding(ExtendedTheme.dimensions.mainContentPadding),
                 verticalArrangement = Arrangement.spacedBy(ExtendedTheme.dimensions.contentSpaceBetween),
             ) {
-
+                SwitchSettings(
+                    overlineTitle = "Может вызвать проблемы с размером",
+                    title = "Анимация переходов",
+                    supportingTitle = "Переходы между вложенными экранами",
+                    currentState = settingsData.ui.isNestedScreenTransitionEnabled,
+                    onToggle = onToggleNestedScreenTransition,
+                )
             }
         }
     }
+}
+
+@Composable
+fun SwitchSettings(
+    currentState: Boolean,
+    onToggle: (Boolean) -> Unit,
+    title: String,
+    supportingTitle: String,
+    overlineTitle: String,
+    modifier: Modifier = Modifier,
+) {
+    ListItem(
+        headlineContent = {
+            Text(title)
+        },
+        supportingContent =
+        {
+            Text(supportingTitle)
+        },
+        overlineContent =
+        {
+            Text(overlineTitle)
+        },
+        trailingContent = {
+            Switch(checked = currentState, onCheckedChange = onToggle)
+        },
+        modifier = modifier,
+    )
 }

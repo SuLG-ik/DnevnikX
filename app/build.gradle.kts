@@ -20,8 +20,8 @@ android {
         applicationId = "ru.sulgik.dnevnikx"
         minSdk = 21
         targetSdk = 33
-        versionCode = 6
-        versionName = "0.3.1"
+        versionCode = 8
+        versionName = "0.4.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -37,7 +37,7 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("debug")
-            buildConfigField("String", "APP_VERSION", "\"v0.3.1-alpha01\"")
+            buildConfigField("String", "APP_VERSION", "\"v0.4.1\"")
         }
         debug {
             buildConfigField("String", "APP_VERSION", "\"v0.3.1-001\"")
@@ -76,6 +76,14 @@ android {
     sourceSets {
         // Adds exported schema location as test app assets.
         getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    }
+    productFlavors {
+        val dev by creating {
+            applicationIdSuffix = ".dev"
+        }
+        val production by creating {
+
+        }
     }
 }
 

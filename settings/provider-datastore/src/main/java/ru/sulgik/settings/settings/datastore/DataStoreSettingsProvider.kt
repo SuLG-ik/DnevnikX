@@ -9,7 +9,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.settings.core.SettingsKind.*
@@ -37,7 +36,7 @@ class DataStoreSettingsProvider(
             } else {
                 producer.descriptor.defaultValue
             }
-        }.distinctUntilChanged()
+        }
     }
 
     override suspend fun <T : Any> provide(authScope: AuthScope, value: T, type: KType) {

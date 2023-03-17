@@ -14,12 +14,12 @@ android {
     }
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            resValue("string", "app_version", "v0.3.1-alpha01")
+            resValue("string", "app_version", "v0.4.1")
         }
         debug {
             resValue("string", "app_version", "v0.3.1-001")

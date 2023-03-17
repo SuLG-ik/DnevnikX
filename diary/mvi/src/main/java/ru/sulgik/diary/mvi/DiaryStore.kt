@@ -1,6 +1,8 @@
 package ru.sulgik.diary.mvi
 
 import com.arkivanov.mvikotlin.core.store.Store
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.datetime.LocalDate
 import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.common.platform.TimePeriod
@@ -36,19 +38,19 @@ interface DiaryStore : Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Lab
             val currentPeriod: DatePeriod?,
             val nextPeriod: DatePeriod?,
             val previousPeriod: DatePeriod?,
-            val periods: List<DatePeriod>,
+            val periods: ImmutableList<DatePeriod>,
             val isOther: Boolean,
         )
 
         data class Diary(
-            val data: Map<DatePeriod, DiaryData>? = null,
+            val data: ImmutableMap<DatePeriod, DiaryData>? = null,
             val selectedLesson: SelectedLesson? = null,
         )
 
         data class DiaryData(
             val isLoading: Boolean = true,
             val isRefreshing: Boolean = false,
-            val diary: List<DiaryDate>,
+            val diary: ImmutableList<DiaryDate>,
         )
 
         data class SelectedLesson(
@@ -58,7 +60,7 @@ interface DiaryStore : Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Lab
         data class DiaryDate(
             val date: LocalDate,
             val alert: DiaryAlert?,
-            val lessons: List<Lesson>,
+            val lessons: ImmutableList<Lesson>,
         )
 
         data class DiaryAlert(
@@ -70,9 +72,9 @@ interface DiaryStore : Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Lab
             val number: String,
             val title: String,
             val time: TimePeriod,
-            val homework: List<Homework>,
-            val files: List<File>,
-            val marks: List<Mark>,
+            val homework: ImmutableList<Homework>,
+            val files: ImmutableList<File>,
+            val marks: ImmutableList<Mark>,
         )
 
         data class Homework(

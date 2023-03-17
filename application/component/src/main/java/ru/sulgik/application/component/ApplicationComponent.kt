@@ -7,7 +7,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.bringToFront
-import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import ru.sulgik.account.host.component.AccountHostComponent
 import ru.sulgik.account.selector.component.AccountSelectorComponent
@@ -24,9 +23,10 @@ import ru.sulgik.core.states
 import ru.sulgik.diary.component.DiaryComponent
 import ru.sulgik.marks.component.MarksComponent
 import ru.sulgik.modal.ui.FloatingModalUI
-import ru.sulgik.ui.component.Content
 import ru.sulgik.ui.component.DefaultAnimation
 import ru.sulgik.ui.component.LocalNestedChildrenStackAnimator
+import ru.sulgik.ui.component.NamedConfig
+import ru.sulgik.ui.component.TrackedContent
 
 class ApplicationComponent(
     componentContext: AuthorizedComponentContext,
@@ -112,7 +112,7 @@ class ApplicationComponent(
                     LocalNestedChildrenStackAnimator provides
                             if (applicationState.applicationConfig.isNestedScreenTransactionEnabled) DefaultAnimation else null
                 ) {
-                    state.Content(
+                    state.TrackedContent(
                         modifier = Modifier.fillMaxSize(),
                         animation = null,
                     )
@@ -121,16 +121,25 @@ class ApplicationComponent(
         }
     }
 
-    sealed interface Config : Parcelable {
+    sealed interface Config : NamedConfig {
 
         @Parcelize
-        object Dairy : Config
+        object Dairy : Config {
+            override val screenName: String
+                get() = "diary"
+        }
 
         @Parcelize
-        object Marks : Config
+        object Marks : Config {
+            override val screenName: String
+                get() = "marks"
+        }
 
         @Parcelize
-        object Profile : Config
+        object Profile : Config {
+            override val screenName: String?
+                get() = null
+        }
 
 
     }

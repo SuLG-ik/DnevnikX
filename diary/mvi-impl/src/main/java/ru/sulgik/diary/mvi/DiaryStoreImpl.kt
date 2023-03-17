@@ -1,10 +1,17 @@
 package ru.sulgik.diary.mvi
 
+import com.arkivanov.mvikotlin.core.store.Reducer
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.core.utils.ExperimentalMviKotlinApi
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.mutate
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -16,7 +23,6 @@ import kotlinx.datetime.toKotlinLocalDate
 import org.koin.core.annotation.Factory
 import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.common.platform.DatePeriod
-import ru.sulgik.core.directReducer
 import ru.sulgik.core.syncDispatch
 import ru.sulgik.diary.domain.CachedDiaryRepository
 import ru.sulgik.diary.domain.data.DiaryOutput
@@ -34,7 +40,7 @@ class DiaryStoreImpl(
     cachedPeriodsRepository: CachedPeriodsRepository,
     cachedDiaryRepository: CachedDiaryRepository,
 ) : DiaryStore,
-    Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Label> by storeFactory.create<_, Action, _, _, _>(
+    Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Label> by storeFactory.create<_, Action, Message, _, _>(
         name = "DiaryStoreImpl",
         initialState = DiaryStore.State(),
         bootstrapper = coroutineBootstrapper {
@@ -47,130 +53,84 @@ class DiaryStoreImpl(
                     var periods =
                         cachedPeriodsRepository.getPeriodsFast(auth).periods.toState()
                     syncDispatch(
-                        DiaryStore.State(
-                            periods = DiaryStore.State.Periods(
+                        Message.UpdatePeriods(
+                            DiaryStore.State.Periods(
                                 isLoading = false,
                                 data = periods,
                             )
                         )
                     )
-                    val diary =
-                        cachedDiaryRepository.getDiaryActual(auth, periods.selectedPeriod)
+                    var diary =
+                        cachedDiaryRepository.getDiaryFast(auth, periods.selectedPeriod)
                             .withState(state)
                     syncDispatch(
-                        state.copy(
-                            diary = diary,
-                        )
+                        Message.UpdateDiary(diary)
                     )
                     periods =
                         cachedPeriodsRepository.getPeriodsActual(auth).periods.toState()
                     syncDispatch(
-                        state.copy(
-                            periods = DiaryStore.State.Periods(
+                        Message.UpdatePeriods(
+                            DiaryStore.State.Periods(
                                 isLoading = false,
                                 data = periods,
                             )
                         )
                     )
+                    diary =
+                        cachedDiaryRepository.getDiaryActual(auth, periods.selectedPeriod)
+                            .withState(state)
+                    syncDispatch(Message.UpdateDiary(diary))
                 }
             }
 
             onIntent<DiaryStore.Intent.SelectOtherPeriod> {
-                val state = state
                 val periodsData = state.periods.data
                 if (state.periods.isLoading || periodsData == null)
                     return@onIntent
-                dispatch(
-                    state.copy(
-                        periods = state.periods.copy(
-                            data = periodsData.copy(
-                                isOther = true
-                            )
-                        )
-                    )
-                )
+                dispatch(Message.ShowOtherPeriods(true))
             }
             onIntent<DiaryStore.Intent.HideLessonInfo> {
-                val state = state
                 if (state.diary.data == null) {
                     return@onIntent
                 }
-                dispatch(
-                    state.copy(
-                        diary = state.diary.copy(
-                            selectedLesson = null,
-                        )
-                    )
-                )
+                dispatch(Message.SelectLesson(null))
             }
             onIntent<DiaryStore.Intent.HidePeriodSelector> {
-                val state = state
-                val periodsData = state.periods.data ?: return@onIntent
-                dispatch(
-                    state.copy(
-                        periods = state.periods.copy(
-                            data = periodsData.copy(
-                                isOther = false,
-                            )
-                        )
-                    )
-                )
+                state.periods.data ?: return@onIntent
+                dispatch(Message.ShowOtherPeriods(false))
             }
             onIntent<DiaryStore.Intent.ShowLessonInfo> { intent ->
-                val state = state
                 if (state.diary.data == null) {
                     return@onIntent
                 }
                 dispatch(
-                    state.copy(
-                        diary = state.diary.copy(
-                            selectedLesson = DiaryStore.State.SelectedLesson(
-                                date = intent.date,
-                                lesson = intent.lesson
-                            ),
-                        )
+                    Message.SelectLesson(
+                        DiaryStore.State.SelectedLesson(
+                            date = intent.date,
+                            lesson = intent.lesson
+                        ),
                     )
                 )
             }
             onIntent<DiaryStore.Intent.SelectPeriodSelector> { intent ->
-                val state = state
                 val periodsData = state.periods.data
-                if (state.periods.isLoading || periodsData == null)
+                if (state.periods.isLoading || periodsData == null || periodsData.selectedPeriod == intent.period)
                     return@onIntent
-                dispatch(
-                    state.copy(
-                        periods = state.periods.copy(
-                            data = periodsData.copy(
-                                selectedPeriod = intent.period,
-                                isOther = false,
-                            ),
-                        ),
-                        diary = state.diary.copy(
-
-                        )
-                    )
-                )
+                dispatch(Message.SelectPeriod(intent.period))
                 val job = selectPeriodJob
                 selectPeriodJob = launch {
                     job?.cancelAndJoin()
                     var diary = cachedDiaryRepository.getDiaryFast(auth, intent.period)
                         .withState(this@onIntent.state)
-                    syncDispatch(
-                        this@onIntent.state.copy(
-                            diary = diary,
-                        )
-                    )
+                    syncDispatch(Message.UpdateDiary(diary))
                     diary = cachedDiaryRepository.getDiaryActual(auth, intent.period)
                         .withState(this@onIntent.state)
                     syncDispatch(
-                        this@onIntent.state.copy(
-                            diary = diary,
-                        )
+                        Message.UpdateDiary(diary)
                     )
                 }
             }
             onIntent<DiaryStore.Intent.RefreshDiary> { intent ->
-                val state = state
                 val periodsData = state.periods.data
                 if (state.periods.isLoading || periodsData == null)
                     return@onIntent
@@ -178,30 +138,83 @@ class DiaryStoreImpl(
                 val diaryData = state.diary.data?.get(intent.period)
                 if (diaryData?.isLoading == true || diaryData?.isRefreshing == true)
                     return@onIntent
-                dispatch(
-                    state.copy(
-                        diary = state.diary.copy(
-                            data = state.diary.data.orFill(intent.period, isRefreshing = true)
-                        )
-                    )
-                )
+                dispatch(Message.SetDiaryRefreshing(intent.period))
                 val job = selectPeriodJob
                 selectPeriodJob = launch {
                     job?.cancelAndJoin()
                     val diary = cachedDiaryRepository.getDiaryActual(auth, selectedPeriod)
                         .withState(this@onIntent.state)
-                    syncDispatch(
-                        this@onIntent.state.copy(
-                            diary = diary,
-                            isRefreshing = false,
-                        )
-                    )
+                    syncDispatch(Message.UpdateDiary(diary))
                 }
             }
         },
-        reducer = directReducer(),
+        reducer = Reducer {
+            when (it) {
+                is Message.SelectLesson -> copy(
+                    diary = diary.copy(
+                        selectedLesson = it.lesson?.let { lesson ->
+                            DiaryStore.State.SelectedLesson(
+                                date = lesson.date,
+                                lesson = lesson.lesson
+                            )
+                        },
+                    )
+                )
+
+                is Message.SelectPeriod -> copy(
+                    periods = periods.copy(
+                        data = periods.data?.copy(
+                            selectedPeriod = it.period,
+                            isOther = false,
+                        ),
+                    ),
+                )
+
+                is Message.SetDiaryRefreshing ->
+                    copy(
+                        diary = diary.copy(
+                            data = diary.data.orFill(it.period, isRefreshing = true)
+                        )
+                    )
+
+                is Message.ShowOtherPeriods ->
+                    copy(
+                        periods = periods.copy(
+                            data = periods.data?.copy(
+                                isOther = it.value,
+                            )
+                        )
+                    )
+
+                is Message.UpdateDiary ->
+                    copy(
+                        diary = it.diary,
+                    )
+
+                is Message.UpdatePeriods ->
+                    copy(
+                        periods = it.periods
+                    )
+            }
+        }
     ) {
 
+
+    private sealed interface Message {
+
+        data class UpdatePeriods(val periods: DiaryStore.State.Periods) : Message
+
+        data class ShowOtherPeriods(val value: Boolean) : Message
+
+        data class SelectPeriod(val period: DatePeriod) : Message
+
+        data class UpdateDiary(val diary: DiaryStore.State.Diary) : Message
+
+        data class SetDiaryRefreshing(val period: DatePeriod) : Message
+
+        data class SelectLesson(val lesson: DiaryStore.State.SelectedLesson?) : Message
+
+    }
 
     private sealed interface Action {
         object Setup : Action
@@ -220,33 +233,32 @@ private fun List<GetPeriodsOutput.Period>.toState(): DiaryStore.State.PeriodsDat
         nextPeriod = if (nextPeriod in periods) nextPeriod else null,
         previousPeriod = if (previousPeriod in periods) previousPeriod else null,
         selectedPeriod = currentPeriod,
-        periods = periods,
+        periods = periods.toPersistentList(),
         isOther = false,
     )
 }
 
-private fun Map<DatePeriod, DiaryStore.State.DiaryData>?.orFill(
+private fun ImmutableMap<DatePeriod, DiaryStore.State.DiaryData>?.orFill(
     period: DatePeriod,
     isRefreshing: Boolean = false,
-): MutableMap<DatePeriod, DiaryStore.State.DiaryData> {
-    val mutableMap = this?.toMutableMap() ?: mutableMapOf()
-    val data = mutableMap[period]?.copy(isRefreshing = false, isLoading = true)
-        ?: DiaryStore.State.DiaryData(
-            isLoading = !isRefreshing,
-            isRefreshing = isRefreshing,
-            diary = emptyList(),
-        )
-    mutableMap[period] = data
-    return mutableMap
-
+): ImmutableMap<DatePeriod, DiaryStore.State.DiaryData> {
+    return this?.toPersistentMap()?.mutate {
+        val data = it[period]?.copy(isRefreshing = isRefreshing, isLoading = !isRefreshing)
+            ?: DiaryStore.State.DiaryData(
+                isLoading = true,
+                isRefreshing = false,
+                diary = persistentListOf(),
+            )
+        it[period] = data
+    } ?: persistentMapOf()
 }
 
 private fun DiaryOutput.withState(state: DiaryStore.State): DiaryStore.State.Diary {
     return state.diary.copy(
-        data = state.diary.data.let {
-            val mutableMap = it?.toMutableMap() ?: mutableMapOf()
-            mutableMap[period] = this.toState()
-            mutableMap
+        data = state.diary.data.let { diary ->
+            diary?.toPersistentMap()?.mutate {
+                it[period] = this.toState()
+            } ?: persistentMapOf(period to this.toState())
         }
     )
 }
@@ -271,17 +283,17 @@ private fun DiaryOutput.toState(): DiaryStore.State.DiaryData {
                         time = lesson.time,
                         homework = lesson.homework.map { homework ->
                             DiaryStore.State.Homework(homework.text)
-                        },
+                        }.toPersistentList(),
                         files = lesson.files.map { file ->
                             DiaryStore.State.File(file.name, file.url)
-                        },
+                        }.toPersistentList(),
                         marks = lesson.marks.map { mark ->
                             DiaryStore.State.Mark(mark.mark, mark.value)
-                        },
+                        }.toPersistentList(),
                     )
-                }
+                }.toPersistentList()
             )
-        }
+        }.toPersistentList()
     )
 }
 

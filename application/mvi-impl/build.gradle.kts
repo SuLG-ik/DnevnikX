@@ -14,7 +14,7 @@ android {
     }
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -35,6 +35,8 @@ android {
 }
 
 dependencies {
+    coreLibraryDesugaring(libs.desugar.libs)
+
     implementation(projects.core.common)
     implementation(projects.auth.core)
     implementation(projects.application.mvi)

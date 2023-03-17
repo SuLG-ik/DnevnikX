@@ -63,6 +63,8 @@
             <option value="$PROJECT_DIR$/diary/domain-room" />
             <option value="$PROJECT_DIR$/diary/mvi" />
             <option value="$PROJECT_DIR$/diary/mvi-impl" />
+            <option value="$PROJECT_DIR$/diary/settings" />
+            <option value="$PROJECT_DIR$/diary/settings-serializer" />
             <option value="$PROJECT_DIR$/diary/ui" />
             <option value="$PROJECT_DIR$/experimentalsettings" />
             <option value="$PROJECT_DIR$/experimentalsettings/component" />
@@ -133,6 +135,7 @@
             <option value="$PROJECT_DIR$/splash/component" />
             <option value="$PROJECT_DIR$/splash/ui" />
             <option value="$PROJECT_DIR$/ui" />
+            <option value="$PROJECT_DIR$/ui/analytics" />
             <option value="$PROJECT_DIR$/ui/component" />
             <option value="$PROJECT_DIR$/ui/core" />
           </set>

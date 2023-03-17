@@ -6,7 +6,6 @@ import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.router.stack.replaceAll
-import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import ru.sulgik.application.component.ApplicationComponent
 import ru.sulgik.auth.component.AuthComponent
@@ -17,7 +16,8 @@ import ru.sulgik.core.diChildStack
 import ru.sulgik.core.getParameterizedStore
 import ru.sulgik.core.withAuth
 import ru.sulgik.main.mvi.MainStore
-import ru.sulgik.ui.component.Content
+import ru.sulgik.ui.component.NamedConfig
+import ru.sulgik.ui.component.TrackedContent
 
 class MainComponent(
     componentContext: DIComponentContext,
@@ -74,23 +74,28 @@ class MainComponent(
 
     @Composable
     override fun Content(modifier: Modifier) {
-        childStack.Content(modifier = modifier)
+        childStack.TrackedContent(modifier = modifier)
     }
 
     override val isLoading: Boolean
         get() = childStack.value.active.instance.isLoading
 
-    sealed interface Config : Parcelable {
+    sealed interface Config : NamedConfig {
 
         @Parcelize
         data class Auth(
             val isBackAvailable: Boolean = false,
-        ) : Config
+        ) : Config {
+            override val screenName: String get() = "auth"
+        }
 
         @Parcelize
         data class Application(
             val authScope: AuthScope,
-        ) : Config
+        ) : Config {
+
+            override val screenName: String? get() = null
+        }
 
     }
 

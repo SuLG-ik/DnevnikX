@@ -15,6 +15,7 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.parcelable.Parcelable
 import ru.sulgik.core.BaseComponentContext
+import trackScreen
 
 
 val DefaultAnimation =
@@ -23,6 +24,12 @@ val DefaultAnimation =
 val LocalNestedChildrenStackAnimator = staticCompositionLocalOf<StackAnimator?> { null }
 
 val LocalChildrenStackAnimator = staticCompositionLocalOf { DefaultAnimation }
+
+interface NamedConfig : Parcelable {
+
+    val screenName: String?
+
+}
 
 @Composable
 fun <Config : Parcelable> ChildStack<Config, BaseComponentContext>.Content(
@@ -44,6 +51,32 @@ fun <Config : Parcelable> Value<ChildStack<Config, BaseComponentContext>>.Conten
     ),
 ) {
     Children(stack = this, animation = animation) {
+        it.instance.Content(modifier = modifier)
+    }
+}
+
+@Composable
+fun <Config : NamedConfig> Value<ChildStack<Config, BaseComponentContext>>.TrackedContent(
+    modifier: Modifier = Modifier,
+    animation: StackAnimation<Config, BaseComponentContext>? = stackAnimation(
+        LocalChildrenStackAnimator.current
+    ),
+) {
+    Children(stack = this, animation = animation) {
+        it.configuration.screenName?.let { screenName -> trackScreen(screenName) }
+        it.instance.Content(modifier = modifier)
+    }
+}
+
+@Composable
+fun <Config : NamedConfig> ChildStack<Config, BaseComponentContext>.TrackedContent(
+    modifier: Modifier = Modifier,
+    animation: StackAnimation<Config, BaseComponentContext>? = stackAnimation(
+        LocalChildrenStackAnimator.current
+    ),
+) {
+    Children(stack = this, animation = animation) {
+        it.configuration.screenName?.let { screenName -> trackScreen(screenName) }
         it.instance.Content(modifier = modifier)
     }
 }

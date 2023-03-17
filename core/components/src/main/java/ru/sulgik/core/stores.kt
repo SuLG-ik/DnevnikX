@@ -60,8 +60,11 @@ abstract class SyncCoroutineExecutor<in Intent : Any, in Action : Any, in State 
 
 }
 
-fun <T : Any> directReducer(): Reducer<T, T> {
-    return Reducer { it }
+fun <T : Any> directReducer(predispatch: (T) -> Unit = {}): Reducer<T, T> {
+    return Reducer {
+        predispatch(it)
+        it
+    }
 }
 
 interface ParametrizedStore<in Intent : Any, out State : Any, out Label : Any, in Params : Any> :

@@ -40,8 +40,8 @@ include(":settings:provider")
 include(":settings:provider-datastore")
 
 include(":ui:core")
-
 include(":ui:component")
+include(":ui:analytics")
 
 include(":application:ui")
 include(":application:component")
@@ -56,6 +56,8 @@ include(":diary:domain")
 include(":diary:domain-ktor")
 include(":diary:domain-merged")
 include(":diary:domain-room")
+include(":diary:settings")
+include(":diary:settings-serializer")
 include(":diary:ui")
 
 include(":diary:component")

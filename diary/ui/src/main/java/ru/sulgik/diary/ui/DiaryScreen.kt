@@ -1,6 +1,11 @@
 package ru.sulgik.diary.ui
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.exponentialDecay
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -19,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -42,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.common.platform.LocalTimeFormatter
+import ru.sulgik.diary.mvi.DiarySettingsStore
 import ru.sulgik.diary.mvi.DiaryStore
 import ru.sulgik.periods.ui.NoData
 import ru.sulgik.periods.ui.Period
@@ -58,6 +65,7 @@ import java.time.Month.*
 fun DiaryScreen(
     periods: DiaryStore.State.Periods,
     diary: DiaryStore.State.Diary,
+    settings: DiarySettingsStore.State.DiarySettings,
     onSelect: (DatePeriod) -> Unit,
     onOther: () -> Unit,
     onLesson: (date: DiaryStore.State.DiaryDate, lesson: DiaryStore.State.Lesson) -> Unit,
@@ -107,6 +115,19 @@ fun DiaryScreen(
                 HorizontalPager(
                     pageCount = periodsData.periods.size,
                     key = { it },
+                    beyondBoundsPageCount = 1,
+                    userScrollEnabled = settings.isPagerEnabled,
+                    flingBehavior = PagerDefaults.flingBehavior(
+                        state = pagerState,
+                        lowVelocityAnimationSpec = tween(
+                            durationMillis = 500,
+                            easing = LinearEasing,
+                        ),
+                        highVelocityAnimationSpec = remember { exponentialDecay() },
+                        snapAnimationSpec = spring(
+                            stiffness = Spring.StiffnessLow
+                        )
+                    ),
                     state = pagerState,
                 ) {
                     val period = periodsData.periods[it]
@@ -117,7 +138,7 @@ fun DiaryScreen(
                                 diary = diaryData,
                                 onLesson = onLesson,
                                 onRefresh = { onRefresh(period) },
-                                modifier = modifier
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
 
@@ -128,7 +149,6 @@ fun DiaryScreen(
         }
     }
 }
-
 
 @Composable
 fun DiaryDateData(
