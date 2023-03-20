@@ -1,19 +1,23 @@
 package ru.sulgik.marks.mvi
 
+import com.arkivanov.mvikotlin.core.store.Reducer
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.core.utils.ExperimentalMviKotlinApi
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.mutate
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toKotlinLocalDate
 import ru.sulgik.auth.core.AuthScope
-import ru.sulgik.core.directReducer
 import ru.sulgik.core.syncDispatch
-import ru.sulgik.dnevnikx.mvi.marks.MarksStore
 import ru.sulgik.marks.domain.CachedMarksRepository
 import ru.sulgik.marks.domain.data.MarksOutput
 import ru.sulgik.periods.domain.CachedPeriodsRepository
@@ -28,7 +32,7 @@ class MarksStoreImpl(
     cachedPeriodsRepository: CachedPeriodsRepository,
     cachedMarksRepository: CachedMarksRepository,
 ) : MarksStore,
-    Store<MarksStore.Intent, MarksStore.State, MarksStore.Label> by storeFactory.create<_, Action, _, _, _>(
+    Store<MarksStore.Intent, MarksStore.State, MarksStore.Label> by storeFactory.create<_, Action, Message, _, _>(
         name = "MarksStoreImpl",
         initialState = MarksStore.State(),
         bootstrapper = coroutineBootstrapper(coroutineDispatcher) {
@@ -43,29 +47,26 @@ class MarksStoreImpl(
                     val currentPeriod =
                         periods.firstOrNull { currentDate in it.period } ?: periods.first()
                     syncDispatch(
-                        MarksStore.State(
-                            periods = MarksStore.State.Periods(
-                                isLoading = false,
-                                data = MarksStore.State.PeriodsData(
-                                    selectedPeriod = currentPeriod,
-                                    periods = periods,
-                                ),
+                        Message.UpdatePeriods(
+                            periods = MarksStore.State.PeriodsData(
+                                selectedPeriod = currentPeriod,
+                                periods = periods,
                             )
                         )
                     )
-                    var marks = cachedMarksRepository.getMarksFast(auth, currentPeriod.period)
-                        .toState(this@onAction.state.marks)
-                    cache[currentPeriod] = marks
+                    var marks =
+                        cachedMarksRepository.getMarksFast(auth, currentPeriod.period).toState()
                     syncDispatch(
-                        state.copy(
+                        Message.UpdateMarks(
+                            period = currentPeriod,
                             marks = marks,
                         )
                     )
-                    marks = cachedMarksRepository.getMarksActual(auth, currentPeriod.period)
-                        .toState(this@onAction.state.marks)
-                    cache[currentPeriod] = marks
+                    marks =
+                        cachedMarksRepository.getMarksActual(auth, currentPeriod.period).toState()
                     syncDispatch(
-                        state.copy(
+                        Message.UpdateMarks(
+                            period = currentPeriod,
                             marks = marks,
                         )
                     )
@@ -75,120 +76,135 @@ class MarksStoreImpl(
             onIntent<MarksStore.Intent.SelectPeriod> {
                 val state = state
                 val periodsData = state.periods.data
-                if (state.periods.isLoading || periodsData == null)
-                    return@onIntent
+                if (state.periods.isLoading || periodsData == null) return@onIntent
                 dispatch(
-                    state.copy(
-                        marks = MarksStore.State.Marks(),
-                        periods = state.periods.copy(
-                            isLoading = false,
-                            data = periodsData.copy(
-                                selectedPeriod = it.period
-                            )
-                        )
-                    )
+                    Message.SelectPeriod(period = it.period)
                 )
-                val cachedMarks = cache[it.period]
-                if (cachedMarks != null) {
-                    dispatch(
-                        this@onIntent.state.copy(
-                            marks = cachedMarks,
-                        )
-                    )
-                }
                 val job = selectPeriodJob
                 selectPeriodJob = launch {
                     job?.cancelAndJoin()
-                    var marks = cachedMarksRepository.getMarksFast(auth, it.period.period)
-                        .toState(this@onIntent.state.marks)
-                    cache[it.period] = marks
+                    var marks = cachedMarksRepository.getMarksFast(auth, it.period.period).toState()
                     syncDispatch(
-                        this@onIntent.state.copy(
+                        Message.UpdateMarks(
+                            period = it.period,
                             marks = marks,
                         )
                     )
-                    marks = cachedMarksRepository.getMarksActual(auth, it.period.period)
-                        .toState(this@onIntent.state.marks)
-                    cache[it.period] = marks
+                    marks = cachedMarksRepository.getMarksActual(auth, it.period.period).toState()
                     syncDispatch(
-                        this@onIntent.state.copy(
+                        Message.UpdateMarks(
+                            period = it.period,
                             marks = marks,
                         )
                     )
                 }
             }
             onIntent<MarksStore.Intent.HideMark> {
-                val state = state
-                val marksData = state.marks.data
-                if (marksData == null) {
-                    return@onIntent
-                }
                 dispatch(
-                    state.copy(
-                        marks = state.marks.copy(
-                            data = marksData.copy(
-                                selectedMark = null,
-                            )
-                        )
-                    )
+                    Message.SelectMark(null)
                 )
             }
             onIntent<MarksStore.Intent.SelectMark> {
-                val state = state
-                val marksData = state.marks.data
-                if (marksData == null) {
-                    return@onIntent
-                }
                 dispatch(
-                    state.copy(
-                        marks = state.marks.copy(
-                            data = marksData.copy(
-                                selectedMark = it.mark
-                            )
-                        )
-                    )
+                    Message.SelectMark(MarksStore.State.SelectedMark(it.mark.first, it.mark.second))
                 )
             }
-            onIntent<MarksStore.Intent.RefreshMarks> {
+            onIntent<MarksStore.Intent.RefreshMarks> { intent ->
                 val state = state
                 val periodsData = state.periods.data
-                if (state.periods.isLoading || periodsData == null || state.marks.isLoading || state.marks.isRefreshing)
-                    return@onIntent
-                val period = periodsData.selectedPeriod
+                if (state.periods.isLoading || periodsData == null) return@onIntent
+                val diaryData = state.marks.data[intent.period]
+                if (diaryData?.isLoading == true || diaryData?.isRefreshing == true) return@onIntent
                 dispatch(
-                    state.copy(
-                        marks = state.marks.copy(
-                            isRefreshing = true
-                        ),
-                        periods = state.periods.copy(
-                            isLoading = false,
-                            data = periodsData.copy(
-                                selectedPeriod = period
-                            )
-                        )
-                    )
+                    Message.SetDiaryRefreshing(intent.period)
                 )
                 val job = selectPeriodJob
                 selectPeriodJob = launch {
                     job?.cancelAndJoin()
-                    val marks = cachedMarksRepository.getMarksActual(auth, period.period)
-                        .toState(this@onIntent.state.marks)
-                    cache[period] = marks
+                    val marks =
+                        cachedMarksRepository.getMarksActual(auth, intent.period.period).toState()
                     syncDispatch(
-                        this@onIntent.state.copy(
-                            marks = marks,
-                        )
+                        Message.UpdateMarks(intent.period, marks)
                     )
                 }
             }
         },
-        reducer = directReducer(),
+        reducer = Reducer {
+            when (it) {
+                is Message.SelectMark -> copy(
+                    marks = marks.copy(
+                        selectedMark = it.lesson
+                    )
+                )
+
+                is Message.SelectPeriod -> {
+                    copy(
+                        periods = periods.copy(
+                            data = periods.data?.copy(
+                                selectedPeriod = it.period,
+                            )
+                        )
+                    )
+                }
+
+                is Message.SetDiaryRefreshing -> {
+                    copy(
+                        marks = marks.copy(
+                            data = marks.data.orFill(it.period, isRefreshing = true)
+                        )
+                    )
+                }
+
+                is Message.UpdateMarks -> copy(
+                    marks = it.marks.withState(it.period, this),
+                )
+
+                is Message.UpdatePeriods -> copy(
+                    periods = MarksStore.State.Periods(
+                        isLoading = false, data = it.periods
+                    ),
+                )
+
+            }
+        },
     ) {
+
+    private sealed interface Message {
+
+        data class UpdatePeriods(val periods: MarksStore.State.PeriodsData) : Message
+
+        data class SelectPeriod(val period: MarksStore.State.Period) : Message
+
+        data class UpdateMarks(
+            val period: MarksStore.State.Period,
+            val marks: MarksStore.State.MarksData,
+        ) : Message
+
+        data class SetDiaryRefreshing(val period: MarksStore.State.Period) : Message
+
+        data class SelectMark(val lesson: MarksStore.State.SelectedMark?) : Message
+
+    }
 
     private sealed interface Action {
         object Setup : Action
     }
 
+}
+
+private fun ImmutableMap<MarksStore.State.Period, MarksStore.State.MarksData>?.orFill(
+    period: MarksStore.State.Period,
+    isRefreshing: Boolean = false,
+): ImmutableMap<MarksStore.State.Period, MarksStore.State.MarksData> {
+    return this?.toPersistentMap()?.mutate {
+        val data = it[period]?.copy(isRefreshing = isRefreshing, isLoading = !isRefreshing)
+            ?: MarksStore.State.MarksData(
+                isLoading = true,
+                isRefreshing = false,
+                lessons = persistentListOf(),
+            )
+        it[period] = data
+    } ?: persistentMapOf()
 }
 
 private fun GetPeriodsOutput.toState(): List<MarksStore.State.Period> {
@@ -200,46 +216,36 @@ private fun GetPeriodsOutput.toState(): List<MarksStore.State.Period> {
     }
 }
 
-private fun MarksOutput.toState(
-    state: MarksStore.State.Marks,
-    isRefreshing: Boolean = false,
+
+private fun MarksStore.State.MarksData.withState(
+    period: MarksStore.State.Period,
+    state: MarksStore.State,
 ): MarksStore.State.Marks {
-    return state.copy(
+    return state.marks.copy(data = state.marks.data.let { mark ->
+        mark.toPersistentMap().mutate {
+            it[period] = this
+        }
+    })
+}
+
+
+private fun MarksOutput.toState(): MarksStore.State.MarksData {
+    return MarksStore.State.MarksData(
         isLoading = false,
-        isRefreshing = isRefreshing,
-        data = state.data?.copy(
-            lessons = lessons.map { lesson ->
-                MarksStore.State.Lesson(
-                    title = lesson.title,
-                    average = lesson.average,
-                    averageValue = lesson.averageValue,
-                    marks = lesson.marks.map { mark ->
-                        MarksStore.State.Mark(
-                            mark = mark.mark,
-                            value = mark.value,
-                            date = mark.date,
-                            message = mark.message
-                        )
-                    }
-                )
-            },
-        ) ?: MarksStore.State.MarksData(
-            lessons = lessons.map { lesson ->
-                MarksStore.State.Lesson(
-                    title = lesson.title,
-                    average = lesson.average,
-                    averageValue = lesson.averageValue,
-                    marks = lesson.marks.map { mark ->
-                        MarksStore.State.Mark(
-                            mark = mark.mark,
-                            value = mark.value,
-                            date = mark.date,
-                            message = mark.message
-                        )
-                    }
-                )
-            },
-            selectedMark = null,
-        ),
+        isRefreshing = false,
+        lessons = lessons.map { lesson ->
+            MarksStore.State.Lesson(title = lesson.title,
+                average = lesson.average,
+                averageValue = lesson.averageValue,
+                marks = lesson.marks.map { mark ->
+                    MarksStore.State.Mark(
+                        mark = mark.mark,
+                        value = mark.value,
+                        date = mark.date,
+                        message = mark.message
+                    )
+                })
+        },
     )
+
 }

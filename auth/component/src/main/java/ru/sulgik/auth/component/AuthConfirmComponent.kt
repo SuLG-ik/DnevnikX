@@ -5,9 +5,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import ru.sulgik.auth.mvi.AuthStore
 import ru.sulgik.auth.ui.AuthConfirmScreen
 import ru.sulgik.core.DIComponentContext
-import ru.sulgik.dnevnikx.mvi.auth.AuthStore
 import ru.sulgik.modal.component.ModalComponentContext
 import ru.sulgik.modal.component.ModalState
 

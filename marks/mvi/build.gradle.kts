@@ -36,6 +36,7 @@ android {
 dependencies {
     implementation(projects.core.common)
 
+    api(libs.kotlinx.collections)
     implementation(libs.mvi.core)
     implementation(libs.kotlinx.datetime)
     implementation(libs.bundles.android)

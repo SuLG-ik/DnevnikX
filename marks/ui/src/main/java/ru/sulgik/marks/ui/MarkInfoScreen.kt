@@ -13,13 +13,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.sulgik.common.platform.LocalTimeFormatter
-import ru.sulgik.dnevnikx.mvi.marks.MarksStore
+import ru.sulgik.marks.mvi.MarksStore
 import ru.sulgik.ui.core.ExtendedTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MarkInfoScreen(
-    mark: Pair<MarksStore.State.Lesson, MarksStore.State.Mark>,
+    mark: MarksStore.State.SelectedMark,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -27,22 +27,22 @@ fun MarkInfoScreen(
     ) {
         TopAppBar(title = {
             Text(
-                text = "${mark.first.title}, ${LocalTimeFormatter.current.format(mark.second.date)}",
+                text = "${mark.lesson.title}, ${LocalTimeFormatter.current.format(mark.mark.date)}",
                 modifier = Modifier
             )
         },
             actions = {
                 Text(
-                    text = mark.second.mark,
+                    text = mark.mark.mark,
                     style = MaterialTheme.typography.bodyLarge,
                     fontSize = 20.sp,
-                    color = mark.second.value.markColor(),
+                    color = mark.mark.value.markColor(),
                     modifier = Modifier.padding(end = 10.dp)
                 )
             }
         )
         Text(
-            mark.second.message ?: "нет сообщения",
+            mark.mark.message ?: "нет сообщения",
             textAlign = TextAlign.Center,
             modifier = Modifier.align(Alignment.CenterHorizontally),
         )

@@ -1,6 +1,8 @@
-package ru.sulgik.dnevnikx.mvi.marks
+package ru.sulgik.marks.mvi
 
 import com.arkivanov.mvikotlin.core.store.Store
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.datetime.LocalDate
 import ru.sulgik.common.platform.DatePeriod
 
@@ -14,7 +16,7 @@ interface MarksStore : Store<MarksStore.Intent, MarksStore.State, MarksStore.Lab
 
         object HideMark : Intent
 
-        object RefreshMarks : Intent
+        data class RefreshMarks(val period: State.Period) : Intent
     }
 
     data class State(
@@ -38,13 +40,18 @@ interface MarksStore : Store<MarksStore.Intent, MarksStore.State, MarksStore.Lab
         )
 
         data class Marks(
-            val isLoading: Boolean = true,
-            val isRefreshing: Boolean = false,
-            val data: MarksData? = null,
+            val selectedMark: SelectedMark? = null,
+            val data: ImmutableMap<Period, MarksData> = persistentMapOf(),
+        )
+
+        class SelectedMark(
+            val lesson: Lesson,
+            val mark: Mark,
         )
 
         data class MarksData(
-            val selectedMark: Pair<Lesson, Mark>?,
+            val isLoading: Boolean = true,
+            val isRefreshing: Boolean = false,
             val lessons: List<Lesson>,
         )
 

@@ -34,11 +34,16 @@ class DiaryLessonInfoComponent(
         uriHandler.open(file.url)
     }
 
+    private fun onLink(link: String) {
+        uriHandler.open(link)
+    }
+
     @Composable
     override fun Content(modifier: Modifier) {
         DiaryLessonInfoScreen(
             state = currentLesson,
             onFile = this::onFile,
+            onLink = this::onLink,
             modifier = modifier,
         )
     }

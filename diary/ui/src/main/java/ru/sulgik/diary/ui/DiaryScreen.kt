@@ -1,12 +1,11 @@
 package ru.sulgik.diary.ui
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.Spring
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -23,11 +22,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -50,9 +49,11 @@ import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.common.platform.LocalTimeFormatter
 import ru.sulgik.diary.mvi.DiarySettingsStore
 import ru.sulgik.diary.mvi.DiaryStore
+import ru.sulgik.periods.ui.AnimatedPeriod
 import ru.sulgik.periods.ui.NoData
 import ru.sulgik.periods.ui.Period
-import ru.sulgik.periods.ui.PeriodPlaceholder
+import ru.sulgik.periods.ui.PeriodPlaceholders
+import ru.sulgik.ui.core.AnimatedContentWithPlaceholder
 import ru.sulgik.ui.core.MiddleEllipsisText
 import ru.sulgik.ui.core.RefreshableBox
 import ru.sulgik.ui.core.defaultPlaceholder
@@ -60,7 +61,10 @@ import ru.sulgik.ui.core.outlined
 import java.time.DayOfWeek.*
 import java.time.Month.*
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class
+)
 @Composable
 fun DiaryScreen(
     periods: DiaryStore.State.Periods,
@@ -92,8 +96,7 @@ fun DiaryScreen(
             modifier = Modifier.padding(paddingValues)
         ) {
             val periodsData = periods.data
-            val diariesData = diary.data
-            if (periodsData == null || diariesData == null) {
+            if (periodsData == null) {
                 DiaryDatePlaceholders(
                     modifier = Modifier.fillMaxSize()
                 )
@@ -115,40 +118,51 @@ fun DiaryScreen(
                 HorizontalPager(
                     pageCount = periodsData.periods.size,
                     key = { it },
-                    beyondBoundsPageCount = 1,
                     userScrollEnabled = settings.isPagerEnabled,
                     flingBehavior = PagerDefaults.flingBehavior(
                         state = pagerState,
-                        lowVelocityAnimationSpec = tween(
-                            durationMillis = 500,
-                            easing = LinearEasing,
+                        lowVelocityAnimationSpec = spring(
+                            stiffness = 30f,
+                            visibilityThreshold = 0.005f,
                         ),
                         highVelocityAnimationSpec = remember { exponentialDecay() },
                         snapAnimationSpec = spring(
-                            stiffness = Spring.StiffnessLow
+                            stiffness = 100f,
                         )
                     ),
                     state = pagerState,
-                ) {
-                    val period = periodsData.periods[it]
-                    val diaryData = diariesData[period]
-                    when {
-                        diaryData != null -> {
+                ) { pageIndex ->
+                    val period =
+                        remember(periodsData.periods, pageIndex) { periodsData.periods[pageIndex] }
+                    val diaryData = remember(diary.data, period) { diary.data[period] }
+                    AnimatedContentWithPlaceholder(
+                        diaryData?.isLoading ?: true,
+                        state = diaryData,
+                        label = "diary_placeholder",
+                        placeholderContent = {
+                            DiaryDatePlaceholders()
+                        },
+                        content = {
                             DiaryDateData(
-                                diary = diaryData,
+                                diary = it,
                                 onLesson = onLesson,
                                 onRefresh = { onRefresh(period) },
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.fillMaxSize(),
                             )
                         }
-
-                        else -> DiaryDatePlaceholders()
-                    }
+                    )
                 }
             }
         }
     }
 }
+
+val diaryInListModifier = Modifier
+    .fillMaxSize()
+
+val diaryDateInListModifier = Modifier
+    .padding(horizontal = 10.dp)
+    .fillMaxWidth()
 
 @Composable
 fun DiaryDateData(
@@ -157,39 +171,24 @@ fun DiaryDateData(
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val scrollState = rememberScrollState()
     RefreshableBox(
         refreshing = diary.isRefreshing,
         onRefresh = onRefresh,
         modifier = modifier,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(
-                    state = scrollState,
-                    enabled = !diary.isLoading,
-                ),
+        LazyColumn(
+            modifier = diaryInListModifier,
             verticalArrangement = Arrangement.spacedBy(10.dp),
             content = {
-                if (diary.isLoading) {
-                    repeat(6) {
-                        DiaryDatePlaceholder(
-                            modifier = Modifier
-                                .padding(horizontal = 10.dp)
-                                .fillMaxWidth(),
-                        )
+                items(diary.diary.size, key = { it }, contentType = { "diary" }) {
+                    val diaryDate = remember(diary.diary, it) {
+                        diary.diary[it]
                     }
-                } else {
-                    diary.diary.forEach { diary ->
-                        DiaryDate(
-                            diary = diary,
-                            onLesson = onLesson,
-                            modifier = Modifier
-                                .padding(horizontal = 10.dp)
-                                .fillMaxWidth()
-                        )
-                    }
+                    DiaryDate(
+                        diary = diaryDate,
+                        onLesson = onLesson,
+                        modifier = diaryDateInListModifier,
+                    )
                 }
             }
         )
@@ -460,6 +459,7 @@ fun DiaryLessonPlaceholder(
 }
 
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun PeriodSelector(
     periods: DiaryStore.State.Periods,
@@ -467,74 +467,87 @@ fun PeriodSelector(
     onOther: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val scrollState = rememberScrollState()
     Row(
         modifier = modifier
-            .horizontalScroll(rememberScrollState())
-            .animateContentSize(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .horizontalScroll(scrollState, !periods.isLoading),
     ) {
-        val periodsData = periods.data
-        Spacer(Modifier)
-        when {
-            periods.isLoading -> {
-                repeat(5) {
-                    PeriodPlaceholder()
-                }
-            }
-
-            periodsData == null || periodsData.periods.isEmpty() -> {
+        Spacer(Modifier.width(10.dp))
+        AnimatedContentWithPlaceholder(
+            isLoading = periods.isLoading,
+            state = periods.data,
+            label = "period_placeholder",
+            modifier = Modifier.fillMaxWidth(),
+            placeholderContent = {
+                PeriodPlaceholders()
+            }, noDataContent = {
                 NoData(modifier = Modifier.fillMaxWidth())
-            }
-
-            else -> {
+            }, content = {
                 CurrentPeriods(
-                    period = periodsData,
+                    scrollState = scrollState,
+                    period = it,
                     onSelect = onSelect,
                     onOther = onOther,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
-        }
-        Spacer(Modifier)
-
+        )
+        Spacer(Modifier.width(10.dp))
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun CurrentPeriods(
+    scrollState: ScrollState,
     period: DiaryStore.State.PeriodsData,
     onSelect: (DatePeriod) -> Unit,
     onOther: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    val previousPeriod = period.previousPeriod
-    val selectedPeriod = period.selectedPeriod
-    if (previousPeriod != null) {
-        Period(
-            period = "Предыдущая",
-            selected = previousPeriod == selectedPeriod,
-            onSelect = { onSelect(previousPeriod) }
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        val previousPeriod = period.previousPeriod
+        val selectedPeriod = period.selectedPeriod
+        if (previousPeriod != null) {
+            Period(
+                period = "Предыдущая",
+                selected = previousPeriod == selectedPeriod,
+                onSelect = { onSelect(previousPeriod) }
+            )
+        }
+        val currentPeriod = period.currentPeriod
+        if (currentPeriod != null) {
+            Period(
+                period = "Текущая неделя",
+                selected = currentPeriod == selectedPeriod,
+                onSelect = { onSelect(currentPeriod) },
+            )
+        }
+        val nextPeriod = period.nextPeriod
+        if (nextPeriod != null) {
+            Period(
+                period = "Следующая",
+                selected = nextPeriod == selectedPeriod,
+                onSelect = { onSelect(nextPeriod) }
+            )
+        }
+        val isOther =
+            currentPeriod != selectedPeriod && nextPeriod != selectedPeriod && previousPeriod != selectedPeriod && currentPeriod != null
+        val currentOther =
+            if (isOther) LocalTimeFormatter.current.format(selectedPeriod) else "Выбрать"
+        LaunchedEffect(key1 = isOther, block = {
+            if (isOther) {
+                scrollState.animateScrollTo(Int.MAX_VALUE)
+            }
+        })
+        AnimatedPeriod(
+            period = currentOther,
+            selected = isOther,
+            onSelect = onOther
         )
     }
-    val currentPeriod = period.currentPeriod
-    if (currentPeriod != null) {
-        Period(
-            period = "Текущая неделя",
-            selected = currentPeriod == selectedPeriod,
-            onSelect = { onSelect(currentPeriod) },
-        )
-    }
-    val nextPeriod = period.nextPeriod
-    if (nextPeriod != null) {
-        Period(
-            period = "Следующая",
-            selected = nextPeriod == selectedPeriod,
-            onSelect = { onSelect(nextPeriod) }
-        )
-    }
-    val isOther =
-        currentPeriod != selectedPeriod && nextPeriod != selectedPeriod && previousPeriod != selectedPeriod && currentPeriod != null
-    Period(
-        period = if (isOther) LocalTimeFormatter.current.format(selectedPeriod) else "Выбрать",
-        selected = isOther,
-        onSelect = onOther
-    )
 }

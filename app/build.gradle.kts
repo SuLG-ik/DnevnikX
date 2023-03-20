@@ -77,14 +77,14 @@ android {
         // Adds exported schema location as test app assets.
         getByName("androidTest").assets.srcDir("$projectDir/schemas")
     }
-    productFlavors {
-        val dev by creating {
-            applicationIdSuffix = ".dev"
-        }
-        val production by creating {
-
-        }
-    }
+//    productFlavors {
+//        val dev by creating {
+//            applicationIdSuffix = ".dev"
+//        }
+//        val production by creating {
+//
+//        }
+//    }
 }
 
 dependencies {

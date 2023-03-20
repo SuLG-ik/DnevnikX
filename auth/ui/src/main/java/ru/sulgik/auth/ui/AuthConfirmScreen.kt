@@ -21,7 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import ru.sulgik.dnevnikx.mvi.auth.AuthStore
+import ru.sulgik.auth.mvi.AuthStore
 import ru.sulgik.ui.core.ExtendedTheme
 
 @Composable

@@ -135,7 +135,7 @@ class DiaryStoreImpl(
                 if (state.periods.isLoading || periodsData == null)
                     return@onIntent
                 val selectedPeriod = periodsData.selectedPeriod
-                val diaryData = state.diary.data?.get(intent.period)
+                val diaryData = state.diary.data[intent.period]
                 if (diaryData?.isLoading == true || diaryData?.isRefreshing == true)
                     return@onIntent
                 dispatch(Message.SetDiaryRefreshing(intent.period))
@@ -256,9 +256,9 @@ private fun ImmutableMap<DatePeriod, DiaryStore.State.DiaryData>?.orFill(
 private fun DiaryOutput.withState(state: DiaryStore.State): DiaryStore.State.Diary {
     return state.diary.copy(
         data = state.diary.data.let { diary ->
-            diary?.toPersistentMap()?.mutate {
+            diary.toPersistentMap().mutate {
                 it[period] = this.toState()
-            } ?: persistentMapOf(period to this.toState())
+            }
         }
     )
 }

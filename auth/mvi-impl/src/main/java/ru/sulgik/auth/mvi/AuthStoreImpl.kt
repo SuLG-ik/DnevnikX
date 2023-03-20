@@ -16,7 +16,6 @@ import ru.sulgik.auth.domain.data.Authorization
 import ru.sulgik.common.ErrorResponseException
 import ru.sulgik.core.directReducer
 import ru.sulgik.core.syncDispatch
-import ru.sulgik.dnevnikx.mvi.auth.AuthStore
 
 @OptIn(ExperimentalMviKotlinApi::class)
 class AuthStoreImpl(

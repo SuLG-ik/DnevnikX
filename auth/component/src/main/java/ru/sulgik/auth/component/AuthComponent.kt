@@ -6,13 +6,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import ru.sulgik.auth.core.AuthScope
+import ru.sulgik.auth.mvi.AuthStore
 import ru.sulgik.auth.ui.AuthScreen
 import ru.sulgik.core.BaseComponentContext
 import ru.sulgik.core.DIComponentContext
 import ru.sulgik.core.childDIContext
 import ru.sulgik.core.getStore
 import ru.sulgik.core.states
-import ru.sulgik.dnevnikx.mvi.auth.AuthStore
 import ru.sulgik.modal.ui.FloatingModalUI
 
 class AuthComponent(

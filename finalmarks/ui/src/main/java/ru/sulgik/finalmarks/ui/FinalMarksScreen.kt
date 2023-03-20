@@ -19,8 +19,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -40,13 +40,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.sulgik.finalmarks.mvi.FinalMarksStore
+import ru.sulgik.ui.core.AnimatedContentWithPlaceholder
+import ru.sulgik.ui.core.ExtendedTheme
 import ru.sulgik.ui.core.RefreshableBox
 import ru.sulgik.ui.core.defaultPlaceholder
 import ru.sulgik.ui.core.optionalBackNavigationIcon
 import ru.sulgik.ui.core.outlined
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FinalMarksScreen(
     state: FinalMarksStore.State,
@@ -69,50 +71,70 @@ fun FinalMarksScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            val verticalScroll = rememberScrollState()
-            val horizontalScroll = rememberScrollState()
-            RefreshableBox(refreshing = state.isRefreshing, onRefresh = onRefresh) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(
-                            state = verticalScroll,
-                            enabled = !state.isLoading,
-                        ),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    val lessons = state.lessons
-                    when {
-                        lessons != null -> {
-                            lessons.lessons.forEach {
-                                CompositionLocalProvider(
-                                    LocalOverscrollConfiguration provides null
-                                ) {
-                                    FinalMarksLesson(
-                                        lesson = it,
-                                        scrollState = horizontalScroll,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 10.dp)
-                                    )
-                                }
-                            }
-                        }
-
-                        else -> {
-                            repeat(12) {
-                                FinalMarksLessonPlaceholder(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 10.dp)
-                                )
-                            }
-                        }
-                    }
-
-                }
-            }
+            AnimatedContentWithPlaceholder(
+                isLoading = state.isLoading,
+                state = state.lessons,
+                placeholderContent = {
+                    FinalMarksPlaceholder(modifier = Modifier.fillMaxSize())
+                },
+                content = {
+                    FinalMarks(
+                        state = it,
+                        onRefresh = onRefresh,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                },
+            )
         }
+    }
+}
+
+@Composable
+fun FinalMarksPlaceholder(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(ExtendedTheme.dimensions.contentSpaceBetween),
+    ) {
+        repeat(12) {
+            FinalMarksLessonPlaceholder(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = ExtendedTheme.dimensions.contentSpaceBetween)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun FinalMarks(
+    state: FinalMarksStore.State.LessonsData,
+    onRefresh: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val horizontalScroll = rememberScrollState()
+    RefreshableBox(refreshing = state.isRefreshing, onRefresh = onRefresh) {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(ExtendedTheme.dimensions.contentSpaceBetween),
+            modifier = Modifier
+                .fillMaxSize(),
+            content = {
+                items(state.lessons.size, key = { it }, contentType = { "final_marks" }) {
+                    val lesson = remember(state.lessons, it) { state.lessons[it] }
+                    CompositionLocalProvider(
+                        LocalOverscrollConfiguration provides null
+                    ) {
+                        FinalMarksLesson(
+                            lesson = lesson,
+                            scrollState = horizontalScroll,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp)
+                        )
+                    }
+                }
+            },
+        )
     }
 }
 

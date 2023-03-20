@@ -38,6 +38,7 @@ dependencies {
 
     implementation(libs.mvi.core)
     implementation(libs.kotlinx.datetime)
+    api(libs.kotlinx.collections)
     implementation(libs.bundles.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.junit.android)

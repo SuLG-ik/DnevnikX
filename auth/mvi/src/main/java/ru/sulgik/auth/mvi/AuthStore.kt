@@ -1,4 +1,4 @@
-package ru.sulgik.dnevnikx.mvi.auth
+package ru.sulgik.auth.mvi
 
 import com.arkivanov.mvikotlin.core.store.Store
 

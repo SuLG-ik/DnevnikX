@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -21,7 +23,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
@@ -29,17 +33,21 @@ import androidx.compose.ui.unit.sp
 import kotlinx.datetime.LocalDate
 import ru.sulgik.common.platform.LocalTimeFormatter
 import ru.sulgik.diary.mvi.DiaryStore
+import ru.sulgik.ui.core.linkify
+import ru.sulgik.ui.core.urlAt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiaryLessonInfoScreen(
     state: Pair<LocalDate, DiaryStore.State.Lesson>?,
     onFile: (DiaryStore.State.File) -> Unit,
+    onLink: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var homeworkCopyIndex by rememberSaveable(state) { mutableStateOf(-1) }
     val timeFormatter = LocalTimeFormatter.current
     val clipboardManager = LocalClipboardManager.current
+    val haptic = LocalHapticFeedback.current
     if (state != null) {
         Column(
             modifier = modifier.padding(bottom = 10.dp)
@@ -88,6 +96,7 @@ fun DiaryLessonInfoScreen(
                     )
                 }
                 state.second.homework.forEachIndexed { index, homework ->
+                    val homeworkText = homework.text.linkify()
                     ListItem(
                         leadingContent = {
                             Image(
@@ -96,7 +105,21 @@ fun DiaryLessonInfoScreen(
                                 modifier = Modifier.size(35.dp),
                             )
                         },
-                        headlineContent = { Text(homework.text) },
+                        headlineContent = {
+                            ClickableText(
+                                text = homeworkText,
+                                style = LocalTextStyle.current.copy(color = LocalContentColor.current),
+                                onClick = {
+                                    val url = homeworkText.urlAt(it)
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    if (url == null) {
+                                        clipboardManager.setText(AnnotatedString(homework.text))
+                                        homeworkCopyIndex = index
+                                    } else {
+                                        onLink(url)
+                                    }
+                                })
+                        },
                         trailingContent = {
                             when (homeworkCopyIndex) {
                                 index -> {
@@ -126,6 +149,7 @@ fun DiaryLessonInfoScreen(
                                 onClick = {
                                     clipboardManager.setText(AnnotatedString(homework.text))
                                     homeworkCopyIndex = index
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 }
                             )
                     )
@@ -161,3 +185,4 @@ fun DiaryLessonInfoScreen(
         }
     }
 }
+

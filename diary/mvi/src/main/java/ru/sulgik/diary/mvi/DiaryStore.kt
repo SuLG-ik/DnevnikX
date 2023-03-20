@@ -3,6 +3,7 @@ package ru.sulgik.diary.mvi
 import com.arkivanov.mvikotlin.core.store.Store
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.datetime.LocalDate
 import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.common.platform.TimePeriod
@@ -43,7 +44,7 @@ interface DiaryStore : Store<DiaryStore.Intent, DiaryStore.State, DiaryStore.Lab
         )
 
         data class Diary(
-            val data: ImmutableMap<DatePeriod, DiaryData>? = null,
+            val data: ImmutableMap<DatePeriod, DiaryData> = persistentMapOf(),
             val selectedLesson: SelectedLesson? = null,
         )
 

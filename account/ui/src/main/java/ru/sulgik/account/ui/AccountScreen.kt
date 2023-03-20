@@ -34,8 +34,9 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ru.sulgik.account.mvi.AccountStore
-import ru.sulgik.ui.core.outlined
+import ru.sulgik.ui.core.AnimatedContentWithPlaceholder
 import ru.sulgik.ui.core.defaultPlaceholder
+import ru.sulgik.ui.core.outlined
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,9 +58,9 @@ fun AccountScreen(
             })
         },
         modifier = modifier,
-    ) {
+    ) { paddingValues ->
         Box(
-            modifier = Modifier.padding(it)
+            modifier = Modifier.padding(paddingValues)
         ) {
             Column(
                 modifier = Modifier
@@ -67,37 +68,45 @@ fun AccountScreen(
                     .verticalScroll(rememberScrollState())
             ) {
                 val account = accountData.account
-                if (account != null) {
-                    Profile(
-                        account = account,
-                        onSelectAccount = onSelectAccount,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    )
-                } else {
-                    ProfilePlaceholder(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    )
-                }
+                AnimatedContentWithPlaceholder(
+                    isLoading = accountData.isLoading, state = account,
+                    placeholderContent = {
+                        ProfilePlaceholder(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                    },
+                    content = {
+                        Profile(
+                            account = it,
+                            onSelectAccount = onSelectAccount,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                    }
+                )
                 Spacer(
                     modifier = Modifier.height(20.dp)
                 )
-                val actions = actionsData.actions
-                if (!actionsData.isLoading && actions != null)
-                    ProfileActions(
-                        actions = actions,
-                        onSchedule = onSchedule,
-                        onUpdates = onUpdates,
-                        onFinalMarks = onFinalMarks,
-                        onAbout = onAbout,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                else {
-                    ProfileActionsPlaceholder(
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+                AnimatedContentWithPlaceholder(
+                    isLoading = actionsData.isLoading,
+                    state = actionsData.actions,
+                    placeholderContent = {
+                        ProfileActionsPlaceholder(
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
+                    content = {
+                        ProfileActions(
+                            actions = it,
+                            onSchedule = onSchedule,
+                            onUpdates = onUpdates,
+                            onFinalMarks = onFinalMarks,
+                            onAbout = onAbout,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                )
             }
         }
     }

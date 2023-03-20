@@ -35,7 +35,6 @@ android {
 
 dependencies {
     implementation(projects.core.common)
-
     implementation(libs.mvi.core)
     implementation(libs.kotlinx.collections)
     implementation(libs.kotlinx.datetime)

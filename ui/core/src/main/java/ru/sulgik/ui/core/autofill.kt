@@ -13,12 +13,13 @@ import androidx.compose.ui.platform.LocalAutofillTree
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun Modifier.autofill(
-  vararg autofillTypes: AutofillType,
-  onFill: ((String) -> Unit),
+    vararg autofillTypes: AutofillType,
+    onFill: ((String) -> Unit),
 ) = composed {
-  val autofill = LocalAutofill.current
-  val autofillNode = AutofillNode(onFill = onFill, autofillTypes = autofillTypes.toList())
-  LocalAutofillTree.current += autofillNode
+    val autofill = LocalAutofill.current
+    val autofillNode = AutofillNode(onFill = onFill, autofillTypes = autofillTypes.toList())
+    val autofillTree = LocalAutofillTree.current
+    autofillTree += autofillNode
     this
         .onGloballyPositioned {
             autofillNode.boundingBox = it.boundsInWindow()

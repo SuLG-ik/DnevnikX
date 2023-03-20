@@ -1,6 +1,8 @@
 package ru.sulgik.finalmarks.mvi
 
 import com.arkivanov.mvikotlin.core.store.Store
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 interface FinalMarksStore :
     Store<FinalMarksStore.Intent, FinalMarksStore.State, FinalMarksStore.Label> {
@@ -13,20 +15,20 @@ interface FinalMarksStore :
 
     data class State(
         val isLoading: Boolean = true,
-        val isRefreshing: Boolean = false,
         val lessons: LessonsData? = null,
     ) {
 
-        class LessonsData(
-            val lessons: List<Lesson>,
+        data class LessonsData(
+            val isRefreshing: Boolean = false,
+            val lessons: ImmutableList<Lesson> = persistentListOf(),
         )
 
-        class Lesson(
+        data class Lesson(
             val title: String,
-            val marks: List<Mark>,
+            val marks: ImmutableList<Mark>,
         )
 
-        class Mark(
+        data class Mark(
             val mark: String,
             val value: Int,
             val period: String,

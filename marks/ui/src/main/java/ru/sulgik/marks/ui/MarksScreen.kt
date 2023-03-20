@@ -1,6 +1,9 @@
 package ru.sulgik.marks.ui
 
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.exponentialDecay
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,8 +19,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -38,22 +45,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.datetime.LocalDate
 import ru.sulgik.common.platform.LocalTimeFormatter
-import ru.sulgik.dnevnikx.mvi.marks.MarksStore
+import ru.sulgik.marks.mvi.MarksSettingsStore
+import ru.sulgik.marks.mvi.MarksStore
 import ru.sulgik.periods.ui.NoData
 import ru.sulgik.periods.ui.Period
-import ru.sulgik.periods.ui.PeriodPlaceholder
+import ru.sulgik.periods.ui.PeriodPlaceholders
+import ru.sulgik.ui.core.AnimatedContentWithPlaceholder
+import ru.sulgik.ui.core.ExtendedTheme
 import ru.sulgik.ui.core.RefreshableBox
 import ru.sulgik.ui.core.defaultPlaceholder
 import ru.sulgik.ui.core.outlined
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun MarksScreen(
     periods: MarksStore.State.Periods,
     marks: MarksStore.State.Marks,
+    settings: MarksSettingsStore.State.MarksSettings,
     onSelect: (MarksStore.State.Period) -> Unit,
     onMark: (Pair<MarksStore.State.Lesson, MarksStore.State.Mark>) -> Unit,
-    onRefresh: () -> Unit,
+    onRefresh: (MarksStore.State.Period) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -74,47 +85,91 @@ fun MarksScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            val scrollState = rememberScrollState()
-            LaunchedEffect(key1 = marks.isLoading, block = {
-                if (marks.isLoading) {
-                    scrollState.animateScrollTo(0)
-                }
-            })
-            RefreshableBox(refreshing = marks.isRefreshing, onRefresh = onRefresh) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(
-                            state = scrollState,
-                            enabled = !marks.isLoading,
-                        ),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+            val periodsData = periods.data
+            if (periodsData == null) {
+                MarksPlaceholders(
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                val pagerState =
+                    rememberPagerState(periodsData.periods.indexOf(periodsData.selectedPeriod))
+                LaunchedEffect(key1 = periodsData.selectedPeriod, block = {
+                    if (periodsData.periods[pagerState.targetPage] != periodsData.selectedPeriod)
+                        pagerState.scrollToPage(periodsData.periods.indexOf(periodsData.selectedPeriod))
+                })
+                LaunchedEffect(
+                    key1 = pagerState.targetPage,
+                    key2 = pagerState.currentPage,
                 ) {
-                    val marksData = marks.data
-                    when {
-                        marks.isLoading -> {
-                            repeat(6) {
-                                LessonPlaceholder(
-                                    modifier = Modifier
-                                        .padding(horizontal = 10.dp)
-                                        .fillMaxWidth(),
-                                )
-                            }
-                        }
-
-                        marksData != null -> {
-                            marksData.lessons.forEach { lesson ->
-                                Lesson(
-                                    lesson = lesson,
-                                    onMark = { mark -> onMark(lesson to mark) },
-                                    modifier = Modifier
-                                        .padding(horizontal = 10.dp)
-                                        .fillMaxWidth()
-                                )
-                            }
-                        }
+                    if (pagerState.currentPage != pagerState.targetPage && periodsData.selectedPeriod != periodsData.periods[pagerState.targetPage]) {
+                        onSelect(periodsData.periods[pagerState.targetPage])
                     }
                 }
+                HorizontalPager(
+                    pageCount = periodsData.periods.size,
+                    key = { it },
+                    userScrollEnabled = settings.isPagerEnabled,
+                    flingBehavior = PagerDefaults.flingBehavior(
+                        state = pagerState,
+                        lowVelocityAnimationSpec = spring(
+                            stiffness = 30f,
+                            visibilityThreshold = 0.005f,
+                        ),
+                        highVelocityAnimationSpec = remember { exponentialDecay() },
+                        snapAnimationSpec = spring(
+                            stiffness = 100f,
+                        )
+                    ),
+                    state = pagerState,
+                ) { pageIndex ->
+                    val period = periodsData.periods[pageIndex]
+                    val marksData = marks.data[period]
+                    AnimatedContentWithPlaceholder(
+                        isLoading = marksData?.isLoading ?: true, state = marksData,
+                        placeholderContent = {
+                            MarksPlaceholders()
+                        },
+                        content = {
+                            MarksDate(
+                                marksData = it,
+                                onMark = onMark,
+                                onRefresh = { onRefresh(period) })
+                        },
+                    )
+                }
+            }
+        }
+
+    }
+}
+
+private val lessonInListModifier = Modifier
+    .padding(horizontal = 10.dp)
+    .fillMaxWidth()
+
+@Composable
+fun MarksDate(
+    marksData: MarksStore.State.MarksData,
+    onMark: (Pair<MarksStore.State.Lesson, MarksStore.State.Mark>) -> Unit,
+    onRefresh: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    RefreshableBox(
+        refreshing = marksData.isRefreshing,
+        onRefresh = onRefresh,
+        modifier = modifier
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(ExtendedTheme.dimensions.contentSpaceBetween),
+        ) {
+            items(marksData.lessons.size, key = { it }, contentType = { "marks" }) {
+                val lesson = remember(marksData.lessons, it) { marksData.lessons[it] }
+                Lesson(
+                    lesson = lesson,
+                    onMark = remember(lesson, onMark) { { mark -> onMark(lesson to mark) } },
+                    modifier = lessonInListModifier
+                )
             }
         }
     }
@@ -157,6 +212,18 @@ fun Lesson(
             lesson.marks.forEach { mark ->
                 MarkWithMessage(mark = mark, onClick = onMark)
             }
+        }
+    }
+}
+
+@Composable
+fun MarksPlaceholders(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(ExtendedTheme.dimensions.contentSpaceBetween),
+    ) {
+        repeat(6) {
+            LessonPlaceholder(modifier = Modifier.padding(horizontal = ExtendedTheme.dimensions.mainContentPadding))
         }
     }
 }
@@ -320,36 +387,36 @@ fun PeriodSelector(
     onSelect: (MarksStore.State.Period) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val scrollState = rememberScrollState()
     Row(
         modifier = modifier
-            .horizontalScroll(rememberScrollState())
-            .animateContentSize(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .horizontalScroll(scrollState, !periods.isLoading),
     ) {
-        Spacer(Modifier)
-        val periodsData = periods.data
-        when {
-            periods.isLoading -> {
-                repeat(5) {
-                    PeriodPlaceholder()
+        Spacer(Modifier.width(10.dp))
+        AnimatedContentWithPlaceholder(
+            isLoading = periods.isLoading,
+            state = periods.data,
+            placeholderContent = {
+                PeriodPlaceholders()
+            },
+            noDataContent = {
+                NoData()
+            },
+            content = { periodsData ->
+                Row(
+                    modifier = Modifier,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    periodsData.periods.forEach { period ->
+                        Period(
+                            period = period.title,
+                            selected = period == periodsData.selectedPeriod,
+                            onSelect = { onSelect(period) },
+                        )
+                    }
                 }
-            }
-
-            periodsData == null || periodsData.periods.isEmpty() -> {
-                NoData(modifier = Modifier.fillMaxWidth())
-            }
-
-            else -> {
-                periodsData.periods.forEach {
-                    Period(
-                        period = it.title,
-                        selected = it == periodsData.selectedPeriod,
-                        onSelect = { onSelect(it) },
-                    )
-                }
-            }
-        }
-        Spacer(Modifier)
-
+            })
+        Spacer(Modifier.width(10.dp))
     }
 }
