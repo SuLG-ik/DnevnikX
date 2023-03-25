@@ -45,6 +45,7 @@ dependencies {
     implementation(projects.main.mviImpl)
     implementation(projects.application.mviImpl)
     implementation(projects.experimentalsettings.mviImpl)
+    implementation(projects.marksupdates.mviImpl)
 
     implementation(libs.koin.core)
     implementation(libs.bundles.android)

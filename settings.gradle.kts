@@ -27,6 +27,9 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 rootProject.name = "DnevnikX"
 include(":app")
 
+include(":core:common")
+include(":core:components")
+
 include(":splash:ui")
 include(":splash:component")
 
@@ -87,6 +90,15 @@ include(":marks:domain-room")
 include(":marks:ui")
 include(":marks:component")
 
+include(":marksupdates:mvi")
+include(":marksupdates:mvi-impl")
+include(":marksupdates:domain")
+include(":marksupdates:domain-ktor")
+include(":marksupdates:domain-merged")
+//include(":marksupdates:domain-room")
+include(":marksupdates:ui")
+include(":marksupdates:component")
+
 include(":about:mvi")
 include(":about:mvi-impl")
 include(":about:domain")
@@ -133,9 +145,6 @@ include(":account-selector:ui")
 include(":account-selector:component")
 include(":account-host:component")
 
-include(":core:common")
-
-include(":core:components")
 include(":modal:ui")
 
 include(":modal:component")

@@ -11,6 +11,7 @@ import ru.sulgik.experimentalsettings.mvi.ExperimentalSettingsMVIModule
 import ru.sulgik.finalmarks.mvi.FinalMarksMVIModule
 import ru.sulgik.main.mvi.MainMVIModule
 import ru.sulgik.marks.mvi.MarksMVIModule
+import ru.sulgik.marksupdates.MarksUpdatesMVIModule
 import ru.sulgik.schedule.mvi.ScheduleMVIModule
 
 class KoinMVIModule {
@@ -27,6 +28,7 @@ class KoinMVIModule {
         includes(MainMVIModule().module)
         includes(ApplicationMVIModule().module)
         includes(ExperimentalSettingsMVIModule().module)
+        includes(MarksUpdatesMVIModule().module)
     }
 
 }

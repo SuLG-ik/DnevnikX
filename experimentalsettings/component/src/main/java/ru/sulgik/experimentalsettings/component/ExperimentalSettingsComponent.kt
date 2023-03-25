@@ -17,7 +17,7 @@ import ru.sulgik.settings.ui.SettingsScreenState
 
 class ExperimentalSettingsComponent(
     componentContext: DIComponentContext,
-    val isBackAvailable: Boolean = false,
+    val backAvailable: Boolean = false,
     val onBack: () -> Unit = {},
 ) :
     BaseComponentContext(componentContext) {
@@ -28,7 +28,7 @@ class ExperimentalSettingsComponent(
     private val state by store.states(this)
 
     private fun onBack() {
-        if (isBackAvailable) {
+        if (backAvailable) {
             onBack.invoke()
         }
     }
@@ -75,7 +75,7 @@ class ExperimentalSettingsComponent(
                         )
                     ),
                 ),
-                backAvailable = isBackAvailable,
+                backAvailable = backAvailable,
                 onBack = this::onBack,
                 modifier = modifier,
             )

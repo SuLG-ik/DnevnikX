@@ -61,6 +61,9 @@ dependencies {
 
     implementation(projects.about.domainBuiltin)
 
+    implementation(projects.marksupdates.domainKtor)
+    implementation(projects.marksupdates.domainMerged)
+
     implementation(libs.koin.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.junit.android)

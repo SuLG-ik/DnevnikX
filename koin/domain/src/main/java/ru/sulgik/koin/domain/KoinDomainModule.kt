@@ -16,6 +16,8 @@ import ru.sulgik.finalmarks.domain.FinalMarksRemoteModule
 import ru.sulgik.marks.domain.MarksCachedModule
 import ru.sulgik.marks.domain.MarksLocalModule
 import ru.sulgik.marks.domain.MarksRemoteModule
+import ru.sulgik.marksupdates.domain.MarksUpdatesCachedModule
+import ru.sulgik.marksupdates.domain.MarksUpdatesRemoteModule
 import ru.sulgik.periods.domain.PeriodsCachedModule
 import ru.sulgik.periods.domain.PeriodsRemoteModule
 import ru.sulgik.periods.domain.room.PeriodsLocalModule
@@ -24,8 +26,16 @@ import ru.sulgik.schedule.domain.ScheduleRemoteModule
 class KoinDomainModule {
 
     val module = module {
-        includes(DiaryLocalModule().module, DiaryRemoteModule().module, DiaryCachedModule().module)
-        includes(MarksLocalModule().module, MarksRemoteModule().module, MarksCachedModule().module)
+        includes(
+            DiaryLocalModule().module,
+            DiaryRemoteModule().module,
+            DiaryCachedModule().module
+        )
+        includes(
+            MarksLocalModule().module,
+            MarksRemoteModule().module,
+            MarksCachedModule().module
+        )
         includes(
             FinalMarksLocalModule().module,
             FinalMarksRemoteModule().module,
@@ -42,6 +52,10 @@ class KoinDomainModule {
             AccountLocalModule().module,
             AccountRemoteModule().module,
             AccountSessionLocalModule().module
+        )
+        includes(
+            MarksUpdatesCachedModule().module,
+            MarksUpdatesRemoteModule().module,
         )
         includes(AboutBuiltInModule().module)
     }

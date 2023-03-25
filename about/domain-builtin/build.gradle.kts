@@ -19,10 +19,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            resValue("string", "app_version", "v0.4.1")
+            resValue("string", "app_version", "v0.5.0")
         }
         debug {
-            resValue("string", "app_version", "v0.3.1-001")
+            resValue("string", "app_version", "v0.5.0-dev")
         }
     }
     compileOptions {

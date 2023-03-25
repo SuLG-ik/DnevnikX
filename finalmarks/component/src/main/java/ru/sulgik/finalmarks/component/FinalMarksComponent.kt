@@ -16,9 +16,9 @@ class FinalMarksComponent(
     private val onBack: () -> Unit = {},
 ) : BaseAuthorizedComponentContext(componentContext) {
 
-    val store: FinalMarksStore = getStore()
+    private val store: FinalMarksStore = getStore()
 
-    val state by store.states(this)
+    private val state by store.states(this)
 
     private fun onRefresh() {
         store.accept(FinalMarksStore.Intent.RefreshFinalMarks)

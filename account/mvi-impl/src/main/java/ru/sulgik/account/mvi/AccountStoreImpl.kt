@@ -46,7 +46,7 @@ class AccountStoreImpl(
                                 isLoading = false,
                                 actions = AccountStore.State.Actions(
                                     isScheduleAvailable = true,
-                                    isUpdatesAvailable = false,
+                                    isUpdatesAvailable = true,
                                     isFinalMarksAvailable = true,
                                     AccountStore.State.AboutData(
                                         applicationFullName = aboutData.application.fullName,

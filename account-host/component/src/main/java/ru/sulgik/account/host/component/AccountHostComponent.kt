@@ -15,6 +15,7 @@ import ru.sulgik.core.BaseComponentContext
 import ru.sulgik.core.authChildStack
 import ru.sulgik.experimentalsettings.component.ExperimentalSettingsComponent
 import ru.sulgik.finalmarks.component.FinalMarksComponent
+import ru.sulgik.marksupdates.component.MarksUpdatesComponent
 import ru.sulgik.schedule.component.ScheduleComponent
 import ru.sulgik.ui.component.Content
 import ru.sulgik.ui.component.LocalNestedChildrenStackAnimator
@@ -43,7 +44,7 @@ class AccountHostComponent(
     }
 
     private fun onUpdates() {
-        /* TODO */
+        navigation.bringToFront(Config.MarksUpdates)
     }
 
     private fun onFinalMarks() {
@@ -60,7 +61,7 @@ class AccountHostComponent(
     ): BaseComponentContext {
         return when (config) {
             is Config.About -> AboutComponent(
-                componentContext,
+                componentContext = componentContext,
                 isBackAvailable = true,
                 onBack = this::onBack,
                 onExperimentalSettings = this::onExperimentalSettings,
@@ -89,7 +90,13 @@ class AccountHostComponent(
 
             Config.ExperimentalSettings -> ExperimentalSettingsComponent(
                 componentContext = componentContext,
-                isBackAvailable = true,
+                backAvailable = true,
+                onBack = this::onBack,
+            )
+
+            Config.MarksUpdates -> MarksUpdatesComponent(
+                componentContext = componentContext,
+                backAvailable = true,
                 onBack = this::onBack,
             )
         }
@@ -135,6 +142,12 @@ class AccountHostComponent(
         object ExperimentalSettings : Config {
             override val screenName: String
                 get() = "experimental_settings"
+        }
+
+        @Parcelize
+        object MarksUpdates : Config {
+            override val screenName: String
+                get() = "marks_updates"
         }
 
     }

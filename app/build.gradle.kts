@@ -13,15 +13,15 @@ ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
 android {
-    namespace = "ru.sulgik.dnevnikx"
     compileSdk = 33
+    namespace = "ru.sulgik.dnevnikx"
 
     defaultConfig {
         applicationId = "ru.sulgik.dnevnikx"
         minSdk = 21
         targetSdk = 33
         versionCode = 8
-        versionName = "0.4.1"
+        versionName = "0.5.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -77,14 +77,19 @@ android {
         // Adds exported schema location as test app assets.
         getByName("androidTest").assets.srcDir("$projectDir/schemas")
     }
-//    productFlavors {
-//        val dev by creating {
-//            applicationIdSuffix = ".dev"
-//        }
-//        val production by creating {
-//
-//        }
-//    }
+
+    flavorDimensions += "dnevnikx"
+    productFlavors {
+        create("dev") {
+            dimension = "dnevnikx"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+        }
+        create("production") {
+            dimension = "dnevnikx"
+            applicationId = "ru.sulgik.dnevnikx"
+        }
+    }
 }
 
 dependencies {
