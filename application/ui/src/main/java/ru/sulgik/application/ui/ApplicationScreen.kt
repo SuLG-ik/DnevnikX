@@ -109,8 +109,8 @@ fun ApplicationScreen(
     Scaffold(
         bottomBar = {
             ApplicationBottomNavigation(
-                NavigationConfig.navItems,
-                currentNavigation,
+                navItems = NavigationConfig.navItems,
+                active = currentNavigation,
                 onClick = onNavigate,
                 onLongClick = onSecondaryNavigate,
                 modifier = Modifier.fillMaxWidth()

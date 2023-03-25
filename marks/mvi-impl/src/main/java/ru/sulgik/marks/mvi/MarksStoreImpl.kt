@@ -1,6 +1,5 @@
 package ru.sulgik.marks.mvi
 
-import com.arkivanov.mvikotlin.core.store.Reducer
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.core.utils.ExperimentalMviKotlinApi
@@ -39,7 +38,6 @@ class MarksStoreImpl(
             dispatch(Action.Setup)
         },
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
-            val cache = mutableMapOf<MarksStore.State.Period, MarksStore.State.Marks>()
             onAction<Action.Setup> {
                 launch {
                     val periods = cachedPeriodsRepository.getPeriodsFast(auth).toState()
@@ -129,7 +127,7 @@ class MarksStoreImpl(
                 }
             }
         },
-        reducer = Reducer {
+        reducer = {
             when (it) {
                 is Message.SelectMark -> copy(
                     marks = marks.copy(

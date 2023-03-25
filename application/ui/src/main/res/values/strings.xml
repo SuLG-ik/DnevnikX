@@ -1,5 +1,5 @@
 <resources>
     <string name="nav_diary_title">Дневник</string>
-    <string name="nav_marks_title">Оценки</string>
+    <string name="nav_marks_title">Отметки</string>
     <string name="nav_profile_title">Профиль</string>
 </resources>

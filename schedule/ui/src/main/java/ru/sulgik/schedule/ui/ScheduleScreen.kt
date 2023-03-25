@@ -1,5 +1,7 @@
 package ru.sulgik.schedule.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -21,6 +25,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
@@ -28,18 +34,19 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.common.platform.LocalTimeFormatter
+import ru.sulgik.periods.ui.AnimatedPeriod
 import ru.sulgik.periods.ui.Period
 import ru.sulgik.periods.ui.PeriodPlaceholders
 import ru.sulgik.schedule.mvi.ScheduleStore
 import ru.sulgik.ui.core.AnimatedContentWithPlaceholder
+import ru.sulgik.ui.core.ExtendedTheme
 import ru.sulgik.ui.core.RefreshableBox
 import ru.sulgik.ui.core.defaultPlaceholder
+import ru.sulgik.ui.core.flingBehaviour
 import ru.sulgik.ui.core.optionalBackNavigationIcon
 import ru.sulgik.ui.core.outlined
-import java.time.DayOfWeek.*
-import java.time.Month.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ScheduleScreen(
     periods: ScheduleStore.State.Periods,
@@ -48,7 +55,7 @@ fun ScheduleScreen(
     onSelect: (DatePeriod) -> Unit,
     onOther: () -> Unit,
     onBack: () -> Unit,
-    onRefresh: () -> Unit,
+    onRefresh: (DatePeriod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -70,54 +77,88 @@ fun ScheduleScreen(
             )
         }
     ) { paddingValues ->
-        val scrollState = rememberScrollState()
-        LaunchedEffect(key1 = schedule.isLoading, block = {
-            if (schedule.isLoading) {
-                scrollState.animateScrollTo(0)
-            }
-        })
         Box(
             modifier = Modifier.padding(paddingValues)
         ) {
-            RefreshableBox(refreshing = schedule.isRefreshing, onRefresh = onRefresh) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(
-                            state = scrollState,
-                            enabled = !schedule.isLoading,
-                        ),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    content = {
-                        val scheduleData = schedule.schedule
-                        when {
-                            schedule.isLoading -> {
-                                repeat(3) {
-                                    ScheduleDatePlaceholder(
-                                        modifier = Modifier
-                                            .padding(horizontal = 10.dp)
-                                            .fillMaxWidth(),
-                                    )
-                                }
-                            }
-
-                            scheduleData != null -> {
-                                scheduleData.schedule.forEach { diary ->
-                                    ScheduleDate(
-                                        diary = diary,
-                                        modifier = Modifier
-                                            .padding(horizontal = 10.dp)
-                                            .fillMaxWidth()
-                                    )
-                                }
-                            }
-                        }
+            val periodsData = periods.data
+            if (periodsData == null) {
+                ScheduleDatePlaceholders(
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                val pagerState =
+                    rememberPagerState(periodsData.periods.indexOf(periodsData.selectedPeriod))
+                LaunchedEffect(key1 = periodsData.selectedPeriod, block = {
+                    if (periodsData.periods[pagerState.targetPage] != periodsData.selectedPeriod) {
+                        pagerState.scrollToPage(periodsData.periods.indexOf(periodsData.selectedPeriod))
                     }
+                })
+                LaunchedEffect(
+                    key1 = pagerState,
+                ) {
+                    snapshotFlow { pagerState.currentPage }.collect {
+                        onSelect(periodsData.periods[it])
+                    }
+                }
+                HorizontalPager(
+                    pageCount = periodsData.periods.size,
+                    key = { it },
+                    flingBehavior = pagerState.flingBehaviour(),
+                    state = pagerState,
+                ) { pageIndex ->
+                    val period =
+                        remember(periodsData.periods, pageIndex) { periodsData.periods[pageIndex] }
+                    val diaryData = remember(schedule.data, period) { schedule.data[period] }
+                    AnimatedContentWithPlaceholder(
+                        diaryData?.isLoading ?: true,
+                        state = diaryData,
+                        label = "schedule_placeholder",
+                        placeholderContent = {
+                            ScheduleDatePlaceholders(
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        },
+                        content = {
+                            ScheduleDates(
+                                data = it,
+                                onRefresh = { onRefresh(period) },
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ScheduleDates(
+    data: ScheduleStore.State.ScheduleData,
+    onRefresh: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    RefreshableBox(refreshing = data.isRefreshing, onRefresh = onRefresh) {
+        Column(
+            modifier = modifier
+                .verticalScroll(
+                    state = rememberScrollState(),
+                    enabled = !data.isLoading,
+                ),
+            verticalArrangement = Arrangement.spacedBy(ExtendedTheme.dimensions.contentSpaceBetween),
+        ) {
+            data.schedule.forEach { schedule ->
+                ScheduleDate(
+                    diary = schedule,
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                        .fillMaxWidth()
                 )
             }
         }
     }
 }
+
 
 @Composable
 fun ScheduleDate(
@@ -163,6 +204,24 @@ fun ScheduleDatePlaceholder(
             repeat(6) {
                 LessonsGroupPlaceholder()
             }
+        }
+    }
+}
+
+@Composable
+fun ScheduleDatePlaceholders(
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(ExtendedTheme.dimensions.contentSpaceBetween),
+    ) {
+        repeat(3) {
+            ScheduleDatePlaceholder(
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .fillMaxWidth(),
+            )
         }
     }
 }
@@ -306,13 +365,15 @@ fun PeriodSelector(
             NoData(modifier = Modifier.fillMaxWidth())
         },
         content = {
+            val scrollState = rememberScrollState()
             Row(
                 modifier = modifier
-                    .horizontalScroll(rememberScrollState()),
+                    .horizontalScroll(scrollState),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Spacer(Modifier)
                 CurrentPeriods(
+                    scrollState = scrollState,
                     period = it,
                     onSelect = onSelect,
                     onOther = onOther,
@@ -340,6 +401,7 @@ fun NoData(modifier: Modifier = Modifier) {
 
 @Composable
 fun CurrentPeriods(
+    scrollState: ScrollState,
     period: ScheduleStore.State.PeriodsData,
     onSelect: (DatePeriod) -> Unit,
     onOther: () -> Unit,
@@ -371,8 +433,15 @@ fun CurrentPeriods(
     }
     val isOther =
         currentPeriod != selectedPeriod && nextPeriod != selectedPeriod && previousPeriod != selectedPeriod && currentPeriod != null
-    Period(
-        period = if (isOther) LocalTimeFormatter.current.format(selectedPeriod) else "Выбрать",
+    val currentOther =
+        if (isOther) LocalTimeFormatter.current.format(selectedPeriod) else "Выбрать"
+    LaunchedEffect(key1 = isOther, block = {
+        if (isOther) {
+            scrollState.animateScrollTo(Int.MAX_VALUE)
+        }
+    })
+    AnimatedPeriod(
+        period = currentOther,
         selected = isOther,
         onSelect = onOther
     )

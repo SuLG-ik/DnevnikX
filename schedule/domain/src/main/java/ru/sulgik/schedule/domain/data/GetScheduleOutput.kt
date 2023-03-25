@@ -1,9 +1,11 @@
-package ru.sulgik.dnevnikx.repository.data
+package ru.sulgik.schedule.domain.data
 
 import kotlinx.datetime.LocalDate
+import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.common.platform.TimePeriod
 
 data class GetScheduleOutput(
+    val period: DatePeriod,
     val schedule: List<Item>,
 ) {
     data class Item(

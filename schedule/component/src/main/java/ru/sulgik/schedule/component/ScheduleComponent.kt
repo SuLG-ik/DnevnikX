@@ -86,8 +86,8 @@ class ScheduleComponent(
         store.accept(ScheduleStore.Intent.SelectOtherPeriod)
     }
 
-    private fun onRefresh() {
-        store.accept(ScheduleStore.Intent.RefreshSchedule)
+    private fun onRefresh(period: DatePeriod) {
+        store.accept(ScheduleStore.Intent.RefreshSchedule(period))
     }
 
     @Composable

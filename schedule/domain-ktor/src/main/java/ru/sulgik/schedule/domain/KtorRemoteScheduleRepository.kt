@@ -13,7 +13,7 @@ import ru.sulgik.common.CustomLocalDateSerializer
 import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.common.platform.TimePeriod
 import ru.sulgik.common.safeBody
-import ru.sulgik.dnevnikx.repository.data.GetScheduleOutput
+import ru.sulgik.schedule.domain.data.GetScheduleOutput
 
 class KtorRemoteScheduleRepository(
     private val client: Client,
@@ -60,6 +60,7 @@ class KtorRemoteScheduleRepository(
             )
         }
         return GetScheduleOutput(
+            period = period,
             schedule = items,
         )
     }

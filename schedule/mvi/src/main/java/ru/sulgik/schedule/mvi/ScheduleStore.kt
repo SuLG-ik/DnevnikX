@@ -1,6 +1,9 @@
 package ru.sulgik.schedule.mvi
 
 import com.arkivanov.mvikotlin.core.store.Store
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.datetime.LocalDate
 import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.common.platform.TimePeriod
@@ -10,7 +13,8 @@ interface ScheduleStore : Store<ScheduleStore.Intent, ScheduleStore.State, Sched
     sealed interface Intent {
         data class SelectPeriod(val period: DatePeriod) : Intent
         object SelectOtherPeriod : Intent
-        object RefreshSchedule : Intent
+        object HidePeriodSelector : Intent
+        data class RefreshSchedule(val period: DatePeriod) : Intent
     }
 
     data class State(
@@ -28,29 +32,29 @@ interface ScheduleStore : Store<ScheduleStore.Intent, ScheduleStore.State, Sched
             val currentPeriod: DatePeriod?,
             val nextPeriod: DatePeriod?,
             val previousPeriod: DatePeriod?,
-            val periods: List<DatePeriod>,
+            val periods: ImmutableList<DatePeriod>,
             val isOther: Boolean,
         )
 
         data class Schedule(
-            val isLoading: Boolean = true,
-            val isRefreshing: Boolean = false,
-            val schedule: ScheduleData? = null,
+            val data: ImmutableMap<DatePeriod, ScheduleData> = persistentMapOf(),
         )
 
         data class ScheduleData(
-            val schedule: List<ScheduleDate>,
+            val isLoading: Boolean = true,
+            val isRefreshing: Boolean = false,
+            val schedule: ImmutableList<ScheduleDate>,
         )
 
         data class ScheduleDate(
             val title: String,
             val date: LocalDate,
-            val lessonGroups: List<LessonGroup>,
+            val lessonGroups: ImmutableList<LessonGroup>,
         )
 
         data class LessonGroup(
             val number: String,
-            val lessons: List<Lesson>,
+            val lessons: ImmutableList<Lesson>,
         )
 
         data class Lesson(

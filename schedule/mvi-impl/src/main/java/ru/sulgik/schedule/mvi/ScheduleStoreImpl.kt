@@ -5,6 +5,12 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.core.utils.ExperimentalMviKotlinApi
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.mutate
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -17,11 +23,11 @@ import ru.sulgik.account.domain.RemoteAccountRepository
 import ru.sulgik.account.domain.data.GetAccountOutput
 import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.common.platform.DatePeriod
-import ru.sulgik.core.directReducer
 import ru.sulgik.core.syncDispatch
-import ru.sulgik.dnevnikx.repository.data.GetScheduleOutput
 import ru.sulgik.periods.domain.CachedPeriodsRepository
+import ru.sulgik.periods.domain.data.GetPeriodsOutput
 import ru.sulgik.schedule.domain.RemoteScheduleRepository
+import ru.sulgik.schedule.domain.data.GetScheduleOutput
 import java.time.LocalDate
 
 @OptIn(ExperimentalMviKotlinApi::class)
@@ -33,70 +39,35 @@ class ScheduleStoreImpl(
     cachedPeriodsRepository: CachedPeriodsRepository,
     remoteScheduleRepository: RemoteScheduleRepository,
 ) : ScheduleStore,
-    Store<ScheduleStore.Intent, ScheduleStore.State, ScheduleStore.Label> by storeFactory.create<_, Action, _, _, _>(
+    Store<ScheduleStore.Intent, ScheduleStore.State, ScheduleStore.Label> by storeFactory.create<_, Action, Message, _, _>(
         name = "ScheduleStoreImpl",
         initialState = ScheduleStore.State(),
         bootstrapper = coroutineBootstrapper(coroutineDispatcher) {
             dispatch(Action.Setup)
         },
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
-            val cache = mutableMapOf<DatePeriod, ScheduleStore.State.Schedule>()
             var cachedAccount: GetAccountOutput? = null
             onAction<Action.Setup> {
                 launch {
+                    val periods = cachedPeriodsRepository.getPeriodsFast(authScope).periods
+                    val periodsState = periods.toState()
+                    syncDispatch(Message.UpdatePeriods(periodsState))
                     val account = remoteAccountRepository.getAccount(authScope)
                     cachedAccount = account
-                    val periods =
-                        cachedPeriodsRepository.getPeriodsFast(authScope).periods.flatMap { it.nestedPeriods }
-                    val currentDate = LocalDate.now().toKotlinLocalDate()
-                    val currentPeriod = getPeriod(currentDate)
-                    val nextPeriod =
-                        getPeriod(currentDate.plus(1, DateTimeUnit.WEEK))
-                    val previousPeriod =
-                        getPeriod(currentDate.minus(1, DateTimeUnit.WEEK))
-                    syncDispatch(
-                        ScheduleStore.State(
-                            periods = ScheduleStore.State.Periods(
-                                isLoading = false,
-                                data = ScheduleStore.State.PeriodsData(
-                                    currentPeriod = if (currentPeriod in periods) currentPeriod else null,
-                                    nextPeriod = if (nextPeriod in periods) nextPeriod else null,
-                                    previousPeriod = if (previousPeriod in periods) previousPeriod else null,
-                                    selectedPeriod = currentPeriod,
-                                    periods = periods,
-                                    isOther = false,
-                                ),
-                            )
-                        )
-                    )
                     val schedule = remoteScheduleRepository.getSchedule(
                         auth = authScope,
-                        period = currentPeriod,
+                        period = periodsState.selectedPeriod,
                         classGroup = account.student.classGroup.title
                     ).toState()
-                    cache[currentPeriod] = schedule
-                    syncDispatch(
-                        state.copy(
-                            schedule = schedule,
-                        )
-                    )
+                    syncDispatch(Message.UpdateSchedule(periodsState.selectedPeriod, schedule))
                 }
             }
 
             onIntent<ScheduleStore.Intent.SelectOtherPeriod> {
-                val state = state
-                val periodsData = state.periods.data
-                if (state.periods.isLoading || periodsData == null)
-                    return@onIntent
-                dispatch(
-                    state.copy(
-                        periods = state.periods.copy(
-                            data = periodsData.copy(
-                                isOther = true
-                            )
-                        )
-                    )
-                )
+                dispatch(Message.ShowOtherPeriods(true))
+            }
+            onIntent<ScheduleStore.Intent.HidePeriodSelector> {
+                dispatch(Message.ShowOtherPeriods(false))
             }
             var selectPeriodJob: Job? = null
             onIntent<ScheduleStore.Intent.SelectPeriod> { intent ->
@@ -104,25 +75,7 @@ class ScheduleStoreImpl(
                 val periodsData = state.periods.data
                 if (state.periods.isLoading || periodsData == null)
                     return@onIntent
-                dispatch(
-                    state.copy(
-                        schedule = ScheduleStore.State.Schedule(),
-                        periods = state.periods.copy(
-                            data = periodsData.copy(
-                                selectedPeriod = intent.period,
-                                isOther = false,
-                            ),
-                        )
-                    )
-                )
-                val cachedSchedule = cache[intent.period]
-                if (cachedSchedule != null) {
-                    dispatch(
-                        this@onIntent.state.copy(
-                            schedule = cachedSchedule,
-                        )
-                    )
-                }
+                dispatch(Message.SelectPeriod(intent.period))
                 val job = selectPeriodJob
                 selectPeriodJob = launch {
                     val account = cachedAccount ?: remoteAccountRepository.getAccount(authScope)
@@ -133,26 +86,17 @@ class ScheduleStoreImpl(
                         period = intent.period,
                         classGroup = account.student.classGroup.title
                     ).toState()
-                    cache[intent.period] = schedule
-                    syncDispatch(
-                        this@onIntent.state.copy(
-                            schedule = schedule,
-                        )
-                    )
+                    syncDispatch(Message.UpdateSchedule(intent.period, schedule))
                 }
             }
-            onIntent<ScheduleStore.Intent.RefreshSchedule> {
+            onIntent<ScheduleStore.Intent.RefreshSchedule> { intent ->
                 val state = state
                 val periodsData = state.periods.data
-                if (state.periods.isLoading || periodsData == null || state.schedule.isLoading || state.schedule.isRefreshing)
+                if (state.periods.isLoading || periodsData == null)
                     return@onIntent
-                dispatch(
-                    state.copy(
-                        schedule = state.schedule.copy(
-                            isRefreshing = true,
-                        ),
-                    )
-                )
+                val scheduleData = state.schedule.data[intent.period]
+                if (scheduleData?.isLoading == true || scheduleData?.isRefreshing == true) return@onIntent
+                dispatch(Message.SetScheduleRefreshing(intent.period))
                 val period = periodsData.selectedPeriod
                 val job = selectPeriodJob
                 selectPeriodJob = launch {
@@ -164,17 +108,63 @@ class ScheduleStoreImpl(
                         period = period,
                         classGroup = account.student.classGroup.title
                     ).toState()
-                    cache[period] = schedule
-                    syncDispatch(
-                        this@onIntent.state.copy(
-                            schedule = schedule,
-                        )
-                    )
+                    syncDispatch(Message.UpdateSchedule(intent.period, schedule))
                 }
             }
         },
-        reducer = directReducer(),
+        reducer = {
+            when (it) {
+                is Message.SelectPeriod -> {
+                    copy(
+                        periods = periods.copy(
+                            data = periods.data?.copy(
+                                selectedPeriod = it.period,
+                            )
+                        )
+                    )
+                }
+
+                is Message.SetScheduleRefreshing -> {
+                    copy(
+                        schedule = schedule.copy(
+                            data = schedule.data.orFill(it.period, isRefreshing = true)
+                        )
+                    )
+                }
+
+                is Message.ShowOtherPeriods -> copy(
+                    periods = periods.copy(data = periods.data?.copy(isOther = it.value))
+                )
+
+                is Message.UpdatePeriods -> copy(
+                    periods = ScheduleStore.State.Periods(
+                        isLoading = false, data = it.periods
+                    ),
+                )
+
+                is Message.UpdateSchedule -> copy(
+                    schedule = it.schedule.withState(it.period, this),
+                )
+            }
+        },
     ) {
+
+    private sealed interface Message {
+
+        data class UpdatePeriods(val periods: ScheduleStore.State.PeriodsData) : Message
+
+        data class ShowOtherPeriods(val value: Boolean) : Message
+
+        data class SelectPeriod(val period: DatePeriod) : Message
+
+        data class UpdateSchedule(
+            val period: DatePeriod,
+            val schedule: ScheduleStore.State.ScheduleData,
+        ) : Message
+
+        data class SetScheduleRefreshing(val period: DatePeriod) : Message
+
+    }
 
     private sealed interface Action {
         object Setup : Action
@@ -200,30 +190,71 @@ private fun String.formatTeacherName(): String {
     }
 }
 
-private fun GetScheduleOutput.toState(): ScheduleStore.State.Schedule {
-    return ScheduleStore.State.Schedule(
+private fun List<GetPeriodsOutput.Period>.toState(): ScheduleStore.State.PeriodsData {
+    val periods = flatMap { it.nestedPeriods }
+    val currentDate = LocalDate.now().toKotlinLocalDate()
+    val currentPeriod = getPeriod(currentDate)
+    val nextPeriod = getPeriod(currentDate.plus(1, DateTimeUnit.WEEK))
+    val previousPeriod = getPeriod(currentDate.minus(1, DateTimeUnit.WEEK))
+    return ScheduleStore.State.PeriodsData(
+        currentPeriod = if (currentPeriod in periods) currentPeriod else null,
+        nextPeriod = if (nextPeriod in periods) nextPeriod else null,
+        previousPeriod = if (previousPeriod in periods) previousPeriod else null,
+        selectedPeriod = currentPeriod,
+        periods = periods.toPersistentList(),
+        isOther = false,
+    )
+}
+
+private fun ImmutableMap<DatePeriod, ScheduleStore.State.ScheduleData>?.orFill(
+    period: DatePeriod,
+    isRefreshing: Boolean = false,
+): ImmutableMap<DatePeriod, ScheduleStore.State.ScheduleData> {
+    return this?.toPersistentMap()?.mutate {
+        val data = it[period]?.copy(isRefreshing = isRefreshing, isLoading = !isRefreshing)
+            ?: ScheduleStore.State.ScheduleData(
+                isLoading = true,
+                isRefreshing = false,
+                schedule = persistentListOf(),
+            )
+        it[period] = data
+    } ?: persistentMapOf()
+}
+
+private fun ScheduleStore.State.ScheduleData.withState(
+    period: DatePeriod,
+    state: ScheduleStore.State,
+): ScheduleStore.State.Schedule {
+    return state.schedule.copy(data = state.schedule.data.let { mark ->
+        mark.toPersistentMap().mutate {
+            it[period] = this
+        }
+    })
+}
+
+private fun GetScheduleOutput.toState(): ScheduleStore.State.ScheduleData {
+    return ScheduleStore.State.ScheduleData(
         isLoading = false,
-        schedule = ScheduleStore.State.ScheduleData(
-            schedule.map { item ->
-                ScheduleStore.State.ScheduleDate(
-                    title = item.title,
-                    date = item.date,
-                    lessonGroups = item.lessonGroups.map { lessonGroup ->
-                        ScheduleStore.State.LessonGroup(
-                            number = lessonGroup.number,
-                            lessons = lessonGroup.lessons.map { lesson ->
-                                ScheduleStore.State.Lesson(
-                                    title = lesson.title,
-                                    time = lesson.time,
-                                    teacher = lesson.teacher.formatTeacherName(),
-                                    group = lesson.group
-                                )
-                            }
-                        )
-                    }
-                )
-            },
-        )
+        isRefreshing = false,
+        schedule = schedule.map { item ->
+            ScheduleStore.State.ScheduleDate(
+                title = item.title,
+                date = item.date,
+                lessonGroups = item.lessonGroups.map { lessonGroup ->
+                    ScheduleStore.State.LessonGroup(
+                        number = lessonGroup.number,
+                        lessons = lessonGroup.lessons.map { lesson ->
+                            ScheduleStore.State.Lesson(
+                                title = lesson.title,
+                                time = lesson.time,
+                                teacher = lesson.teacher.formatTeacherName(),
+                                group = lesson.group
+                            )
+                        }.toPersistentList(),
+                    )
+                }.toPersistentList(),
+            )
+        }.toPersistentList(),
     )
 }
 
