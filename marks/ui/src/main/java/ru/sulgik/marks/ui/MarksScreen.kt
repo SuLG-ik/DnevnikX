@@ -1,7 +1,5 @@
 package ru.sulgik.marks.ui
 
-import androidx.compose.animation.core.exponentialDecay
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Badge
@@ -37,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,6 +52,7 @@ import ru.sulgik.ui.core.AnimatedContentWithPlaceholder
 import ru.sulgik.ui.core.ExtendedTheme
 import ru.sulgik.ui.core.RefreshableBox
 import ru.sulgik.ui.core.defaultPlaceholder
+import ru.sulgik.ui.core.flingBehaviour
 import ru.sulgik.ui.core.outlined
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -94,32 +93,22 @@ fun MarksScreen(
                 val pagerState =
                     rememberPagerState(periodsData.periods.indexOf(periodsData.selectedPeriod))
                 LaunchedEffect(key1 = periodsData.selectedPeriod, block = {
-                    if (periodsData.periods[pagerState.targetPage] != periodsData.selectedPeriod)
+                    if (periodsData.periods[pagerState.targetPage] != periodsData.selectedPeriod) {
                         pagerState.scrollToPage(periodsData.periods.indexOf(periodsData.selectedPeriod))
+                    }
                 })
                 LaunchedEffect(
-                    key1 = pagerState.targetPage,
-                    key2 = pagerState.currentPage,
+                    key1 = pagerState,
                 ) {
-                    if (pagerState.currentPage != pagerState.targetPage && periodsData.selectedPeriod != periodsData.periods[pagerState.targetPage]) {
-                        onSelect(periodsData.periods[pagerState.targetPage])
+                    snapshotFlow { pagerState.currentPage }.collect {
+                        onSelect(periodsData.periods[it])
                     }
                 }
                 HorizontalPager(
                     pageCount = periodsData.periods.size,
                     key = { it },
                     userScrollEnabled = settings.isPagerEnabled,
-                    flingBehavior = PagerDefaults.flingBehavior(
-                        state = pagerState,
-                        lowVelocityAnimationSpec = spring(
-                            stiffness = 30f,
-                            visibilityThreshold = 0.005f,
-                        ),
-                        highVelocityAnimationSpec = remember { exponentialDecay() },
-                        snapAnimationSpec = spring(
-                            stiffness = 100f,
-                        )
-                    ),
+                    flingBehavior = pagerState.flingBehaviour(),
                     state = pagerState,
                 ) { pageIndex ->
                     val period = periodsData.periods[pageIndex]
