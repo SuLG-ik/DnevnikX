@@ -1,6 +1,5 @@
 package ru.sulgik.schedule.ui
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,8 +29,9 @@ import androidx.compose.ui.unit.dp
 import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.common.platform.LocalTimeFormatter
 import ru.sulgik.periods.ui.Period
-import ru.sulgik.periods.ui.PeriodPlaceholder
+import ru.sulgik.periods.ui.PeriodPlaceholders
 import ru.sulgik.schedule.mvi.ScheduleStore
+import ru.sulgik.ui.core.AnimatedContentWithPlaceholder
 import ru.sulgik.ui.core.RefreshableBox
 import ru.sulgik.ui.core.defaultPlaceholder
 import ru.sulgik.ui.core.optionalBackNavigationIcon
@@ -290,36 +290,37 @@ fun PeriodSelector(
     onOther: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier
-            .horizontalScroll(rememberScrollState())
-            .animateContentSize(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Spacer(Modifier)
-        val periodsData = periods.data
-        when {
-            periods.isLoading -> {
-                repeat(5) {
-                    PeriodPlaceholder()
-                }
+    AnimatedContentWithPlaceholder(
+        isLoading = periods.isLoading,
+        state = periods.data,
+        placeholderContent = {
+            Row(
+                modifier = modifier
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                PeriodPlaceholders()
             }
-
-            periodsData == null || periodsData.periods.isEmpty() -> {
-                NoData(modifier = Modifier.fillMaxWidth())
-            }
-
-            else -> {
+        },
+        noDataContent = {
+            NoData(modifier = Modifier.fillMaxWidth())
+        },
+        content = {
+            Row(
+                modifier = modifier
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Spacer(Modifier)
                 CurrentPeriods(
-                    period = periodsData,
+                    period = it,
                     onSelect = onSelect,
                     onOther = onOther,
                 )
+                Spacer(Modifier)
             }
         }
-        Spacer(Modifier)
-
-    }
+    )
 }
 
 @Composable
