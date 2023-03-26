@@ -30,21 +30,21 @@ fun MarkInfoScreen(
                 text = "${mark.lesson.title}, ${LocalTimeFormatter.current.format(mark.mark.date)}",
                 modifier = Modifier
             )
-        },
-            actions = {
-                Text(
-                    text = mark.mark.mark,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontSize = 20.sp,
-                    color = mark.mark.value.markColor(),
-                    modifier = Modifier.padding(end = 10.dp)
-                )
-            }
-        )
+        }, actions = {
+            Text(
+                text = mark.mark.mark,
+                style = MaterialTheme.typography.bodyLarge,
+                fontSize = 20.sp,
+                color = mark.mark.value.markColor(),
+                modifier = Modifier.padding(end = 10.dp)
+            )
+        })
         Text(
             mark.mark.message ?: "нет сообщения",
             textAlign = TextAlign.Center,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(horizontal = ExtendedTheme.dimensions.mainContentPadding),
         )
     }
 }

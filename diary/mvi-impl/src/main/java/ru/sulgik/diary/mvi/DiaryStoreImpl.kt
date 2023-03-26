@@ -90,9 +90,6 @@ class DiaryStoreImpl(
                 dispatch(Message.ShowOtherPeriods(true))
             }
             onIntent<DiaryStore.Intent.HideLessonInfo> {
-                if (state.diary.data == null) {
-                    return@onIntent
-                }
                 dispatch(Message.SelectLesson(null))
             }
             onIntent<DiaryStore.Intent.HidePeriodSelector> {
@@ -100,9 +97,6 @@ class DiaryStoreImpl(
                 dispatch(Message.ShowOtherPeriods(false))
             }
             onIntent<DiaryStore.Intent.ShowLessonInfo> { intent ->
-                if (state.diary.data == null) {
-                    return@onIntent
-                }
                 dispatch(
                     Message.SelectLesson(
                         DiaryStore.State.SelectedLesson(
