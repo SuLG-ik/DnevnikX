@@ -8,7 +8,6 @@ class MarksMVIModule {
 
     val module = module {
         factoryOf(::MarksStoreImpl) bind MarksStore::class
-        factoryOf(::MarksSettingsStoreImpl) bind MarksSettingsStore::class
     }
 
 }

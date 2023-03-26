@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.common.platform.LocalTimeFormatter
-import ru.sulgik.diary.mvi.DiarySettingsStore
 import ru.sulgik.diary.mvi.DiaryStore
 import ru.sulgik.periods.ui.AnimatedPeriod
 import ru.sulgik.periods.ui.NoData
@@ -68,7 +67,6 @@ import java.time.Month.*
 fun DiaryScreen(
     periods: DiaryStore.State.Periods,
     diary: DiaryStore.State.Diary,
-    settings: DiarySettingsStore.State.DiarySettings,
     onSelect: (DatePeriod) -> Unit,
     onOther: () -> Unit,
     onLesson: (date: DiaryStore.State.DiaryDate, lesson: DiaryStore.State.Lesson) -> Unit,
@@ -118,7 +116,6 @@ fun DiaryScreen(
                 HorizontalPager(
                     pageCount = periodsData.periods.size,
                     key = { it },
-                    userScrollEnabled = settings.isPagerEnabled,
                     flingBehavior = pagerState.flingBehaviour(),
                     state = pagerState,
                 ) { pageIndex ->

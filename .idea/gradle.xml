@@ -63,8 +63,6 @@
             <option value="$PROJECT_DIR$/diary/domain-room" />
             <option value="$PROJECT_DIR$/diary/mvi" />
             <option value="$PROJECT_DIR$/diary/mvi-impl" />
-            <option value="$PROJECT_DIR$/diary/settings" />
-            <option value="$PROJECT_DIR$/diary/settings-serializer" />
             <option value="$PROJECT_DIR$/diary/ui" />
             <option value="$PROJECT_DIR$/experimentalsettings" />
             <option value="$PROJECT_DIR$/experimentalsettings/component" />

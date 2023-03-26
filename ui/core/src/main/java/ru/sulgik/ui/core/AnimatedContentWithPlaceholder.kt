@@ -2,7 +2,6 @@ package ru.sulgik.ui.core
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -13,11 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 
-@OptIn(ExperimentalAnimationApi::class)
 val LocalAnimatedContentTransition =
     staticCompositionLocalOf { fadeIn(tween(300)) with fadeOut(tween(250)) }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun <T : Any> AnimatedContentWithPlaceholder(
     isLoading: Boolean,
@@ -34,6 +31,7 @@ fun <T : Any> AnimatedContentWithPlaceholder(
         targetState = isLoading,
         transitionSpec = { transition },
         label = label,
+        modifier = modifier,
     ) { it ->
         if (it) {
             placeholderContent()

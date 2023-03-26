@@ -3,7 +3,6 @@ package ru.sulgik.experimentalsettings.component
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.AnnotatedString
 import kotlinx.collections.immutable.persistentListOf
 import ru.sulgik.core.BaseComponentContext
 import ru.sulgik.core.DIComponentContext
@@ -11,8 +10,6 @@ import ru.sulgik.core.getStore
 import ru.sulgik.core.states
 import ru.sulgik.experimentalsettings.mvi.ExperimentalSettingsStore
 import ru.sulgik.settings.ui.SettingsScreen
-import ru.sulgik.settings.ui.SettingsScreenBlock
-import ru.sulgik.settings.ui.SettingsScreenItem
 import ru.sulgik.settings.ui.SettingsScreenState
 
 class ExperimentalSettingsComponent(
@@ -33,14 +30,6 @@ class ExperimentalSettingsComponent(
         }
     }
 
-    private fun onToggleNestedScreenTransition(value: Boolean) {
-        store.accept(ExperimentalSettingsStore.Intent.ToggleNestedScreenTransition(value))
-    }
-
-    private fun onToggleDiaryPager(value: Boolean) {
-        store.accept(ExperimentalSettingsStore.Intent.ToggleDiaryPager(value))
-    }
-
     @Composable
     override fun Content(modifier: Modifier) {
         val settingsData = state.settings
@@ -48,32 +37,7 @@ class ExperimentalSettingsComponent(
             SettingsScreen(
                 state = SettingsScreenState(
                     title = "Скрытые настройки",
-                    blocks = persistentListOf(
-                        SettingsScreenBlock(
-                            title = "Интерфейс",
-                            items = persistentListOf(
-                                SettingsScreenItem.Switch(
-                                    overlineTitle = AnnotatedString("Может вызвать проблемы с размером"),
-                                    title = AnnotatedString("Анимация переходов"),
-                                    supportingTitle = AnnotatedString("Переходы между вложенными экранами"),
-                                    currentState = settingsData.ui.isNestedScreenTransitionEnabled,
-                                    onToggle = this::onToggleNestedScreenTransition,
-                                )
-                            )
-                        ),
-                        SettingsScreenBlock(
-                            title = "Дневник",
-                            items = persistentListOf(
-                                SettingsScreenItem.Switch(
-                                    overlineTitle = AnnotatedString("Может вызвать лаги и баги"),
-                                    title = AnnotatedString("Пейджер дневника"),
-                                    supportingTitle = AnnotatedString("Свайпы влево вправо в дневнике"),
-                                    currentState = settingsData.diary.isPagerEnabled,
-                                    onToggle = this::onToggleDiaryPager,
-                                )
-                            )
-                        )
-                    ),
+                    blocks = persistentListOf(),
                 ),
                 backAvailable = backAvailable,
                 onBack = this::onBack,

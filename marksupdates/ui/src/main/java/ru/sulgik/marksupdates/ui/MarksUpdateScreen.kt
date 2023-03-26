@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -22,10 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ru.sulgik.common.platform.LocalTimeFormatter
 import ru.sulgik.marksupdates.mvi.MarksUpdatesStore
@@ -49,7 +48,7 @@ fun MarksUpdateScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Обновления отметок") },
+                title = { Text("Обновления оценок") },
                 navigationIcon = optionalBackNavigationIcon(backAvailable, onBack),
             )
         },
@@ -198,7 +197,7 @@ fun MarkUpdate(update: MarksUpdatesStore.State.MarkUpdate, modifier: Modifier = 
                 style = MaterialTheme.typography.bodyLarge,
             )
         }
-        Text(text = buildMark(update))
+        Mark(data = update)
     }
 }
 
@@ -214,7 +213,7 @@ fun MarkUpdatePlaceholder(modifier: Modifier = Modifier) {
                 .weight(1f, fill = false)
         ) {
             Text(
-                text = "Понедельник, 25 числа",
+                text = "Суббота, 25 числа",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.defaultPlaceholder(),
             )
@@ -228,20 +227,34 @@ fun MarkUpdatePlaceholder(modifier: Modifier = Modifier) {
     }
 }
 
+val arrowModifier = Modifier.size(24.dp)
+
 @Composable
-fun buildMark(data: MarksUpdatesStore.State.MarkUpdate): AnnotatedString {
-    return buildAnnotatedString {
-        val previousMark = data.previous
-        if (previousMark != null) {
-            withStyle(SpanStyle(color = previousMark.value.markColor())) {
-                append(previousMark.mark)
-            }
-            withStyle(SpanStyle(LocalContentColor.current.copy(alpha = 0.7f))) {
-                append(" → ")
-            }
-        }
-        withStyle(SpanStyle(color = data.current.value.markColor())) {
-            append(data.current.mark)
+fun Mark(data: MarksUpdatesStore.State.MarkUpdate, modifier: Modifier = Modifier) {
+    val previousMark = data.previous
+    if (previousMark == null) {
+        Text(
+            text = data.current.mark,
+            color = data.current.value.markColor(),
+            modifier = modifier
+        )
+    } else {
+        Row(
+            modifier = modifier,
+        ) {
+            Text(
+                text = previousMark.mark,
+                color = previousMark.value.markColor(),
+            )
+            Icon(
+                painterResource(id = R.drawable.mark_arrow),
+                contentDescription = "изменена на",
+                modifier = arrowModifier,
+            )
+            Text(
+                text = data.current.mark,
+                color = data.current.value.markColor(),
+            )
         }
     }
 }

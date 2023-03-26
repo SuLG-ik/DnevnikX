@@ -2,7 +2,6 @@ package ru.sulgik.application.component
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.router.stack.StackNavigation
@@ -23,8 +22,6 @@ import ru.sulgik.core.states
 import ru.sulgik.diary.component.DiaryComponent
 import ru.sulgik.marks.component.MarksComponent
 import ru.sulgik.modal.ui.FloatingModalUI
-import ru.sulgik.ui.component.DefaultAnimation
-import ru.sulgik.ui.component.LocalNestedChildrenStackAnimator
 import ru.sulgik.ui.component.NamedConfig
 import ru.sulgik.ui.component.TrackedContent
 
@@ -108,15 +105,10 @@ class ApplicationComponent(
                 onSecondaryNavigate = this::onSecondaryNavigate,
                 modifier = modifier,
             ) {
-                CompositionLocalProvider(
-                    LocalNestedChildrenStackAnimator provides
-                            if (applicationState.applicationConfig.isNestedScreenTransactionEnabled) DefaultAnimation else null
-                ) {
-                    state.TrackedContent(
-                        modifier = Modifier.fillMaxSize(),
-                        animation = null,
-                    )
-                }
+                state.TrackedContent(
+                    modifier = Modifier.fillMaxSize(),
+                    animation = null,
+                )
             }
         }
     }

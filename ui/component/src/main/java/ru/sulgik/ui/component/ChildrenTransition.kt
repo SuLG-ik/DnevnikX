@@ -21,7 +21,7 @@ import trackScreen
 val DefaultAnimation =
     fade(spring()) + scale(spring(), frontFactor = 0.8f, backFactor = 1.2f)
 
-val LocalNestedChildrenStackAnimator = staticCompositionLocalOf<StackAnimator?> { null }
+val LocalNestedChildrenStackAnimator = staticCompositionLocalOf<StackAnimator?> { DefaultAnimation }
 
 val LocalChildrenStackAnimator = staticCompositionLocalOf { DefaultAnimation }
 

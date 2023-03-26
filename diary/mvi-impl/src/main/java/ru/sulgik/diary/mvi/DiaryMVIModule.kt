@@ -8,7 +8,6 @@ class DiaryMVIModule {
 
     val module = module {
         factoryOf(::DiaryStoreImpl) bind DiaryStore::class
-        factoryOf(::DiarySettingsStoreImpl) bind DiarySettingsStore::class
     }
 
 }

@@ -35,7 +35,6 @@ android {
 
 dependencies {
     implementation(projects.application.settingsSerializer)
-    implementation(projects.diary.settingsSerializer)
 
     implementation(libs.koin.core)
     testImplementation(libs.junit)

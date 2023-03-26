@@ -1,11 +1,10 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
-    namespace = "ru.sulgik.diary.settings.serializer"
+    namespace = "ru.sulgik.analytics.core"
     compileSdk = 33
     defaultConfig {
         minSdk = 21
@@ -23,6 +22,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -32,14 +32,18 @@ android {
     kotlin {
         jvmToolchain(11)
     }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
+    }
 }
 
 dependencies {
-    implementation(projects.settings.core)
-    implementation(projects.diary.settings)
-    implementation(libs.koin.core)
+    implementation(libs.android.core)
+
     implementation(libs.bundles.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.junit.android)
-    androidTestImplementation(libs.room.testing)
 }

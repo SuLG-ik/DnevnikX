@@ -10,9 +10,7 @@ interface ApplicationStore :
     data class State(
         val applicationConfig: ApplicationConfig = ApplicationConfig(),
     ) {
-        data class ApplicationConfig(
-            val isNestedScreenTransactionEnabled: Boolean = false,
-        )
+        class ApplicationConfig
     }
 
     sealed interface Label

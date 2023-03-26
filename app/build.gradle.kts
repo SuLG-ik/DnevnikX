@@ -37,10 +37,8 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("debug")
-            buildConfigField("String", "APP_VERSION", "\"v0.4.1\"")
         }
         debug {
-            buildConfigField("String", "APP_VERSION", "\"v0.3.1-001\"")
         }
     }
     compileOptions {

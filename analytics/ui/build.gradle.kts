@@ -1,11 +1,10 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
-    namespace = "ru.sulgik.diary.settings"
+    namespace = "ru.sulgik.analytics.ui"
     compileSdk = 33
     defaultConfig {
         minSdk = 21
@@ -32,13 +31,18 @@ android {
     kotlin {
         jvmToolchain(11)
     }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
+    }
 }
 
 dependencies {
-    implementation(projects.settings.core)
-    implementation(libs.koin.core)
+    implementation(projects.analytics.core)
     implementation(libs.bundles.android)
+    implementation(libs.bundles.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.junit.android)
-    androidTestImplementation(libs.room.testing)
 }

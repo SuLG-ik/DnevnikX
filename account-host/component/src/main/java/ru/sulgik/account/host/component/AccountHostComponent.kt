@@ -103,7 +103,7 @@ class AccountHostComponent(
     }
 
     private fun onExperimentalSettings() {
-        navigation.bringToFront(Config.ExperimentalSettings)
+
     }
 
     @Composable

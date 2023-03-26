@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.datetime.LocalDate
 import ru.sulgik.common.platform.LocalTimeFormatter
-import ru.sulgik.marks.mvi.MarksSettingsStore
 import ru.sulgik.marks.mvi.MarksStore
 import ru.sulgik.periods.ui.NoData
 import ru.sulgik.periods.ui.Period
@@ -60,7 +59,6 @@ import ru.sulgik.ui.core.outlined
 fun MarksScreen(
     periods: MarksStore.State.Periods,
     marks: MarksStore.State.Marks,
-    settings: MarksSettingsStore.State.MarksSettings,
     onSelect: (MarksStore.State.Period) -> Unit,
     onMark: (Pair<MarksStore.State.Lesson, MarksStore.State.Mark>) -> Unit,
     onRefresh: (MarksStore.State.Period) -> Unit,
@@ -68,7 +66,7 @@ fun MarksScreen(
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text("Отметки") })
+            CenterAlignedTopAppBar(title = { Text("Оценки") })
         },
         bottomBar = {
             PeriodSelector(
@@ -107,7 +105,6 @@ fun MarksScreen(
                 HorizontalPager(
                     pageCount = periodsData.periods.size,
                     key = { it },
-                    userScrollEnabled = settings.isPagerEnabled,
                     flingBehavior = pagerState.flingBehaviour(),
                     state = pagerState,
                 ) { pageIndex ->

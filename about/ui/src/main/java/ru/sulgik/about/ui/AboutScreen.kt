@@ -76,12 +76,9 @@ fun AboutScreen(
             ) {
                 AboutAppBlock(
                     data = aboutData.application,
+                    onExperimentalSettings = onExperimentalSettings,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .combinedClickable(
-                            onLongClick = onExperimentalSettings,
-                            onClick = {}
-                        ),
+                        .fillMaxWidth(),
                 )
                 Text(
                     "Полезная информация",
@@ -105,9 +102,13 @@ fun AboutScreen(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AboutAppBlock(data: AboutStore.State.AboutData.ApplicationData, modifier: Modifier = Modifier) {
+fun AboutAppBlock(
+    data: AboutStore.State.AboutData.ApplicationData,
+    onExperimentalSettings: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     ListItem(
         leadingContent = {
             Image(
@@ -131,7 +132,12 @@ fun AboutAppBlock(data: AboutStore.State.AboutData.ApplicationData, modifier: Mo
             })
         },
         tonalElevation = 1.dp,
-        modifier = modifier.outlined()
+        modifier = modifier
+            .outlined()
+            .combinedClickable(
+                onLongClick = onExperimentalSettings,
+                onClick = {}
+            )
     )
 }
 

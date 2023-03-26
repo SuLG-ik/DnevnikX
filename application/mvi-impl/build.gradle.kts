@@ -41,8 +41,6 @@ dependencies {
     implementation(projects.auth.core)
     implementation(projects.application.mvi)
     implementation(projects.core.components)
-    implementation(projects.settings.provider)
-    implementation(projects.application.settings)
 
     implementation(libs.bundles.module.mvi)
     implementation(libs.kotlinx.datetime)

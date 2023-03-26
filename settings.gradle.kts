@@ -59,8 +59,6 @@ include(":diary:domain")
 include(":diary:domain-ktor")
 include(":diary:domain-merged")
 include(":diary:domain-room")
-include(":diary:settings")
-include(":diary:settings-serializer")
 include(":diary:ui")
 
 include(":diary:component")

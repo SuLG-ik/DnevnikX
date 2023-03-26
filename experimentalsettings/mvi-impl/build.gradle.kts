@@ -41,8 +41,7 @@ dependencies {
     implementation(projects.experimentalsettings.mvi)
     implementation(projects.core.components)
     implementation(projects.settings.provider)
-    implementation(projects.application.settings)
-    implementation(projects.diary.settings)
+
     implementation(libs.bundles.module.mvi)
     implementation(libs.kotlinx.datetime)
     implementation(libs.bundles.android)

@@ -41,8 +41,6 @@ dependencies {
     implementation(projects.diary.domain)
     implementation(projects.periods.domain)
     implementation(projects.diary.mvi)
-    implementation(projects.diary.settings)
-    implementation(projects.settings.provider)
     implementation(projects.core.components)
     implementation(libs.kotlinx.collections)
 

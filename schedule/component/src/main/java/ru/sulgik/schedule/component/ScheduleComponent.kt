@@ -29,7 +29,7 @@ class ScheduleComponent(
     private val onBack: () -> Unit = {},
 ) : BaseAuthorizedComponentContext(componentContext) {
 
-    val store = getStore<ScheduleStore>()
+    private val store = getStore<ScheduleStore>()
 
     private val timeFormatter = get<TimeFormatter>()
 
@@ -40,7 +40,8 @@ class ScheduleComponent(
         PickerComponent(
             componentContext = childDIContext(key = "period_picker"),
             onContinue = this::onPickerSelected,
-            marked = { currentData in it.data }
+            marked = { currentData in it.data },
+            onHide = { store.accept(ScheduleStore.Intent.HidePeriodSelector) }
         )
 
     val state by store.states(this) {
