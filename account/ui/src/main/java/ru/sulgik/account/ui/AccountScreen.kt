@@ -194,7 +194,7 @@ fun ProfileActions(
             )
         if (actions.isUpdatesAvailable)
             ProfileAction(
-                text = "Обновления отметок",
+                text = "Обновления оценок",
                 subtext = "Изменения в журнале",
                 icon = painterResource(id = R.drawable.updates),
                 onClick = onUpdates,
