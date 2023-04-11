@@ -10,12 +10,10 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.launch
 import ru.sulgik.auth.core.AuthScope
-import ru.sulgik.core.syncDispatch
 import ru.sulgik.finalmarks.domain.CachedFinalMarksRepository
 import ru.sulgik.finalmarks.domain.data.FinalMarksOutput
+import ru.sulgik.kacher.core.on
 
 @OptIn(ExperimentalMviKotlinApi::class)
 class FinalMarksStoreImpl(
@@ -32,16 +30,13 @@ class FinalMarksStoreImpl(
         },
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
             onAction<Action.Setup> {
-                launch {
-                    var lessons = cachedFinalMarksRepository.getFinalMarksFast(authScope)
-                    syncDispatch(
-                        Message.SetData(lessons.toState())
+                cachedFinalMarksRepository.getFinalMarks(authScope)
+                    .on(
+                        scope = this,
+                        success = {
+                            dispatch(Message.SetData(it.toState()))
+                        },
                     )
-                    lessons = cachedFinalMarksRepository.getFinalMarksActual(authScope)
-                    syncDispatch(
-                        Message.SetData(lessons.toState())
-                    )
-                }
             }
             var refreshJob: Job? = null
             onIntent<FinalMarksStore.Intent.RefreshFinalMarks> {
@@ -50,14 +45,13 @@ class FinalMarksStoreImpl(
                 if (state.isLoading || stateLessons?.isRefreshing == true)
                     return@onIntent
                 dispatch(Message.SetRefreshing(true))
-                val job = refreshJob
-                refreshJob = launch {
-                    job?.cancelAndJoin()
-                    val lessons = cachedFinalMarksRepository.getFinalMarksActual(authScope)
-                    syncDispatch(
-                        Message.SetData(lessons.toState())
+                cachedFinalMarksRepository.getFinalMarksActual(authScope)
+                    .on(
+                        scope = this,
+                        success = {
+                            dispatch(Message.SetData(it.toState()))
+                        },
                     )
-                }
             }
         },
         reducer = {

@@ -30,6 +30,8 @@ include(":app")
 include(":core:common")
 include(":core:components")
 
+include(":kacher:core")
+
 include(":splash:ui")
 include(":splash:component")
 

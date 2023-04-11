@@ -111,7 +111,7 @@ class AndroidPagingRemoteMarksUpdateSource(
 
 
     private fun PagingData<MarksUpdatesOutput>.nextKey(): Int? {
-        val data = data ?: return 1
+        if (data == null) return 1
         if (isFullLoaded) {
             return null
         }

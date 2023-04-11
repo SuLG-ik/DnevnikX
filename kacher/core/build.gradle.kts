@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "ru.sulgik.finalmarks.domain"
+    namespace = "ru.sulgik.kacher.core"
     compileSdk = 33
     defaultConfig {
         minSdk = 21
@@ -31,16 +31,14 @@ android {
     kotlin {
         jvmToolchain(11)
     }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
-    api(projects.auth.core)
-    api(projects.core.common)
-    api(projects.kacher.core)
-
-    implementation(libs.kotlinx.datetime)
-    implementation(libs.bundles.android)
+    api(libs.coroutines.core)
+    implementation(libs.napier)
     testImplementation(libs.junit)
     androidTestImplementation(libs.junit.android)
-    androidTestImplementation(libs.room.testing)
 }

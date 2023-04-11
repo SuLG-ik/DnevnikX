@@ -7,7 +7,7 @@
         <option name="testRunner" value="GRADLE" />
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleJvm" value="17" />
+        <option name="gradleJvm" value="corretto-11" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
@@ -80,6 +80,8 @@
             <option value="$PROJECT_DIR$/finalmarks/mvi" />
             <option value="$PROJECT_DIR$/finalmarks/mvi-impl" />
             <option value="$PROJECT_DIR$/finalmarks/ui" />
+            <option value="$PROJECT_DIR$/kacher" />
+            <option value="$PROJECT_DIR$/kacher/core" />
             <option value="$PROJECT_DIR$/koin" />
             <option value="$PROJECT_DIR$/koin/domain" />
             <option value="$PROJECT_DIR$/koin/main" />
