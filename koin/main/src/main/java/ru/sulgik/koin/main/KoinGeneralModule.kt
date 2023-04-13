@@ -8,6 +8,7 @@ import ru.sulgik.dnevnikx.BaseMviModule
 import ru.sulgik.koin.domain.KoinDomainModule
 import ru.sulgik.koin.mvi.KoinMVIModule
 import ru.sulgik.koin.settings.KoinSettingsModule
+import ru.sulgik.ktor.main.KtorModule
 import ru.sulgik.room.auth.AuthDatabaseModule
 import ru.sulgik.room.main.MainDatabaseModule
 import ru.sulgik.settings.settings.datastore.SettingsProviderModule

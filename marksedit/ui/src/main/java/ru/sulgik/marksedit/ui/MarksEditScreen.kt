@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
@@ -365,12 +366,16 @@ fun MarksEditKeyboard(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             DesignedDivider(modifier = Modifier.fillMaxWidth())
-            changes.changes.forEach {
-                Text(it.buildText())
-            }
+            if (LocalConfiguration.current.screenHeightDp >= 600)
+                changes.changes.forEach {
+                    Text(it.buildText())
+                }
             FlowRow(
-                maxItemsInEachRow = 2,
-                horizontalArrangement = Arrangement.spacedBy(12.5.dp, Alignment.CenterHorizontally),
+                maxItemsInEachRow = if (LocalConfiguration.current.screenHeightDp >= 600) 2 else 5,
+                horizontalArrangement = Arrangement.spacedBy(
+                    12.5.dp,
+                    Alignment.CenterHorizontally
+                ),
                 verticalArrangement = Arrangement.spacedBy(7.5.dp, Alignment.CenterVertically),
                 modifier = Modifier.fillMaxWidth(),
             ) {

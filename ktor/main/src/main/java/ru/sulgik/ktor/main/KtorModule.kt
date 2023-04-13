@@ -1,6 +1,5 @@
-package ru.sulgik.koin.main
+package ru.sulgik.ktor.main
 
-import android.util.Log
 import io.github.aakira.napier.BuildConfig
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
@@ -17,7 +16,6 @@ import io.ktor.http.URLProtocol
 import io.ktor.http.contentType
 import io.ktor.http.path
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.util.toMap
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.contextual
@@ -40,20 +38,13 @@ class KtorModule {
                     parameters.append("vendor", "school")
                     parameters.append("devkey", "0c7968cd2b6e14a4eed3c94e593ae9f0")
                     parameters.append("out_format", "json")
-                    Log.d(
-                        "pisus",
-                        "parameters: ${
-                            parameters.build().toMap().map { it.value.joinToString() }
-                                .joinToString()
-                        }"
-                    )
                 }
             }
             if (BuildConfig.DEBUG) {
                 install(Logging) {
                     logger = object : Logger {
                         override fun log(message: String) {
-                            Napier.d(message, tag = "UnauthorizedHttpClient")
+                            Napier.d(message, tag = "HttpClient")
                         }
                     }
                     level = LogLevel.ALL
