@@ -45,7 +45,7 @@ fun AuthConfirmScreen(
         )
         Text(
             text = buildAnnotatedString {
-                appendLine("Вывошли как")
+                appendLine("Вы вошли как")
                 withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
                     append(user.title)
                 }
