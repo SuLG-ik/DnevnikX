@@ -37,6 +37,7 @@ dependencies {
     implementation(projects.diary.mviImpl)
     implementation(projects.about.mviImpl)
     implementation(projects.marks.mviImpl)
+    implementation(projects.marksedit.mviImpl)
     implementation(projects.finalmarks.mviImpl)
     implementation(projects.schedule.mviImpl)
     implementation(projects.auth.mviImpl)

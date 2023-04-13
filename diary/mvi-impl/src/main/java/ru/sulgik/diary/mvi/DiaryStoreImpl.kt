@@ -1,6 +1,5 @@
 package ru.sulgik.diary.mvi
 
-import com.arkivanov.mvikotlin.core.store.Reducer
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.core.utils.ExperimentalMviKotlinApi
@@ -13,6 +12,7 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
@@ -23,9 +23,9 @@ import kotlinx.datetime.toKotlinLocalDate
 import org.koin.core.annotation.Factory
 import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.common.platform.DatePeriod
-import ru.sulgik.core.syncDispatch
 import ru.sulgik.diary.domain.CachedDiaryRepository
 import ru.sulgik.diary.domain.data.DiaryOutput
+import ru.sulgik.kacher.core.on
 import ru.sulgik.periods.domain.CachedPeriodsRepository
 import ru.sulgik.periods.domain.data.GetPeriodsOutput
 import java.time.LocalDate
@@ -49,37 +49,27 @@ class DiaryStoreImpl(
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
             var selectPeriodJob: Job? = null
             onAction<Action.Setup> {
-                selectPeriodJob = launch {
-                    var periods =
-                        cachedPeriodsRepository.getPeriodsFast(auth).periods.toState()
-                    syncDispatch(
-                        Message.UpdatePeriods(
-                            DiaryStore.State.Periods(
-                                isLoading = false,
-                                data = periods,
-                            )
-                        )
+                val periodsRequest = cachedPeriodsRepository.getPeriods(auth)
+                launch(Dispatchers.Main) {
+                    periodsRequest.on(
+                        statusUpdated = { periodsStatus ->
+                            periodsStatus.data?.periods?.toState()?.let { periods ->
+                                dispatch(Message.UpdatePeriods(periods))
+                                cachedDiaryRepository.getDiary(
+                                    auth = auth,
+                                    period = periods.selectedPeriod
+                                ).on(
+                                    statusUpdated = { diaryStatus ->
+                                        diaryStatus.data?.let { diary ->
+                                            dispatch(
+                                                Message.UpdateDiary(diary.period, diary.toState())
+                                            )
+                                        }
+                                    }
+                                )
+                            }
+                        },
                     )
-                    var diary =
-                        cachedDiaryRepository.getDiaryFast(auth, periods.selectedPeriod)
-                            .withState(state)
-                    syncDispatch(
-                        Message.UpdateDiary(diary)
-                    )
-                    periods =
-                        cachedPeriodsRepository.getPeriodsActual(auth).periods.toState()
-                    syncDispatch(
-                        Message.UpdatePeriods(
-                            DiaryStore.State.Periods(
-                                isLoading = false,
-                                data = periods,
-                            )
-                        )
-                    )
-                    diary =
-                        cachedDiaryRepository.getDiaryActual(auth, periods.selectedPeriod)
-                            .withState(state)
-                    syncDispatch(Message.UpdateDiary(diary))
                 }
             }
 
@@ -112,15 +102,20 @@ class DiaryStoreImpl(
                     return@onIntent
                 dispatch(Message.SelectPeriod(intent.period))
                 val job = selectPeriodJob
-                selectPeriodJob = launch {
+                val diaryRequest = cachedDiaryRepository.getDiary(auth, intent.period)
+                selectPeriodJob = launch(Dispatchers.Main) {
                     job?.cancelAndJoin()
-                    var diary = cachedDiaryRepository.getDiaryFast(auth, intent.period)
-                        .withState(this@onIntent.state)
-                    syncDispatch(Message.UpdateDiary(diary))
-                    diary = cachedDiaryRepository.getDiaryActual(auth, intent.period)
-                        .withState(this@onIntent.state)
-                    syncDispatch(
-                        Message.UpdateDiary(diary)
+                    diaryRequest.on(
+                        statusUpdated = { diaryStatus ->
+                            diaryStatus.data?.let {
+                                dispatch(
+                                    Message.UpdateDiary(
+                                        intent.period,
+                                        it.toState(),
+                                    )
+                                )
+                            }
+                        }
                     )
                 }
             }
@@ -128,21 +123,30 @@ class DiaryStoreImpl(
                 val periodsData = state.periods.data
                 if (state.periods.isLoading || periodsData == null)
                     return@onIntent
-                val selectedPeriod = periodsData.selectedPeriod
                 val diaryData = state.diary.data[intent.period]
                 if (diaryData?.isLoading == true || diaryData?.isRefreshing == true)
                     return@onIntent
                 dispatch(Message.SetDiaryRefreshing(intent.period))
                 val job = selectPeriodJob
-                selectPeriodJob = launch {
+                val diaryRequest = cachedDiaryRepository.getDiaryActual(auth, intent.period)
+                selectPeriodJob = launch(Dispatchers.Main) {
                     job?.cancelAndJoin()
-                    val diary = cachedDiaryRepository.getDiaryActual(auth, selectedPeriod)
-                        .withState(this@onIntent.state)
-                    syncDispatch(Message.UpdateDiary(diary))
+                    diaryRequest.on(
+                        statusUpdated = { diaryStatus ->
+                            diaryStatus.data?.let {
+                                dispatch(
+                                    Message.UpdateDiary(
+                                        intent.period,
+                                        it.toState(),
+                                    )
+                                )
+                            }
+                        }
+                    )
                 }
             }
         },
-        reducer = Reducer {
+        reducer = {
             when (it) {
                 is Message.SelectLesson -> copy(
                     diary = diary.copy(
@@ -182,12 +186,15 @@ class DiaryStoreImpl(
 
                 is Message.UpdateDiary ->
                     copy(
-                        diary = it.diary,
+                        diary = it.diary.withState(this, it.period),
                     )
 
                 is Message.UpdatePeriods ->
                     copy(
-                        periods = it.periods
+                        periods = DiaryStore.State.Periods(
+                            isLoading = false,
+                            data = it.periods,
+                        )
                     )
             }
         }
@@ -196,13 +203,14 @@ class DiaryStoreImpl(
 
     private sealed interface Message {
 
-        data class UpdatePeriods(val periods: DiaryStore.State.Periods) : Message
+        data class UpdatePeriods(val periods: DiaryStore.State.PeriodsData) : Message
 
         data class ShowOtherPeriods(val value: Boolean) : Message
 
         data class SelectPeriod(val period: DatePeriod) : Message
 
-        data class UpdateDiary(val diary: DiaryStore.State.Diary) : Message
+        data class UpdateDiary(val period: DatePeriod, val diary: DiaryStore.State.DiaryData) :
+            Message
 
         data class SetDiaryRefreshing(val period: DatePeriod) : Message
 
@@ -247,11 +255,14 @@ private fun ImmutableMap<DatePeriod, DiaryStore.State.DiaryData>?.orFill(
     } ?: persistentMapOf()
 }
 
-private fun DiaryOutput.withState(state: DiaryStore.State): DiaryStore.State.Diary {
+private fun DiaryStore.State.DiaryData.withState(
+    state: DiaryStore.State,
+    period: DatePeriod
+): DiaryStore.State.Diary {
     return state.diary.copy(
         data = state.diary.data.let { diary ->
             diary.toPersistentMap().mutate {
-                it[period] = this.toState()
+                it[period] = this
             }
         }
     )

@@ -11,6 +11,7 @@ import ru.sulgik.experimentalsettings.mvi.ExperimentalSettingsMVIModule
 import ru.sulgik.finalmarks.mvi.FinalMarksMVIModule
 import ru.sulgik.main.mvi.MainMVIModule
 import ru.sulgik.marks.mvi.MarksMVIModule
+import ru.sulgik.marksedit.mvi.MarksEditMVIModule
 import ru.sulgik.marksupdates.MarksUpdatesMVIModule
 import ru.sulgik.schedule.mvi.ScheduleMVIModule
 
@@ -20,6 +21,7 @@ class KoinMVIModule {
         includes(DiaryMVIModule().module)
         includes(AboutMVIModule().module)
         includes(MarksMVIModule().module)
+        includes(MarksEditMVIModule().module)
         includes(FinalMarksMVIModule().module)
         includes(ScheduleMVIModule().module)
         includes(AuthMVIModule().module)

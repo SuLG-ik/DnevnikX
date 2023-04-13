@@ -1,22 +1,26 @@
 package ru.sulgik.kacher.core
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.collectLatest
+
+typealias FlowResource<T> = Flow<Resource<T>>
 
 class Resource<out T> private constructor(
     val status: Status<T>,
 ) {
+    enum class Source {
+        LOCAL, REMOTE,
+    }
+
     sealed interface Status<out T> {
         val data: T?
 
         data class Loading<out T>(override val data: T?) : Status<T>
 
-        data class Success<out T>(override val data: T & Any) : Status<T & Any>
+        data class Success<out T>(
+            override val data: T & Any,
+            val source: Source,
+        ) : Status<T & Any>
 
         object Empty : Status<Nothing> {
             override val data: Nothing?
@@ -38,8 +42,11 @@ class Resource<out T> private constructor(
             return Resource(status = Status.Loading(data = data))
         }
 
-        fun <T> success(data: T & Any): Resource<T> {
-            return Resource(status = Status.Success(data = data))
+        fun <T> success(
+            data: T & Any,
+            source: Source,
+        ): Resource<T> {
+            return Resource(status = Status.Success(data = data, source = source))
         }
 
         fun empty(): Resource<Nothing> = Resource(status = Status.Empty)
@@ -71,10 +78,12 @@ class Resource<out T> private constructor(
 inline fun <T> Resource<T>.on(
     loading: (T?) -> Unit = {},
     success: (T) -> Unit = {},
+    successLocal: (T) -> Unit = {},
+    successRemote: (T) -> Unit = {},
     error: (error: Exception, data: T?) -> Unit = { _, _ -> },
     empty: () -> Unit = {},
     cancel: (T?) -> Unit = {},
-    dataUpdated: (T?) -> Unit,
+    statusUpdated: (Resource.Status<T>) -> Unit,
 ) {
     when (status) {
         Resource.Status.Empty -> {
@@ -90,6 +99,10 @@ inline fun <T> Resource<T>.on(
         }
 
         is Resource.Status.Success -> {
+            when (status.source) {
+                Resource.Source.LOCAL -> successLocal(status.data)
+                Resource.Source.REMOTE -> successRemote(status.data)
+            }
             success(status.data)
         }
 
@@ -97,29 +110,46 @@ inline fun <T> Resource<T>.on(
             cancel(status.data)
         }
     }
-    dataUpdated(status.data)
+    statusUpdated(status)
 }
 
 
-inline fun <T> Flow<Resource<T>>.on(
-    scope: CoroutineScope,
-    dispatcher: CoroutineDispatcher = Dispatchers.Main,
-    crossinline loading: (T?) -> Unit = {},
-    crossinline success: (T) -> Unit = {},
-    crossinline error: (error: Exception, data: T?) -> Unit = { _, _ -> },
-    crossinline empty: () -> Unit = {},
-    crossinline cancel: (T?) -> Unit = {},
-    crossinline dataUpdated: (T?) -> Unit = {},
+suspend fun <T> Flow<Resource<T>>.on(
+    loading: suspend (T?) -> Unit = {},
+    success: suspend (T) -> Unit = {},
+    successLocal: suspend (T) -> Unit = {},
+    successRemote: suspend (T) -> Unit = {},
+    error: suspend (error: Exception, data: T?) -> Unit = { _, _ -> },
+    empty: suspend () -> Unit = {},
+    cancel: suspend (T?) -> Unit = {},
+    statusUpdated: suspend (status: Resource.Status<T>) -> Unit = {},
 ) {
-    onEach {
-        it.on(
-            loading = loading,
-            success = success,
-            error = error,
-            empty = empty,
-            cancel = cancel,
-            dataUpdated = dataUpdated
+    collectLatest { resource ->
+        resource.on(
+            loading = {
+                loading(it)
+            },
+            success = {
+                success(it)
+            },
+            successLocal = {
+                successLocal(it)
+            },
+            successRemote = {
+                successRemote(it)
+            },
+            error = { error, data ->
+                error(error, data)
+            },
+            empty = {
+                empty()
+            },
+            cancel = {
+                cancel(it)
+            },
+            statusUpdated = {
+                statusUpdated(it)
+            }
         )
-    }.flowOn(dispatcher)
-        .launchIn(scope)
+    }
 }

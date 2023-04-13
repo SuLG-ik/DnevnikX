@@ -11,12 +11,13 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toKotlinLocalDate
 import ru.sulgik.auth.core.AuthScope
-import ru.sulgik.core.syncDispatch
+import ru.sulgik.kacher.core.on
 import ru.sulgik.marks.domain.CachedMarksRepository
 import ru.sulgik.marks.domain.data.MarksOutput
 import ru.sulgik.periods.domain.CachedPeriodsRepository
@@ -38,62 +39,63 @@ class MarksStoreImpl(
             dispatch(Action.Setup)
         },
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
+            var selectPeriodJob: Job? = null
             onAction<Action.Setup> {
-                launch {
-                    val periods = cachedPeriodsRepository.getPeriodsFast(auth).toState()
-                    val currentDate = java.time.LocalDate.now().toKotlinLocalDate()
-                    val currentPeriod =
-                        periods.firstOrNull { currentDate in it.period } ?: periods.first()
-                    syncDispatch(
-                        Message.UpdatePeriods(
-                            periods = MarksStore.State.PeriodsData(
-                                selectedPeriod = currentPeriod,
-                                periods = periods,
-                            )
-                        )
-                    )
-                    var marks =
-                        cachedMarksRepository.getMarksFast(auth, currentPeriod.period).toState()
-                    syncDispatch(
-                        Message.UpdateMarks(
-                            period = currentPeriod,
-                            marks = marks,
-                        )
-                    )
-                    marks =
-                        cachedMarksRepository.getMarksActual(auth, currentPeriod.period).toState()
-                    syncDispatch(
-                        Message.UpdateMarks(
-                            period = currentPeriod,
-                            marks = marks,
-                        )
+                val periodsRequest = cachedPeriodsRepository.getPeriods(auth)
+                launch(Dispatchers.Main) {
+                    periodsRequest.on(
+                        statusUpdated = { periodsStatus ->
+                            periodsStatus.data?.toState()?.let { periods ->
+                                dispatch(Message.UpdatePeriods(periods))
+                                cachedMarksRepository.getMarks(
+                                    auth = auth,
+                                    period = MarksOutput.Period(
+                                        periods.selectedPeriod.title,
+                                        periods.selectedPeriod.period
+                                    )
+                                ).on(
+                                    statusUpdated = { diaryStatus ->
+                                        diaryStatus.data?.let {
+                                            dispatch(
+                                                Message.UpdateMarks(
+                                                    periods.selectedPeriod,
+                                                    it.toState(),
+                                                )
+                                            )
+                                        }
+                                    }
+                                )
+                            }
+                        },
                     )
                 }
             }
-            var selectPeriodJob: Job? = null
-            onIntent<MarksStore.Intent.SelectPeriod> {
+            onIntent<MarksStore.Intent.SelectPeriod> { intent ->
                 val state = state
                 val periodsData = state.periods.data
-                if (state.periods.isLoading || periodsData == null) return@onIntent
+                if (state.periods.isLoading || periodsData == null || periodsData.selectedPeriod == intent.period) return@onIntent
                 dispatch(
-                    Message.SelectPeriod(period = it.period)
+                    Message.SelectPeriod(period = intent.period)
                 )
-                val job = selectPeriodJob
-                selectPeriodJob = launch {
-                    job?.cancelAndJoin()
-                    var marks = cachedMarksRepository.getMarksFast(auth, it.period.period).toState()
-                    syncDispatch(
-                        Message.UpdateMarks(
-                            period = it.period,
-                            marks = marks,
-                        )
+                val marksRequest =
+                    cachedMarksRepository.getMarks(
+                        auth,
+                        MarksOutput.Period(intent.period.title, intent.period.period)
                     )
-                    marks = cachedMarksRepository.getMarksActual(auth, it.period.period).toState()
-                    syncDispatch(
-                        Message.UpdateMarks(
-                            period = it.period,
-                            marks = marks,
-                        )
+                val job = selectPeriodJob
+                selectPeriodJob = launch(Dispatchers.Main) {
+                    job?.cancelAndJoin()
+                    marksRequest.on(
+                        statusUpdated = { diaryStatus ->
+                            diaryStatus.data?.let {
+                                dispatch(
+                                    Message.UpdateMarks(
+                                        intent.period,
+                                        it.toState(),
+                                    )
+                                )
+                            }
+                        }
                     )
                 }
             }
@@ -116,13 +118,25 @@ class MarksStoreImpl(
                 dispatch(
                     Message.SetDiaryRefreshing(intent.period)
                 )
+                val marksRequest =
+                    cachedMarksRepository.getMarksActual(
+                        auth,
+                        MarksOutput.Period(intent.period.title, intent.period.period)
+                    )
                 val job = selectPeriodJob
-                selectPeriodJob = launch {
+                selectPeriodJob = launch(Dispatchers.Main) {
                     job?.cancelAndJoin()
-                    val marks =
-                        cachedMarksRepository.getMarksActual(auth, intent.period.period).toState()
-                    syncDispatch(
-                        Message.UpdateMarks(intent.period, marks)
+                    marksRequest.on(
+                        statusUpdated = { diaryStatus ->
+                            diaryStatus.data?.let {
+                                dispatch(
+                                    Message.UpdateMarks(
+                                        intent.period,
+                                        it.toState(),
+                                    )
+                                )
+                            }
+                        }
                     )
                 }
             }
@@ -175,7 +189,7 @@ class MarksStoreImpl(
 
         data class UpdateMarks(
             val period: MarksStore.State.Period,
-            val marks: MarksStore.State.MarksData,
+            val marks: MarksStore.State.MarksLesson,
         ) : Message
 
         data class SetDiaryRefreshing(val period: MarksStore.State.Period) : Message
@@ -190,13 +204,13 @@ class MarksStoreImpl(
 
 }
 
-private fun ImmutableMap<MarksStore.State.Period, MarksStore.State.MarksData>?.orFill(
+private fun ImmutableMap<MarksStore.State.Period, MarksStore.State.MarksLesson>?.orFill(
     period: MarksStore.State.Period,
     isRefreshing: Boolean = false,
-): ImmutableMap<MarksStore.State.Period, MarksStore.State.MarksData> {
+): ImmutableMap<MarksStore.State.Period, MarksStore.State.MarksLesson> {
     return this?.toPersistentMap()?.mutate {
         val data = it[period]?.copy(isRefreshing = isRefreshing, isLoading = !isRefreshing)
-            ?: MarksStore.State.MarksData(
+            ?: MarksStore.State.MarksLesson(
                 isLoading = true,
                 isRefreshing = false,
                 lessons = persistentListOf(),
@@ -205,17 +219,8 @@ private fun ImmutableMap<MarksStore.State.Period, MarksStore.State.MarksData>?.o
     } ?: persistentMapOf()
 }
 
-private fun GetPeriodsOutput.toState(): List<MarksStore.State.Period> {
-    return periods.map {
-        MarksStore.State.Period(
-            it.title,
-            it.period,
-        )
-    }
-}
 
-
-private fun MarksStore.State.MarksData.withState(
+private fun MarksStore.State.MarksLesson.withState(
     period: MarksStore.State.Period,
     state: MarksStore.State,
 ): MarksStore.State.Marks {
@@ -227,12 +232,29 @@ private fun MarksStore.State.MarksData.withState(
 }
 
 
-private fun MarksOutput.toState(): MarksStore.State.MarksData {
-    return MarksStore.State.MarksData(
+private fun GetPeriodsOutput.toState(): MarksStore.State.PeriodsData {
+    val currentDate = java.time.LocalDate.now().toKotlinLocalDate()
+    val currentPeriod =
+        periods.firstOrNull { currentDate in it.period } ?: periods.first()
+    return MarksStore.State.PeriodsData(
+        currentPeriod.toState(),
+        periods.map { it.toState() },
+    )
+}
+
+
+private fun GetPeriodsOutput.Period.toState(): MarksStore.State.Period {
+    return MarksStore.State.Period(title, period)
+}
+
+
+private fun MarksOutput.toState(): MarksStore.State.MarksLesson {
+    return MarksStore.State.MarksLesson(
         isLoading = false,
         isRefreshing = false,
         lessons = lessons.map { lesson ->
-            MarksStore.State.Lesson(title = lesson.title,
+            MarksStore.State.Lesson(
+                title = lesson.title,
                 average = lesson.average,
                 averageValue = lesson.averageValue,
                 marks = lesson.marks.map { mark ->

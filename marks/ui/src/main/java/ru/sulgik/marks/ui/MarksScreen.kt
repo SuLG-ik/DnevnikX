@@ -62,6 +62,7 @@ fun MarksScreen(
     onSelect: (MarksStore.State.Period) -> Unit,
     onMark: (Pair<MarksStore.State.Lesson, MarksStore.State.Mark>) -> Unit,
     onRefresh: (MarksStore.State.Period) -> Unit,
+    onEdit: (MarksStore.State.Period, MarksStore.State.Lesson) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -115,10 +116,11 @@ fun MarksScreen(
                         placeholderContent = {
                             MarksPlaceholders()
                         },
-                        content = {
+                        content = { lessons ->
                             MarksDate(
-                                marksData = it,
+                                marksLesson = lessons,
                                 onMark = onMark,
+                                onEdit = { onEdit(period, it) },
                                 onRefresh = { onRefresh(period) })
                         },
                     )
@@ -135,13 +137,14 @@ private val lessonInListModifier = Modifier
 
 @Composable
 fun MarksDate(
-    marksData: MarksStore.State.MarksData,
+    marksLesson: MarksStore.State.MarksLesson,
     onMark: (Pair<MarksStore.State.Lesson, MarksStore.State.Mark>) -> Unit,
     onRefresh: () -> Unit,
+    onEdit: (MarksStore.State.Lesson) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     RefreshableBox(
-        refreshing = marksData.isRefreshing,
+        refreshing = marksLesson.isRefreshing,
         onRefresh = onRefresh,
         modifier = modifier
     ) {
@@ -149,11 +152,12 @@ fun MarksDate(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(ExtendedTheme.dimensions.contentSpaceBetween),
         ) {
-            items(marksData.lessons.size, key = { it }, contentType = { "marks" }) {
-                val lesson = remember(marksData.lessons, it) { marksData.lessons[it] }
+            items(marksLesson.lessons.size, key = { it }, contentType = { "marks" }) {
+                val lesson = remember(marksLesson.lessons, it) { marksLesson.lessons[it] }
                 Lesson(
                     lesson = lesson,
                     onMark = remember(lesson, onMark) { { mark -> onMark(lesson to mark) } },
+                    onEdit = remember(lesson, onEdit) { { onEdit(lesson) } },
                     modifier = lessonInListModifier
                 )
             }
@@ -166,6 +170,7 @@ fun MarksDate(
 fun Lesson(
     lesson: MarksStore.State.Lesson,
     onMark: (MarksStore.State.Mark) -> Unit,
+    onEdit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -175,14 +180,33 @@ fun Lesson(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                text = lesson.title,
-                style = MaterialTheme.typography.labelLarge,
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f, fill = false)
-            )
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onEdit
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
+            ) {
+                Text(
+                    text = lesson.title,
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                Icon(
+                    painterResource(id = R.drawable.edit),
+                    contentDescription = "edit",
+                    modifier = Modifier
+                        .size(15.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+            }
+
+
             if (lesson.averageValue != 0)
                 Text(
                     text = lesson.average,

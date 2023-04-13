@@ -94,6 +94,8 @@
             <option value="$PROJECT_DIR$/main/mvi" />
             <option value="$PROJECT_DIR$/main/mvi-impl" />
             <option value="$PROJECT_DIR$/marks" />
+            <option value="$PROJECT_DIR$/marks-host" />
+            <option value="$PROJECT_DIR$/marks-host/component" />
             <option value="$PROJECT_DIR$/marks/component" />
             <option value="$PROJECT_DIR$/marks/domain" />
             <option value="$PROJECT_DIR$/marks/domain-ktor" />
@@ -102,6 +104,11 @@
             <option value="$PROJECT_DIR$/marks/mvi" />
             <option value="$PROJECT_DIR$/marks/mvi-impl" />
             <option value="$PROJECT_DIR$/marks/ui" />
+            <option value="$PROJECT_DIR$/marksedit" />
+            <option value="$PROJECT_DIR$/marksedit/component" />
+            <option value="$PROJECT_DIR$/marksedit/mvi" />
+            <option value="$PROJECT_DIR$/marksedit/mvi-impl" />
+            <option value="$PROJECT_DIR$/marksedit/ui" />
             <option value="$PROJECT_DIR$/marksupdates" />
             <option value="$PROJECT_DIR$/marksupdates/component" />
             <option value="$PROJECT_DIR$/marksupdates/domain" />

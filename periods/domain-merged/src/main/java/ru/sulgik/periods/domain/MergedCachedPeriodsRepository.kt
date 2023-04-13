@@ -1,7 +1,8 @@
 package ru.sulgik.periods.domain
 
-import io.github.aakira.napier.Napier
 import ru.sulgik.auth.core.AuthScope
+import ru.sulgik.kacher.core.FlowResource
+import ru.sulgik.kacher.core.Merger
 import ru.sulgik.periods.domain.data.GetPeriodsOutput
 
 class MergedCachedPeriodsRepository(
@@ -9,26 +10,21 @@ class MergedCachedPeriodsRepository(
     private val localPeriodsRepository: LocalPeriodsRepository,
 ) : CachedPeriodsRepository {
 
-    override suspend fun getPeriodsFast(auth: AuthScope): GetPeriodsOutput {
-        val localPeriods = localPeriodsRepository.getPeriods(auth)
-        if (localPeriods != null) return localPeriods
-        val remotePeriods = remotePeriodsRepository.getPeriods(auth)
-        try {
-            localPeriodsRepository.savePeriods(auth, remotePeriods)
-        } catch (e: Exception) {
-            Napier.e("Save remote periods to local error", e)
-        }
-        return remotePeriods
+    private val merger = Merger.named("Periods")
+
+    override fun getPeriods(auth: AuthScope): FlowResource<GetPeriodsOutput> {
+        return merger.merged(
+            localRequest = { localPeriodsRepository.getPeriods(auth) },
+            save = { localPeriodsRepository.savePeriods(auth, it) },
+            remoteRequest = { remotePeriodsRepository.getPeriods(auth) }
+        )
     }
 
-    override suspend fun getPeriodsActual(auth: AuthScope): GetPeriodsOutput {
-        val remotePeriods = remotePeriodsRepository.getPeriods(auth)
-        try {
-            localPeriodsRepository.savePeriods(auth, remotePeriods)
-        } catch (e: Exception) {
-            Napier.e("Save remote periods to local error", e)
-        }
-        return remotePeriods
+    override fun getPeriodsActual(auth: AuthScope): FlowResource<GetPeriodsOutput> {
+        return merger.remote(
+            save = { localPeriodsRepository.savePeriods(auth, it) },
+            remoteRequest = { remotePeriodsRepository.getPeriods(auth) },
+        )
     }
 
 }

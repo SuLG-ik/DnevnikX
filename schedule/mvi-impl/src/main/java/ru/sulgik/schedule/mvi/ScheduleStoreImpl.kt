@@ -12,6 +12,7 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
@@ -24,6 +25,7 @@ import ru.sulgik.account.domain.data.GetAccountOutput
 import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.core.syncDispatch
+import ru.sulgik.kacher.core.on
 import ru.sulgik.periods.domain.CachedPeriodsRepository
 import ru.sulgik.periods.domain.data.GetPeriodsOutput
 import ru.sulgik.schedule.domain.RemoteScheduleRepository
@@ -48,18 +50,28 @@ class ScheduleStoreImpl(
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
             var cachedAccount: GetAccountOutput? = null
             onAction<Action.Setup> {
-                launch {
-                    val periods = cachedPeriodsRepository.getPeriodsFast(authScope).periods
-                    val periodsState = periods.toState()
-                    syncDispatch(Message.UpdatePeriods(periodsState))
-                    val account = remoteAccountRepository.getAccount(authScope)
-                    cachedAccount = account
-                    val schedule = remoteScheduleRepository.getSchedule(
-                        auth = authScope,
-                        period = periodsState.selectedPeriod,
-                        classGroup = account.student.classGroup.title
-                    ).toState()
-                    syncDispatch(Message.UpdateSchedule(periodsState.selectedPeriod, schedule))
+                launch(Dispatchers.Main) {
+                    val periodsRequest = cachedPeriodsRepository.getPeriods(authScope)
+                    periodsRequest.on(
+                        statusUpdated = { status ->
+                            status.data?.periods?.toState()?.let { periods ->
+                                syncDispatch(Message.UpdatePeriods(periods))
+                                val account = remoteAccountRepository.getAccount(authScope)
+                                cachedAccount = account
+                                val schedule = remoteScheduleRepository.getSchedule(
+                                    auth = authScope,
+                                    period = periods.selectedPeriod,
+                                    classGroup = account.student.classGroup.title
+                                ).toState()
+                                syncDispatch(
+                                    Message.UpdateSchedule(
+                                        periods.selectedPeriod,
+                                        schedule
+                                    )
+                                )
+                            }
+                        }
+                    )
                 }
             }
 

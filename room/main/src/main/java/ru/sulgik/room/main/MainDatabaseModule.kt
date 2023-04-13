@@ -7,9 +7,10 @@ import org.koin.core.annotation.Single
 import ru.sulgik.account.domain.AccountDao
 import ru.sulgik.account.domain.AccountDataDao
 import ru.sulgik.diary.domain.DiaryDao
-import ru.sulgik.dnevnikx.repository.marks.room.MarksDao
 import ru.sulgik.finalmarks.domain.FinalMarksDao
+import ru.sulgik.marks.domain.MarksDao
 import ru.sulgik.periods.domain.room.PeriodDao
+import ru.sulgik.room.main.migrations.migrations
 
 
 @Module
@@ -20,6 +21,7 @@ class MainDatabaseModule {
         applicationContext: Context,
     ): MainDnevnikXDatabase {
         return Room.databaseBuilder(applicationContext, MainDnevnikXDatabase::class.java, "db")
+            .addMigrations(*migrations)
             .build()
     }
 

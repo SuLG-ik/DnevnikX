@@ -1,16 +1,12 @@
-package ru.sulgik.dnevnikx.repository.marks.room
+package ru.sulgik.marks.domain
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.datetime.LocalDate
+import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.common.platform.DatePeriod
-import ru.sulgik.marks.domain.MarksLessonEntity
-import ru.sulgik.marks.domain.MarksLessonMarkEntity
-import ru.sulgik.marks.domain.MarksLessonWithMarks
-import ru.sulgik.marks.domain.MarksPeriodEntity
-import ru.sulgik.marks.domain.MarksPeriodWithLesson
 
 @Dao
 interface MarksDao {
@@ -21,7 +17,7 @@ interface MarksDao {
         accountId: String,
         start: LocalDate,
         end: LocalDate,
-    ): MarksPeriodWithLesson?
+    ): MarksPeriodWithLessons?
 
     @Query("DELETE FROM MarksPeriodEntity WHERE accountId = :accountId AND start = :start AND `end` = :end ")
     @Transaction
@@ -37,13 +33,30 @@ interface MarksDao {
     suspend fun saveMarksLessonMarks(lessons: List<MarksLessonMarkEntity>)
 
     @Transaction
-    suspend fun saveMarks(
-        accountId: String,
+    @Query("SELECT * FROM MarksLessonEntity WHERE periodId = :periodId AND title = :title")
+    suspend fun getLesson(periodId: Long, title: String): MarksLessonWithMarks
+
+    @Query("SELECT * FROM MarksPeriodEntity WHERE accountId = :accountId AND start = :start AND `end` = :end")
+    suspend fun getPeriod(accountId: String, start: LocalDate, end: LocalDate): MarksPeriodEntity
+
+    @Transaction
+    suspend fun getMarksPeriodWithLesson(
+        authScope: AuthScope,
         period: DatePeriod,
+        title: String
+    ): Pair<MarksPeriodEntity, MarksPeriodWithLesson> {
+        val period = getPeriod(authScope.id, period.start, period.end)
+        val lesson = getLesson(period.id, title)
+        return period to MarksPeriodWithLesson(period, lesson)
+    }
+
+    @Transaction
+    suspend fun saveMarks(
+        period: MarksPeriodEntity,
         lessons: List<MarksLessonWithMarks>,
     ) {
-        deleteMarks(accountId, period.start, period.end)
-        val periodId = saveMarksPeriod(MarksPeriodEntity(accountId, period.start, period.end))
+        deleteMarks(period.accountId, period.start, period.end)
+        val periodId = saveMarksPeriod(period)
         val lessonsIds = saveMarksLessons(lessons.map {
             it.lesson.periodId = periodId
             it.lesson

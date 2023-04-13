@@ -1,5 +1,6 @@
 package ru.sulgik.marks.domain
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -18,7 +19,7 @@ import ru.sulgik.account.domain.AccountEntity
         Index(
             value = ["accountId"],
             unique = false,
-        )
+        ),
     ],
     foreignKeys = [
         ForeignKey(
@@ -30,6 +31,8 @@ import ru.sulgik.account.domain.AccountEntity
     ]
 )
 class MarksPeriodEntity(
+    @ColumnInfo(defaultValue = "loading")
+    val title: String,
     val accountId: String,
     val start: LocalDate, val end: LocalDate,
 ) {
@@ -38,7 +41,7 @@ class MarksPeriodEntity(
 }
 
 
-class MarksPeriodWithLesson(
+class MarksPeriodWithLessons(
     @Embedded var period: MarksPeriodEntity,
     @Relation(
         entity = MarksLessonEntity::class,
@@ -46,6 +49,11 @@ class MarksPeriodWithLesson(
         entityColumn = "periodId"
     )
     var lessons: List<MarksLessonWithMarks>,
+)
+
+class MarksPeriodWithLesson(
+    var period: MarksPeriodEntity,
+    var lesson: MarksLessonWithMarks,
 )
 
 class MarksLessonWithMarks(
@@ -82,10 +90,9 @@ class MarksLessonEntity(
     val average: String,
     val averageValue: Int,
 ) {
-    var periodId: Long = 0
-
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0
+    var periodId: Long = 0
 }
 
 

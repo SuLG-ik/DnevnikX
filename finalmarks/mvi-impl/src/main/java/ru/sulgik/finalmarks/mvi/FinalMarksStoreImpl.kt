@@ -9,7 +9,9 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.finalmarks.domain.CachedFinalMarksRepository
 import ru.sulgik.finalmarks.domain.data.FinalMarksOutput
@@ -30,13 +32,16 @@ class FinalMarksStoreImpl(
         },
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
             onAction<Action.Setup> {
-                cachedFinalMarksRepository.getFinalMarks(authScope)
-                    .on(
-                        scope = this,
-                        success = {
-                            dispatch(Message.SetData(it.toState()))
-                        },
+                val request = cachedFinalMarksRepository.getFinalMarks(authScope)
+                launch(Dispatchers.Main) {
+                    request.on(
+                        statusUpdated = { status ->
+                            status.data?.let {
+                                dispatch(Message.SetData(it.toState()))
+                            }
+                        }
                     )
+                }
             }
             var refreshJob: Job? = null
             onIntent<FinalMarksStore.Intent.RefreshFinalMarks> {
@@ -45,13 +50,17 @@ class FinalMarksStoreImpl(
                 if (state.isLoading || stateLessons?.isRefreshing == true)
                     return@onIntent
                 dispatch(Message.SetRefreshing(true))
-                cachedFinalMarksRepository.getFinalMarksActual(authScope)
-                    .on(
-                        scope = this,
-                        success = {
-                            dispatch(Message.SetData(it.toState()))
-                        },
+                val request = cachedFinalMarksRepository.getFinalMarksActual(authScope)
+
+                launch(Dispatchers.Main) {
+                    request.on(
+                        statusUpdated = { status ->
+                            status.data?.let {
+                                dispatch(Message.SetData(it.toState()))
+                            }
+                        }
                     )
+                }
             }
         },
         reducer = {

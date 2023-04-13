@@ -23,7 +23,6 @@ import ru.sulgik.core.withDI
 import ru.sulgik.dnevnikx.ui.theme.DnevnikXExtendedTheme
 import ru.sulgik.dnevnikx.ui.theme.DnevnikXTheme
 import ru.sulgik.main.component.MainWithSplashComponent
-import ru.sulgik.ui.core.ExtendedTheme
 
 class MainActivity : ComponentActivity(), AndroidScopeComponent {
 

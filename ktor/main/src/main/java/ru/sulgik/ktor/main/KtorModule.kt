@@ -5,6 +5,7 @@ import io.github.aakira.napier.BuildConfig
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
@@ -57,6 +58,10 @@ class KtorModule {
                     }
                     level = LogLevel.ALL
                 }
+            }
+            install(HttpRequestRetry) {
+                retryOnException(maxRetries = 10)
+                exponentialDelay(base = 1.5, respectRetryAfterHeader = false)
             }
             install(ContentNegotiation) {
                 json(Json {

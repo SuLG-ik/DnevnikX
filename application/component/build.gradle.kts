@@ -52,7 +52,7 @@ dependencies {
     implementation(projects.application.ui)
     implementation(projects.ui.component)
     implementation(projects.diary.component)
-    implementation(projects.marks.component)
+    implementation(projects.marksHost.component)
     implementation(projects.accountHost.component)
     implementation(projects.accountSelector.component)
     implementation(projects.application.mvi)

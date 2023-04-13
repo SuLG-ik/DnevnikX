@@ -1,8 +1,9 @@
 package ru.sulgik.marks.domain
 
-import io.github.aakira.napier.Napier
 import ru.sulgik.auth.core.AuthScope
-import ru.sulgik.common.platform.DatePeriod
+import ru.sulgik.kacher.core.FlowResource
+import ru.sulgik.kacher.core.Merger
+import ru.sulgik.marks.domain.data.LessonOutput
 import ru.sulgik.marks.domain.data.MarksOutput
 
 class MergedCachedMarksRepository(
@@ -10,26 +11,41 @@ class MergedCachedMarksRepository(
     private val remoteMarksRepository: RemoteMarksRepository,
 ) : CachedMarksRepository {
 
-    override suspend fun getMarksFast(auth: AuthScope, period: DatePeriod): MarksOutput {
-        val localPeriods = localMarksRepository.getMarks(auth, period)
-        if (localPeriods != null) return localPeriods
-        val remotePeriods = remoteMarksRepository.getMarks(auth, period)
-        try {
-            localMarksRepository.saveMarks(auth, period, remotePeriods)
-        } catch (e: Exception) {
-            Napier.e("Save remote diary to local error", e)
-        }
-        return remotePeriods
+    private val merger = Merger.named("Marks")
+
+    override fun getMarksOld(
+        auth: AuthScope,
+        period: MarksOutput.Period
+    ): FlowResource<MarksOutput> {
+        return merger.local(localRequest = { localMarksRepository.getMarks(auth, period.period) })
     }
 
-    override suspend fun getMarksActual(auth: AuthScope, period: DatePeriod): MarksOutput {
-        val remotePeriods = remoteMarksRepository.getMarks(auth, period)
-        try {
-            localMarksRepository.saveMarks(auth, period, remotePeriods)
-        } catch (e: Exception) {
-            Napier.e("Save remote diary to local error", e)
-        }
-        return remotePeriods
+    override fun getMarks(auth: AuthScope, period: MarksOutput.Period): FlowResource<MarksOutput> {
+        return merger.merged(
+            localRequest = { localMarksRepository.getMarks(auth, period.period) },
+            save = { localMarksRepository.saveMarks(auth, it) },
+            remoteRequest = { remoteMarksRepository.getMarks(auth, period) },
+        )
+    }
+
+    override fun getMarksActual(
+        auth: AuthScope,
+        period: MarksOutput.Period
+    ): FlowResource<MarksOutput> {
+        return merger.remote(
+            save = { localMarksRepository.saveMarks(auth, it) },
+            remoteRequest = { remoteMarksRepository.getMarks(auth, period) },
+        )
+    }
+
+    override fun getLesson(
+        auth: AuthScope,
+        period: MarksOutput.Period,
+        title: String
+    ): FlowResource<LessonOutput> {
+        return merger.local(localRequest = {
+            localMarksRepository.getLesson(auth, period.period, title)
+        })
     }
 
 }

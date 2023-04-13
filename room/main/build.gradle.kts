@@ -38,6 +38,11 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
+        sourceSets {
+            getByName("androidTest") {
+                assets.srcDirs(files("$projectDir/schemas"))
+            }
+        }
     }
 }
 
@@ -57,4 +62,5 @@ dependencies {
     implementation(libs.bundles.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.junit.android)
+    androidTestImplementation(libs.room.testing)
 }

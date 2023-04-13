@@ -3,11 +3,14 @@ package ru.sulgik.diary.domain
 import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.diary.domain.data.DiaryOutput
+import ru.sulgik.kacher.core.FlowResource
 
 interface CachedDiaryRepository {
 
-    suspend fun getDiaryFast(auth: AuthScope, period: DatePeriod): DiaryOutput
+    fun getDiaryActual(auth: AuthScope, period: DatePeriod): FlowResource<DiaryOutput>
 
-    suspend fun getDiaryActual(auth: AuthScope, period: DatePeriod): DiaryOutput
+    fun getDiaryOld(auth: AuthScope, period: DatePeriod): FlowResource<DiaryOutput>
+
+    fun getDiary(auth: AuthScope, period: DatePeriod): FlowResource<DiaryOutput>
 
 }

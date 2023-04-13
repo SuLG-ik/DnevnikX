@@ -41,6 +41,7 @@ android {
 
 dependencies {
     api(projects.auth.core)
+    api(projects.kacher.core)
     implementation(projects.core.common)
 
     implementation(libs.mvi.core)

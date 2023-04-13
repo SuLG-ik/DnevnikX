@@ -1,7 +1,5 @@
 package ru.sulgik.kacher.core
 
-import kotlinx.coroutines.flow.Flow
-
 
 interface Merger {
 
@@ -10,14 +8,19 @@ interface Merger {
         defaultData: T? = null,
         save: suspend (T) -> Unit,
         remoteRequest: suspend () -> T,
-    ): Flow<Resource<T>>
+    ): FlowResource<T>
+
+    fun <T : Any> local(
+        defaultData: T? = null,
+        localRequest: suspend () -> T?,
+    ): FlowResource<T>
 
     fun <T : Any> merged(
         defaultData: T? = null,
         localRequest: suspend () -> T?,
         save: suspend (T) -> Unit,
         remoteRequest: suspend () -> T,
-    ): Flow<Resource<T>>
+    ): FlowResource<T>
 
     companion object {
 

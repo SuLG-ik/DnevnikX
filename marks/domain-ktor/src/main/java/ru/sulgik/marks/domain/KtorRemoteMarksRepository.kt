@@ -8,38 +8,42 @@ import kotlinx.serialization.Serializable
 import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.auth.ktor.Client
 import ru.sulgik.common.CustomLocalDateSerializer
-import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.common.safeBody
 import ru.sulgik.marks.domain.data.MarksOutput
 
 class KtorRemoteMarksRepository(
     private val client: Client,
 ) : RemoteMarksRepository {
-    override suspend fun getMarks(auth: AuthScope, period: DatePeriod): MarksOutput {
+    override suspend fun getMarks(auth: AuthScope, period: MarksOutput.Period): MarksOutput {
         val response = client.authorizedGet(auth, "getmarks") {
             parameter(
                 "days",
                 "${
-                    period.start.toJavaLocalDate().format(CustomLocalDateSerializer.formatter)
-                }-${period.end.toJavaLocalDate().format(CustomLocalDateSerializer.formatter)}"
+                    period.period.start.toJavaLocalDate()
+                        .format(CustomLocalDateSerializer.formatter)
+                }-${
+                    period.period.end.toJavaLocalDate().format(CustomLocalDateSerializer.formatter)
+                }"
             )
         }
         val student = response.safeBody<MarksResponse>().students.firstNotNullOf { it.value }
-        return MarksOutput(student.lessons.map { lesson ->
-            MarksOutput.Lesson(
-                title = lesson.title,
-                average = lesson.average,
-                averageValue = lesson.averageValue,
-                marks = lesson.marks.map { mark ->
-                    MarksOutput.Mark(
-                        mark = mark.mark,
-                        value = mark.value,
-                        date = mark.date,
-                        message = mark.message
-                    )
-                }
-            )
-        })
+        return MarksOutput(
+            period = period,
+            lessons = student.lessons.map { lesson ->
+                MarksOutput.Lesson(
+                    title = lesson.title,
+                    average = lesson.average,
+                    averageValue = lesson.averageValue,
+                    marks = lesson.marks.map { mark ->
+                        MarksOutput.Mark(
+                            mark = mark.mark,
+                            value = mark.value,
+                            date = mark.date,
+                            message = mark.message
+                        )
+                    }
+                )
+            })
     }
 }
 

@@ -1,12 +1,13 @@
 package ru.sulgik.periods.domain
 
 import ru.sulgik.auth.core.AuthScope
+import ru.sulgik.kacher.core.FlowResource
 import ru.sulgik.periods.domain.data.GetPeriodsOutput
 
 interface CachedPeriodsRepository {
 
-    suspend fun getPeriodsFast(auth: AuthScope): GetPeriodsOutput
+    fun getPeriods(auth: AuthScope): FlowResource<GetPeriodsOutput>
 
-    suspend fun getPeriodsActual(auth: AuthScope): GetPeriodsOutput
+    fun getPeriodsActual(auth: AuthScope): FlowResource<GetPeriodsOutput>
 
 }

@@ -81,6 +81,8 @@ include(":finalmarks:domain-room")
 include(":finalmarks:ui")
 include(":finalmarks:component")
 
+include(":marks-host:component")
+
 include(":marks:mvi")
 include(":marks:mvi-impl")
 include(":marks:domain")
@@ -90,12 +92,16 @@ include(":marks:domain-room")
 include(":marks:ui")
 include(":marks:component")
 
+include(":marksedit:mvi")
+include(":marksedit:mvi-impl")
+include(":marksedit:ui")
+include(":marksedit:component")
+
 include(":marksupdates:mvi")
 include(":marksupdates:mvi-impl")
 include(":marksupdates:domain")
 include(":marksupdates:domain-ktor")
 include(":marksupdates:domain-merged")
-//include(":marksupdates:domain-room")
 include(":marksupdates:ui")
 include(":marksupdates:component")
 
@@ -128,6 +134,7 @@ include(":auth:domain-ktor")
 include(":auth:ktor")
 include(":auth:ui")
 include(":auth:component")
+
 
 include(":account:mvi")
 

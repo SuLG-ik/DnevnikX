@@ -41,7 +41,7 @@ interface MarksStore : Store<MarksStore.Intent, MarksStore.State, MarksStore.Lab
 
         data class Marks(
             val selectedMark: SelectedMark? = null,
-            val data: ImmutableMap<Period, MarksData> = persistentMapOf(),
+            val data: ImmutableMap<Period, MarksLesson> = persistentMapOf(),
         )
 
         class SelectedMark(
@@ -49,7 +49,7 @@ interface MarksStore : Store<MarksStore.Intent, MarksStore.State, MarksStore.Lab
             val mark: Mark,
         )
 
-        data class MarksData(
+        data class MarksLesson(
             val isLoading: Boolean = true,
             val isRefreshing: Boolean = false,
             val lessons: List<Lesson>,

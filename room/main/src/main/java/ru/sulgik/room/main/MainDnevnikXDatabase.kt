@@ -1,5 +1,6 @@
 package ru.sulgik.room.main
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -13,10 +14,10 @@ import ru.sulgik.diary.domain.DiaryDateLessonEntity
 import ru.sulgik.diary.domain.LessonFileEntity
 import ru.sulgik.diary.domain.LessonHomeworkEntity
 import ru.sulgik.diary.domain.LessonMarkEntity
-import ru.sulgik.dnevnikx.repository.marks.room.MarksDao
 import ru.sulgik.finalmarks.domain.FinalMarksDao
 import ru.sulgik.finalmarks.domain.FinalMarksLessonEntity
 import ru.sulgik.finalmarks.domain.FinalMarksLessonMarkEntity
+import ru.sulgik.marks.domain.MarksDao
 import ru.sulgik.marks.domain.MarksLessonEntity
 import ru.sulgik.marks.domain.MarksLessonMarkEntity
 import ru.sulgik.marks.domain.MarksPeriodEntity
@@ -32,7 +33,9 @@ import ru.sulgik.periods.domain.room.PeriodDao
         MarksPeriodEntity::class, MarksLessonEntity::class, MarksLessonMarkEntity::class,
         FinalMarksLessonEntity::class, FinalMarksLessonMarkEntity::class,
     ],
-    version = 1,
+    version = 2,
+    autoMigrations = [AutoMigration(1, 2)],
+    exportSchema = true,
 )
 @TypeConverters(Converters::class)
 abstract class MainDnevnikXDatabase : RoomDatabase() {

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
@@ -49,6 +50,7 @@ dependencies {
 
     coreLibraryDesugaring(libs.desugar.libs)
     implementation(libs.kotlinx.datetime)
+    implementation(libs.essenty.parcelable)
     implementation(libs.koin.core)
     implementation(libs.activity.core)
     implementation(libs.ktor.core)

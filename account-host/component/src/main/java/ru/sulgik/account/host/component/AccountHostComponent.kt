@@ -17,9 +17,9 @@ import ru.sulgik.experimentalsettings.component.ExperimentalSettingsComponent
 import ru.sulgik.finalmarks.component.FinalMarksComponent
 import ru.sulgik.marksupdates.component.MarksUpdatesComponent
 import ru.sulgik.schedule.component.ScheduleComponent
-import ru.sulgik.ui.component.Content
 import ru.sulgik.ui.component.LocalNestedChildrenStackAnimator
 import ru.sulgik.ui.component.NamedConfig
+import ru.sulgik.ui.component.TrackedContent
 
 class AccountHostComponent(
     componentContext: AuthorizedComponentContext,
@@ -109,7 +109,9 @@ class AccountHostComponent(
     @Composable
     override fun Content(modifier: Modifier) {
         val animator = LocalNestedChildrenStackAnimator.current
-        childStack.Content(modifier = modifier, animation = stackAnimation { _, _, _ -> animator })
+        childStack.TrackedContent(
+            modifier = modifier,
+            animation = stackAnimation { _, _, _ -> animator })
     }
 
     private sealed interface Config : NamedConfig {

@@ -1,9 +1,13 @@
 package ru.sulgik.common.platform
 
 import androidx.compose.runtime.compositionLocalOf
+import com.arkivanov.essenty.parcelable.Parcelable
+import com.arkivanov.essenty.parcelable.Parcelize
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.toJavaLocalDate
+import kotlinx.datetime.toKotlinLocalDate
 
 interface TimeFormatter {
 
@@ -42,7 +46,22 @@ open class ComparableRange<T : Comparable<T>>(
 data class DatePeriod(
     override val start: LocalDate,
     val end: LocalDate,
-) : ComparableRange<LocalDate>(start, end)
+) : ComparableRange<LocalDate>(start, end) {
+
+    fun toParcelable(): DatePeriodParcelable {
+        return DatePeriodParcelable(start.toJavaLocalDate(), end.toJavaLocalDate())
+    }
+}
+
+@Parcelize
+data class DatePeriodParcelable(
+    val start: java.time.LocalDate,
+    val end: java.time.LocalDate
+) : Parcelable {
+    fun toDatePeriod(): DatePeriod {
+        return DatePeriod(start.toKotlinLocalDate(), end.toKotlinLocalDate())
+    }
+}
 
 
 data class TimePeriod(
@@ -50,4 +69,5 @@ data class TimePeriod(
     val end: LocalTime,
 )
 
-val LocalTimeFormatter = compositionLocalOf<TimeFormatter> { error("LocalTimeFormatter is not provided") }
+val LocalTimeFormatter =
+    compositionLocalOf<TimeFormatter> { error("LocalTimeFormatter is not provided") }

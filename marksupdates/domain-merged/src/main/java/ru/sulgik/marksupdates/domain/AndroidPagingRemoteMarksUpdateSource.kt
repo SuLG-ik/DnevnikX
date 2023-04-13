@@ -47,8 +47,12 @@ class AndroidPagingRemoteMarksUpdateSource(
         val job = Job()
         nextPageJob = job
         withContext(job) {
-            repeat(count) {
-                loadPage()
+            try {
+                repeat(count) {
+                    loadPage()
+                }
+            } catch (_: Exception) {
+
             }
         }
         toggleProcessing(false)
@@ -57,9 +61,13 @@ class AndroidPagingRemoteMarksUpdateSource(
     override suspend fun refreshPage(startCount: Int) {
         toggleProcessing(true)
         nextPageJob?.cancelAndJoin()
-        refresh()
-        repeat(startCount - 1) {
-            loadPage()
+        try {
+            refresh()
+            repeat(startCount - 1) {
+                loadPage()
+            }
+        } catch (_: Exception) {
+
         }
         toggleProcessing(false)
     }

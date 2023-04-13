@@ -3,6 +3,7 @@ package ru.sulgik.marks.component
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.core.AuthorizedComponentContext
 import ru.sulgik.core.BaseAuthorizedComponentContext
 import ru.sulgik.core.childDIContext
@@ -14,6 +15,7 @@ import ru.sulgik.modal.ui.ModalUI
 
 class MarksComponent(
     componentContext: AuthorizedComponentContext,
+    private val onEdit: (period: DatePeriod, periodTitle: String, title: String) -> Unit,
 ) : BaseAuthorizedComponentContext(componentContext) {
 
     private val store = getStore<MarksStore>()
@@ -39,6 +41,10 @@ class MarksComponent(
         store.accept(MarksStore.Intent.RefreshMarks(period))
     }
 
+    private fun onEdit(period: MarksStore.State.Period, lesson: MarksStore.State.Lesson) {
+        onEdit.invoke(period.period, period.title, lesson.title)
+    }
+
     @Composable
     override fun Content(modifier: Modifier) {
         ModalUI(component = markInfo) {
@@ -48,9 +54,11 @@ class MarksComponent(
                 onSelect = this::onSelect,
                 onMark = this::onMark,
                 onRefresh = this::onRefresh,
+                onEdit = this::onEdit,
                 modifier = modifier,
             )
         }
     }
+
 
 }
