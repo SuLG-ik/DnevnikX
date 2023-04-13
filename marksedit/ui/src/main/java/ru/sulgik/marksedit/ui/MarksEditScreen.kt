@@ -220,7 +220,7 @@ fun Mark(
         modifier = modifier
             .padding(top = 20.dp)
             .width(with(LocalDensity.current) {
-                16.sp.toDp() * 3
+                16.sp.toDp() * 2.75f
             })
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },

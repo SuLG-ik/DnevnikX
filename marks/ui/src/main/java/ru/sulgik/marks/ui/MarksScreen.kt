@@ -217,7 +217,8 @@ fun Lesson(
         }
         Spacer(modifier = Modifier.height(10.dp))
         FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
         ) {
             lesson.marks.forEach { mark ->
                 MarkWithMessage(mark = mark, onClick = onMark)
