@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -20,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
@@ -33,6 +33,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,6 +46,11 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
@@ -55,12 +61,15 @@ import ru.sulgik.marksedit.mvi.MarksEditStore
 import ru.sulgik.ui.core.AnimatedContentWithPlaceholder
 import ru.sulgik.ui.core.DesignedDivider
 import ru.sulgik.ui.core.ExtendedTheme
+import ru.sulgik.ui.core.defaultPlaceholder
 import ru.sulgik.ui.core.optionalBackNavigationIcon
+import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun MarksEditScreen(
     lessonData: MarksEditStore.State.LessonData,
+    changes: MarksEditStore.State.Changes,
     onAddMark: (Int) -> Unit,
     onClear: () -> Unit,
     onChangeStatus: (index: Int) -> Unit,
@@ -78,20 +87,25 @@ fun MarksEditScreen(
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Row(
-                            modifier = Modifier.basicMarquee()
+                        AnimatedContentWithPlaceholder(
+                            isLoading = lessonData.isLoading,
+                            state = lessonData.data,
+                            placeholderContent = {
+                                Text("Программирование", modifier = Modifier.defaultPlaceholder())
+                            },
                         ) {
-                            Text("Что если: ")
-                            AnimatedContentWithPlaceholder(
-                                isLoading = lessonData.isLoading,
-                                state = lessonData.data,
-                            ) {
-                                Text(it.title)
-                            }
+                            Text(it.title, modifier = Modifier.basicMarquee())
                         }
                         AnimatedContentWithPlaceholder(
                             isLoading = lessonData.isLoading,
                             state = lessonData.period,
+                            placeholderContent = {
+                                Text(
+                                    "1 полугодие",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.defaultPlaceholder()
+                                )
+                            },
                         ) {
                             Text(
                                 text = it.title,
@@ -123,6 +137,7 @@ fun MarksEditScreen(
         },
         bottomBar = {
             MarksEditKeyboard(
+                changes = changes,
                 onAddMark = onAddMark,
                 onClear = onClear,
                 modifier = Modifier
@@ -164,7 +179,7 @@ fun MarksEditScreen(
                 LaunchedEffect(key1 = lesson, block = {
                     if (previousSize.value < lesson.marks.size) {
                         isAutoScrolling.value = true
-                        delay(100)
+                        delay(25)
                         scrollState.animateScrollTo(
                             scrollState.maxValue
                         )
@@ -250,6 +265,20 @@ fun Mark(
     }
 }
 
+
+@Composable
+fun MarkPlaceholder(
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .padding(5.dp)
+            .size(width = 40.dp, height = 60.dp)
+            .defaultPlaceholder(),
+    )
+
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LessonMarks(
@@ -277,46 +306,91 @@ fun LessonMarks(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun LessonMarksPlaceholder(
+    modifier: Modifier
+) {
+    FlowRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(13.dp, Alignment.CenterHorizontally),
+    ) {
+        repeat(12) {
+            MarkPlaceholder()
+        }
+    }
+}
+
 val keyboardMarks = listOf(
     4, 5,
     2, 3
 )
 
+@Composable
+private fun MarksEditStore.State.Changes.Change.buildText(): AnnotatedString {
+    return buildAnnotatedString {
+        withStyle(SpanStyle(color = value.markColor(), fontWeight = FontWeight.Bold)) {
+            append(value.toString())
+        }
+        append(" на ${abs(offset)} ")
+        if (offset > 0) {
+            append("больше")
+        } else {
+            append("меньше")
+        }
+    }
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MarksEditKeyboard(
+    changes: MarksEditStore.State.Changes,
     onAddMark: (Int) -> Unit,
     onClear: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    Surface(
+        shadowElevation = 4.dp,
+        shape = MaterialTheme.shapes.extraLarge.copy(
+            bottomEnd = CornerSize(0),
+            bottomStart = CornerSize(0)
+        ),
         modifier = modifier
-            .padding(horizontal = ExtendedTheme.dimensions.mainContentPadding),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        DesignedDivider(modifier = Modifier.fillMaxWidth())
-        FlowRow(
-            maxItemsInEachRow = 2,
-            horizontalArrangement = Arrangement.spacedBy(12.5.dp, Alignment.CenterHorizontally),
-            verticalArrangement = Arrangement.spacedBy(7.5.dp, Alignment.CenterVertically),
-            modifier = Modifier.fillMaxWidth(),
+        Column(
+            modifier = Modifier
+                .padding(ExtendedTheme.dimensions.mainContentPadding)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            keyboardMarks.forEach {
-                MarksEditKeyboardButton(
-                    value = it,
-                    onAddMark = onAddMark,
+            DesignedDivider(modifier = Modifier.fillMaxWidth())
+            changes.changes.forEach {
+                Text(it.buildText())
+            }
+            FlowRow(
+                maxItemsInEachRow = 2,
+                horizontalArrangement = Arrangement.spacedBy(12.5.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(7.5.dp, Alignment.CenterVertically),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                keyboardMarks.forEach {
+                    MarksEditKeyboardButton(
+                        value = it,
+                        onAddMark = onAddMark,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f, fill = false)
+                    )
+                }
+                OutlinedButton(
+                    onClick = onClear,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f, fill = false)
-                )
-            }
-            OutlinedButton(
-                onClick = onClear,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f, fill = false),
-            ) {
-                Text("Очистить", style = MaterialTheme.typography.bodyLarge)
+                        .weight(1f, fill = false),
+                ) {
+                    Text("Очистить", style = MaterialTheme.typography.bodyLarge)
+                }
             }
         }
     }

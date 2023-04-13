@@ -114,6 +114,7 @@ class MarksEditStoreImpl(
                     val data = lessonData.data
                     val average = it.marks.calculateAverage()
                     copy(
+                        changes = average.third,
                         lessonData = lessonData.copy(
                             isLoading = false,
                             data = data?.copy(
@@ -147,17 +148,33 @@ class MarksEditStoreImpl(
 
 }
 
-private fun List<MarksEditStore.State.Mark>.calculateAverage(): Pair<Int, String> {
+private fun List<MarksEditStore.State.Mark>.calculateAverage(): Triple<Int, String, MarksEditStore.State.Changes> {
     var count = 0
     var sum = 0
+    val changesCount = mutableMapOf<Int, Int>()
     forEach {
-        if (it.value != 0 && it.status == MarksEditStore.State.MarkStatus.ENABLED) {
+        if (it.value == 0) return@forEach
+        changesCount.compute(it.value) { _, prev ->
+            val delta = when {
+                it.status == MarksEditStore.State.MarkStatus.DISABLED -> -1
+                it.date == null -> 1
+                else -> 0
+            }
+            prev?.plus(delta) ?: delta
+        }
+        if (it.status == MarksEditStore.State.MarkStatus.ENABLED) {
             count += 1
             sum += it.value
         }
     }
+    val changes =
+        MarksEditStore.State.Changes(
+            calculateChanges(
+                changesCount = changesCount,
+            ).toPersistentList()
+        )
     if (count == 0 || sum == 0) {
-        return 0 to "0"
+        return Triple(0, "0", changes)
     }
     val average = sum.toDouble() / count.toDouble()
     val averageValue = when {
@@ -168,7 +185,16 @@ private fun List<MarksEditStore.State.Mark>.calculateAverage(): Pair<Int, String
     }
     val bd = BigDecimal(average)
     val roundoff = bd.setScale(2, RoundingMode.HALF_UP)
-    return averageValue to roundoff.toEngineeringString().removeSuffix(".00")
+    return Triple(averageValue, roundoff.toEngineeringString().removeSuffix(".00"), changes)
+}
+
+private fun calculateChanges(
+    changesCount: Map<Int, Int>,
+): List<MarksEditStore.State.Changes.Change> {
+    return changesCount.mapNotNull { (key, value) ->
+        if (value == 0) return@mapNotNull null
+        MarksEditStore.State.Changes.Change(key, value)
+    }.sortedByDescending { it.value }
 }
 
 

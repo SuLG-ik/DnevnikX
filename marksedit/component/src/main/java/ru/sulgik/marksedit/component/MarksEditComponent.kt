@@ -48,6 +48,7 @@ class MarksEditComponent(
     override fun Content(modifier: Modifier) {
         MarksEditScreen(
             lessonData = state.lessonData,
+            changes = state.changes,
             onAddMark = this::onAddMark,
             onChangeStatus = this::onChangeStatus,
             onClear = this::onClear,

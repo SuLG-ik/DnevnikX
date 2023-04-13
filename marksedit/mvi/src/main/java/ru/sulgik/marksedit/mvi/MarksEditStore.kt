@@ -1,6 +1,7 @@
 package ru.sulgik.marksedit.mvi
 
 import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.LocalDate
 import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.core.ParametrizedStore
@@ -21,6 +22,7 @@ interface MarksEditStore :
     sealed interface Intent {
 
         data class AddMark(val value: Int) : Intent
+
         data class ChangeStatus(val index: Int) : Intent
 
         object Clear : Intent
@@ -28,8 +30,18 @@ interface MarksEditStore :
     }
 
     data class State(
+        val changes: Changes = Changes(),
         val lessonData: LessonData = LessonData(),
     ) {
+
+        data class Changes(
+            val changes: PersistentList<Change> = persistentListOf()
+        ) {
+            data class Change(
+                val value: Int,
+                val offset: Int,
+            )
+        }
 
         data class LessonData(
             val isLoading: Boolean = true,
