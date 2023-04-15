@@ -11,7 +11,7 @@ import ru.sulgik.core.getStore
 import ru.sulgik.core.states
 import ru.sulgik.marks.mvi.MarksStore
 import ru.sulgik.marks.ui.MarksScreen
-import ru.sulgik.modal.ui.ModalUI
+import ru.sulgik.modal.ui.FloatingModalUI
 
 class MarksComponent(
     componentContext: AuthorizedComponentContext,
@@ -47,7 +47,7 @@ class MarksComponent(
 
     @Composable
     override fun Content(modifier: Modifier) {
-        ModalUI(component = markInfo) {
+        FloatingModalUI(component = markInfo) {
             MarksScreen(
                 periods = state.periods,
                 marks = state.marks,

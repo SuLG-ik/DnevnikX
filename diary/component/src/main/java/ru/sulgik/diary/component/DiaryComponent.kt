@@ -18,7 +18,7 @@ import ru.sulgik.core.getStore
 import ru.sulgik.core.states
 import ru.sulgik.diary.mvi.DiaryStore
 import ru.sulgik.diary.ui.DiaryScreen
-import ru.sulgik.modal.ui.ModalUI
+import ru.sulgik.modal.ui.FloatingModalUI
 import ru.sulgik.picker.component.PickerComponent
 import ru.sulgik.picker.ui.PickerInfo
 import java.time.LocalDate
@@ -99,8 +99,8 @@ class DiaryComponent(
 
     @Composable
     override fun Content(modifier: Modifier) {
-        ModalUI(component = picker) {
-            ModalUI(component = lessonInfo) {
+        FloatingModalUI(component = picker) {
+            FloatingModalUI(component = lessonInfo) {
                 DiaryScreen(
                     periods = state.periods,
                     diary = state.diary,

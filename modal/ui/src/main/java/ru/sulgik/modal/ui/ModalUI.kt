@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import ru.sulgik.modal.component.Modal
 import ru.sulgik.ui.modal.BlurModalBottomSheetValue
@@ -27,7 +28,7 @@ fun FloatingModalUI(
         rememberBlurModalBottomSheetState(
             initialValue = if (firstState.isVisible) BlurModalBottomSheetValue.Expanded else BlurModalBottomSheetValue.Hidden,
             skipHalfExpanded = true,
-            confirmStateChange = remember(component) {
+            confirmValueChange = remember(component) {
                 {
                     if (it == BlurModalBottomSheetValue.Hidden) {
                         component.updateState(false)
@@ -72,7 +73,7 @@ fun ModalUI(
         rememberBlurModalBottomSheetState(
             initialValue = if (firstState.isVisible) BlurModalBottomSheetValue.Expanded else BlurModalBottomSheetValue.Hidden,
             skipHalfExpanded = true,
-            confirmStateChange = remember(component) {
+            confirmValueChange = remember(component) {
                 {
                     if (it == BlurModalBottomSheetValue.Hidden) {
                         component.updateState(false)
@@ -104,14 +105,14 @@ fun ModalUI(
         sheetContent = {
             component.Content(modifier = Modifier.fillMaxWidth())
         },
-        sheetElevation = 0.dp,
+        sheetElevation = if (LocalConfiguration.current.screenWidthDp <= 650) 0.dp else 4.dp,
         showDivider = showDivider,
-        sheetPadding = 0.dp,
+        sheetPadding = if (LocalConfiguration.current.screenWidthDp <= 650) 0.dp else 10.dp,
         modifier = modifier,
-        sheetShape = MaterialTheme.shapes.extraLarge.copy(
+        sheetShape = if (LocalConfiguration.current.screenWidthDp <= 650) MaterialTheme.shapes.extraLarge.copy(
             bottomEnd = ZeroCornerSize,
             bottomStart = ZeroCornerSize
-        ),
+        ) else MaterialTheme.shapes.extraLarge,
         content = content,
     )
 }

@@ -3,9 +3,11 @@ package ru.sulgik.picker.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
+import ru.sulgik.ui.core.ExtendedTheme
 
 @Parcelize
 data class PickerInfo<T : Parcelable>(
@@ -45,9 +48,15 @@ fun <T : Parcelable> PickerScreen(
                 textStyle = MaterialTheme.typography.titleLarge,
             )
         Box(
-            modifier = Modifier.background(MaterialTheme.colorScheme.background)
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
         ) {
-            OutlinedButton(onClick = { onContinue(currentItem) }) {
+            TextButton(
+                onClick = { onContinue(currentItem) },
+                modifier = Modifier.padding(bottom = ExtendedTheme.dimensions.mainContentPadding)
+            ) {
                 Text("Выбрать")
             }
         }

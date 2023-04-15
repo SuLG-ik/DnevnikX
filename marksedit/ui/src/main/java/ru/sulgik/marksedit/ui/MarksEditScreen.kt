@@ -1,8 +1,14 @@
 package ru.sulgik.marksedit.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -23,6 +29,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -44,14 +51,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
@@ -64,7 +66,6 @@ import ru.sulgik.ui.core.DesignedDivider
 import ru.sulgik.ui.core.ExtendedTheme
 import ru.sulgik.ui.core.defaultPlaceholder
 import ru.sulgik.ui.core.optionalBackNavigationIcon
-import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -327,21 +328,6 @@ val keyboardMarks = listOf(
     2, 3
 )
 
-@Composable
-private fun MarksEditStore.State.Changes.Change.buildText(): AnnotatedString {
-    return buildAnnotatedString {
-        withStyle(SpanStyle(color = value.markColor(), fontWeight = FontWeight.Bold)) {
-            append(value.toString())
-        }
-        append(" на ${abs(offset)} ")
-        if (offset > 0) {
-            append("больше")
-        } else {
-            append("меньше")
-        }
-    }
-}
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MarksEditKeyboard(
@@ -366,12 +352,8 @@ fun MarksEditKeyboard(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             DesignedDivider(modifier = Modifier.fillMaxWidth())
-            if (LocalConfiguration.current.screenHeightDp >= 600)
-                changes.changes.forEach {
-                    Text(it.buildText())
-                }
             FlowRow(
-                maxItemsInEachRow = if (LocalConfiguration.current.screenHeightDp >= 600) 2 else 5,
+                maxItemsInEachRow = 2,
                 horizontalArrangement = Arrangement.spacedBy(
                     12.5.dp,
                     Alignment.CenterHorizontally
@@ -381,6 +363,7 @@ fun MarksEditKeyboard(
             ) {
                 keyboardMarks.forEach {
                     MarksEditKeyboardButton(
+                        changesCount = changes.changes.getOrDefault(it, 0),
                         value = it,
                         onAddMark = onAddMark,
                         modifier = Modifier
@@ -401,19 +384,51 @@ fun MarksEditKeyboard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MarksEditKeyboardButton(
+    changesCount: Int,
     value: Int, onAddMark: (Int) -> Unit, modifier: Modifier = Modifier
 ) {
-    OutlinedButton(
-        onClick = remember(value, onAddMark) { { onAddMark(value) } },
-        colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = value.markColor(),
-            containerColor = value.markColor().copy(alpha = 0.04f),
-        ),
+    Box(
         modifier = modifier,
     ) {
-        Text(value.toString(), style = MaterialTheme.typography.bodyLarge)
+        OutlinedButton(
+            onClick = remember(value, onAddMark) { { onAddMark(value) } },
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = value.markColor(),
+                containerColor = value.markColor().copy(alpha = 0.04f),
+            ),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                value.toString(),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier,
+            )
+        }
+        AnimatedVisibility(
+            visible = changesCount != 0,
+            modifier = Modifier.align(Alignment.TopEnd),
+            enter = fadeIn(tween(150)),
+            exit = fadeOut(tween(150))
+        ) {
+            Badge {
+                AnimatedContent(
+                    targetState = changesCount,
+                    label = "marK_changes",
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(50, delayMillis = 20)) with
+                                fadeOut(animationSpec = tween(90))
+                    }) {
+                    Text(
+                        text = it.toString(),
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
     }
 }
 

@@ -8,6 +8,7 @@ import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.plus
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -169,9 +170,7 @@ private fun List<MarksEditStore.State.Mark>.calculateAverage(): Triple<Int, Stri
     }
     val changes =
         MarksEditStore.State.Changes(
-            calculateChanges(
-                changesCount = changesCount,
-            ).toPersistentList()
+            changes = changesCount.toPersistentMap(),
         )
     if (count == 0 || sum == 0) {
         return Triple(0, "0", changes)
@@ -187,16 +186,6 @@ private fun List<MarksEditStore.State.Mark>.calculateAverage(): Triple<Int, Stri
     val roundoff = bd.setScale(2, RoundingMode.HALF_UP)
     return Triple(averageValue, roundoff.toEngineeringString().removeSuffix(".00"), changes)
 }
-
-private fun calculateChanges(
-    changesCount: Map<Int, Int>,
-): List<MarksEditStore.State.Changes.Change> {
-    return changesCount.mapNotNull { (key, value) ->
-        if (value == 0) return@mapNotNull null
-        MarksEditStore.State.Changes.Change(key, value)
-    }.sortedByDescending { it.value }
-}
-
 
 private fun MarksEditStore.State.MarkStatus.inverse(): MarksEditStore.State.MarkStatus {
     return when (this) {

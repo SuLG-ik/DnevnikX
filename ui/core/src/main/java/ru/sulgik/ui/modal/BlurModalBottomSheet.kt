@@ -1,6 +1,5 @@
 package ru.sulgik.ui.modal
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.animateDpAsState
@@ -17,26 +16,31 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.SwipeableDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.semantics.collapse
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.dismiss
@@ -45,10 +49,13 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import ru.sulgik.ui.modal.BlurModalBottomSheetValue.*
+import ru.sulgik.ui.modal.SwipeableV2Defaults.PositionalThreshold
+import ru.sulgik.ui.modal.SwipeableV2Defaults.VelocityThreshold
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -85,31 +92,58 @@ enum class BlurModalBottomSheetValue {
  * <b>Must not be set to true if the [initialValue] is [BlurModalBottomSheetValue.HalfExpanded].</b>
  * If supplied with [BlurModalBottomSheetValue.HalfExpanded] for the [initialValue], an
  * [IllegalArgumentException] will be thrown.
- * @param confirmStateChange Optional callback invoked to confirm or veto a pending state change.
+ * @param confirmValueChange Optional callback invoked to confirm or veto a pending state change.
  */
+@OptIn(ExperimentalMaterialApi::class)
 open class BlurModalBottomSheetState(
     initialValue: BlurModalBottomSheetValue,
     animationSpec: AnimationSpec<Float> = SwipeableDefaults.AnimationSpec,
     internal val isSkipHalfExpanded: Boolean,
-    confirmStateChange: (BlurModalBottomSheetValue) -> Boolean = { true },
-) : SwipeableState<BlurModalBottomSheetValue>(
-    initialValue = initialValue,
-    animationSpec = animationSpec,
-    confirmStateChange = confirmStateChange
+    confirmValueChange: (BlurModalBottomSheetValue) -> Boolean = { true },
 ) {
     /**
      * Whether the bottom sheet is visible.
      */
+    internal val swipeableState = SwipeableV2State(
+        initialValue = initialValue,
+        animationSpec = animationSpec,
+        confirmValueChange = confirmValueChange,
+        positionalThreshold = PositionalThreshold,
+        velocityThreshold = VelocityThreshold
+    )
+
+
+    val currentValue: BlurModalBottomSheetValue
+        get() = swipeableState.currentValue
+
+
+    val targetValue: BlurModalBottomSheetValue
+        get() = swipeableState.targetValue
+
+    /**
+     * Whether the bottom sheet is visible.
+     */
+
     val isVisible: Boolean
-        get() = currentValue != Hidden
+        get() = swipeableState.currentValue != Hidden
+
 
     internal val hasHalfExpandedState: Boolean
-        get() = anchors.values.contains(HalfExpanded)
+        get() = swipeableState.hasAnchorForValue(HalfExpanded)
 
+    @Deprecated(
+        message = "This constructor is deprecated. confirmStateChange has been renamed to " +
+                "confirmValueChange.",
+        replaceWith = ReplaceWith(
+            "ModalBottomSheetState(" +
+                    "initialValue, animationSpec, confirmStateChange, false)"
+        )
+    )
+    @Suppress("Deprecation")
     constructor(
         initialValue: BlurModalBottomSheetValue,
-        animationSpec: AnimationSpec<Float> = SwipeableDefaults.AnimationSpec,
-        confirmStateChange: (BlurModalBottomSheetValue) -> Boolean = { true },
+        animationSpec: AnimationSpec<Float>,
+        confirmStateChange: (BlurModalBottomSheetValue) -> Boolean
     ) : this(initialValue, animationSpec, isSkipHalfExpanded = false, confirmStateChange)
 
     init {
@@ -133,10 +167,7 @@ open class BlurModalBottomSheetState(
             hasHalfExpandedState -> HalfExpanded
             else -> Expanded
         }
-        try {
-            animateTo(targetValue = targetValue)
-        } catch (_: CancellationException) {
-        }
+        animateTo(targetValue)
     }
 
     /**
@@ -149,10 +180,7 @@ open class BlurModalBottomSheetState(
         if (!hasHalfExpandedState) {
             return
         }
-        try {
-            animateTo(HalfExpanded)
-        } catch (_: CancellationException) {
-        }
+        animateTo(HalfExpanded)
     }
 
     /**
@@ -161,9 +189,12 @@ open class BlurModalBottomSheetState(
      * *
      * @throws [CancellationException] if the animation is interrupted
      */
-    internal suspend fun expand() = try {
+
+    internal suspend fun expand() {
+        if (!swipeableState.hasAnchorForValue(Expanded)) {
+            return
+        }
         animateTo(Expanded)
-    } catch (_: CancellationException) {
     }
 
     /**
@@ -172,21 +203,35 @@ open class BlurModalBottomSheetState(
      *
      * @throws [CancellationException] if the animation is interrupted
      */
-    suspend fun hide() = try {
-        animateTo(Hidden)
-    } catch (_: CancellationException) {
+    suspend fun hide() = animateTo(Hidden)
+
+    internal suspend fun animateTo(
+        target: BlurModalBottomSheetValue,
+        velocity: Float = swipeableState.lastVelocity
+    ) = swipeableState.animateTo(target, velocity)
+
+    internal suspend fun snapTo(target: BlurModalBottomSheetValue) = swipeableState.snapTo(target)
+
+    internal fun trySnapTo(target: BlurModalBottomSheetValue): Boolean {
+        return swipeableState.trySnapTo(target)
     }
 
-    internal val nestedScrollConnection = this.PreUpPostDownNestedScrollConnection
+    internal fun requireOffset() = swipeableState.requireOffset()
+
+    internal val lastVelocity: Float get() = swipeableState.lastVelocity
+
+    internal val isAnimationRunning: Boolean get() = swipeableState.isAnimationRunning
 
     companion object {
         /**
-         * The default [Saver] implementation for [BlurModalBottomSheetState].
+         * The default [Saver] implementation for [ModalBottomSheetState].
+         * Saves the [currentValue] and recreates a [ModalBottomSheetState] with the saved value as
+         * initial value.
          */
         fun Saver(
             animationSpec: AnimationSpec<Float>,
+            confirmValueChange: (BlurModalBottomSheetValue) -> Boolean,
             skipHalfExpanded: Boolean,
-            confirmStateChange: (BlurModalBottomSheetValue) -> Boolean,
         ): Saver<BlurModalBottomSheetState, *> = Saver(
             save = { it.currentValue },
             restore = {
@@ -194,32 +239,11 @@ open class BlurModalBottomSheetState(
                     initialValue = it,
                     animationSpec = animationSpec,
                     isSkipHalfExpanded = skipHalfExpanded,
-                    confirmStateChange = confirmStateChange
+                    confirmValueChange = confirmValueChange
                 )
             }
         )
 
-        /**
-         * The default [Saver] implementation for [BlurModalBottomSheetState].
-         */
-        @Deprecated(
-            message = "Please specify the skipHalfExpanded parameter",
-            replaceWith = ReplaceWith(
-                "ModalBottomSheetState.Saver(" +
-                        "animationSpec = animationSpec," +
-                        "skipHalfExpanded = ," +
-                        "confirmStateChange = confirmStateChange" +
-                        ")"
-            )
-        )
-        fun Saver(
-            animationSpec: AnimationSpec<Float>,
-            confirmStateChange: (BlurModalBottomSheetValue) -> Boolean,
-        ): Saver<BlurModalBottomSheetState, *> = Saver(
-            animationSpec = animationSpec,
-            skipHalfExpanded = false,
-            confirmStateChange = confirmStateChange
-        )
     }
 }
 
@@ -228,57 +252,37 @@ open class BlurModalBottomSheetState(
  *
  * @param initialValue The initial value of the state.
  * @param animationSpec The default animation that will be used to animate to a new state.
- * @param skipHalfExpanded Whether the half expanded state, if the sheet is tall enough, should
- * be skipped. If true, the sheet will always expand to the [Expanded] state and move to the
- * [Hidden] state when hiding the sheet, either programmatically or by user interaction.
- * <b>Must not be set to true if the [initialValue] is [BlurModalBottomSheetValue.HalfExpanded].</b>
- * If supplied with [BlurModalBottomSheetValue.HalfExpanded] for the [initialValue], an
- * [IllegalArgumentException] will be thrown.
- * @param confirmStateChange Optional callback invoked to confirm or veto a pending state change.
+ * @param confirmValueChange Optional callback invoked to confirm or veto a pending state change.
  */
 @Composable
-
 fun rememberBlurModalBottomSheetState(
     initialValue: BlurModalBottomSheetValue,
     animationSpec: AnimationSpec<Float> = SwipeableDefaults.AnimationSpec,
-    skipHalfExpanded: Boolean,
-    confirmStateChange: (BlurModalBottomSheetValue) -> Boolean = { true },
+    confirmValueChange: (BlurModalBottomSheetValue) -> Boolean = { true },
+    skipHalfExpanded: Boolean = false,
 ): BlurModalBottomSheetState {
-    return rememberSaveable(
-        initialValue, animationSpec, skipHalfExpanded, confirmStateChange,
-        saver = BlurModalBottomSheetState.Saver(
-            animationSpec = animationSpec,
-            skipHalfExpanded = skipHalfExpanded,
-            confirmStateChange = confirmStateChange
-        )
-    ) {
-        BlurModalBottomSheetState(
-            initialValue = initialValue,
-            animationSpec = animationSpec,
-            isSkipHalfExpanded = skipHalfExpanded,
-            confirmStateChange = confirmStateChange
-        )
+    // Key the rememberSaveable against the initial value. If it changed we don't want to attempt
+    // to restore as the restored value could have been saved with a now invalid set of anchors.
+    // b/152014032
+    return key(initialValue) {
+        rememberSaveable(
+            initialValue, animationSpec, skipHalfExpanded, confirmValueChange,
+            saver = BlurModalBottomSheetState.Saver(
+                animationSpec = animationSpec,
+                skipHalfExpanded = skipHalfExpanded,
+                confirmValueChange = confirmValueChange
+            )
+        ) {
+            BlurModalBottomSheetState(
+                initialValue = initialValue,
+                animationSpec = animationSpec,
+                isSkipHalfExpanded = skipHalfExpanded,
+                confirmValueChange = confirmValueChange
+            )
+        }
     }
 }
 
-/**
- * Create a [BlurModalBottomSheetState] and [remember] it.
- *
- * @param initialValue The initial value of the state.
- * @param animationSpec The default animation that will be used to animate to a new state.
- * @param confirmStateChange Optional callback invoked to confirm or veto a pending state change.
- */
-@Composable
-fun rememberBlurModalBottomSheetState(
-    initialValue: BlurModalBottomSheetValue,
-    animationSpec: AnimationSpec<Float> = SwipeableDefaults.AnimationSpec,
-    confirmStateChange: (BlurModalBottomSheetValue) -> Boolean = { true },
-): BlurModalBottomSheetState = rememberBlurModalBottomSheetState(
-    initialValue = initialValue,
-    animationSpec = animationSpec,
-    skipHalfExpanded = false,
-    confirmStateChange = confirmStateChange
-)
 
 /**
  * <a href="https://material.io/components/sheets-bottom#modal-bottom-sheet" class="external" target="_blank">Material Design modal bottom sheet</a>.
@@ -325,18 +329,33 @@ fun BlurModalBottomSheetLayout(
     content: @Composable () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    BackHandler(enabled = sheetState.isVisible) {
-        if (sheetState.confirmStateChange(Hidden)) {
-            scope.launch { sheetState.hide() }
-        }
+    val orientation = Orientation.Vertical
+    val anchorChangeHandler = remember(sheetState, scope) {
+        ModalBottomSheetAnchorChangeHandler(
+            state = sheetState,
+            animateTo = { target, velocity ->
+                scope.launch { sheetState.animateTo(target, velocity = velocity) }
+            },
+            snapTo = { target ->
+                val didSnapSynchronously = sheetState.trySnapTo(target)
+                if (!didSnapSynchronously) scope.launch { sheetState.snapTo(target) }
+            }
+        )
     }
     BoxWithConstraints(modifier) {
         val fullHeight = constraints.maxHeight.toFloat()
-        val sheetHeightState = remember { mutableStateOf<Float?>(null) }
         val scaleFactor =
-            animateFloatAsState(if (sheetState.targetValue != Hidden) scale else 1f, tween(250))
+            animateFloatAsState(
+                targetValue = if (sheetState.targetValue != Hidden) scale else 1f,
+                animationSpec = tween(250),
+                label = "bottom_sheet_scale"
+            )
         val blurFactor =
-            animateDpAsState(if (sheetState.targetValue != Hidden) blur else 0.dp, tween(250))
+            animateDpAsState(
+                targetValue = if (sheetState.targetValue != Hidden) blur else 0.dp,
+                animationSpec = tween(250),
+                label = "bottom_sheet_blur"
+            )
         Box(
             Modifier
                 .fillMaxSize()
@@ -352,7 +371,7 @@ fun BlurModalBottomSheetLayout(
             Scrim(
                 color = scrimColor,
                 onDismiss = {
-                    if (sheetState.confirmStateChange(Hidden)) {
+                    if (sheetState.swipeableState.confirmValueChange(Hidden)) {
                         scope.launch { sheetState.hide() }
                     }
                 },
@@ -360,41 +379,80 @@ fun BlurModalBottomSheetLayout(
             )
         }
         Surface(
-            modifier = Modifier
+            Modifier
+                .align(Alignment.TopCenter) // We offset from the top so we'll center from there
+                .widthIn(max = 640.dp)
                 .fillMaxWidth()
-                .nestedScroll(sheetState.nestedScrollConnection)
-                .offset {
-                    val y = if (sheetState.anchors.isEmpty()) {
-                        // if we don't know our anchors yet, render the sheet as hidden
-                        fullHeight.roundToInt()
-                    } else {
-                        // if we do know our anchors, respect them
-                        sheetState.offset.value.roundToInt()
+                .nestedScroll(
+                    remember(sheetState.swipeableState, orientation) {
+                        ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
+                            state = sheetState.swipeableState,
+                            orientation = orientation
+                        )
                     }
-                    IntOffset(0, y)
+                )
+                .offset {
+                    IntOffset(
+                        0,
+                        sheetState.swipeableState
+                            .requireOffset()
+                            .roundToInt()
+                    )
                 }
-                .bottomSheetSwipeable(sheetState, fullHeight, sheetHeightState)
-                .onGloballyPositioned {
-                    sheetHeightState.value = it.size.height.toFloat()
+                .swipeableV2(
+                    state = sheetState.swipeableState,
+                    orientation = orientation,
+                    enabled = sheetState.swipeableState.currentValue != Hidden,
+                )
+                .swipeAnchors(
+                    state = sheetState.swipeableState,
+                    possibleValues = setOf(
+                        Hidden,
+                        HalfExpanded,
+                        Expanded
+                    ),
+                    anchorChangeHandler = anchorChangeHandler
+                ) { state, sheetSize ->
+                    when (state) {
+                        Hidden -> fullHeight
+                        HalfExpanded -> when {
+                            sheetSize.height < fullHeight / 2f -> null
+                            sheetState.isSkipHalfExpanded -> null
+                            else -> fullHeight / 2f
+                        }
+
+                        Expanded -> if (sheetSize.height != 0) {
+                            max(0f, fullHeight - sheetSize.height)
+                        } else null
+                    }
                 }
                 .semantics {
                     if (sheetState.isVisible) {
                         dismiss {
-                            if (sheetState.confirmStateChange(Hidden)) {
+                            if (sheetState.swipeableState.confirmValueChange(
+                                    Hidden
+                                )
+                            ) {
                                 scope.launch { sheetState.hide() }
                             }
                             true
                         }
-                        if (sheetState.currentValue == HalfExpanded) {
+                        if (sheetState.swipeableState.currentValue == HalfExpanded) {
                             expand {
-                                if (sheetState.confirmStateChange(Expanded)) {
+                                if (sheetState.swipeableState.confirmValueChange(
+                                        Expanded
+                                    )
+                                ) {
                                     scope.launch { sheetState.expand() }
                                 }
                                 true
                             }
                         } else if (sheetState.hasHalfExpandedState) {
                             collapse {
-                                if (sheetState.confirmStateChange(HalfExpanded)) {
+                                if (sheetState.swipeableState.confirmValueChange(
+                                        HalfExpanded
+                                    )
+                                ) {
                                     scope.launch { sheetState.halfExpand() }
                                 }
                                 true
@@ -413,40 +471,6 @@ fun BlurModalBottomSheetLayout(
     }
 }
 
-@Suppress("ModifierInspectorInfo")
-private fun Modifier.bottomSheetSwipeable(
-    sheetState: BlurModalBottomSheetState,
-    fullHeight: Float,
-    sheetHeightState: State<Float?>,
-): Modifier {
-    val sheetHeight = sheetHeightState.value
-    val modifier = if (sheetHeight != null) {
-        val anchors = if (sheetHeight < fullHeight / 2 || sheetState.isSkipHalfExpanded) {
-            mapOf(
-                fullHeight to Hidden,
-                fullHeight - sheetHeight to Expanded
-            )
-        } else {
-            mapOf(
-                fullHeight to Hidden,
-                fullHeight / 2 to HalfExpanded,
-                max(0f, fullHeight - sheetHeight) to Expanded
-            )
-        }
-        Modifier.swipeable(
-            state = sheetState,
-            anchors = anchors,
-            orientation = Orientation.Vertical,
-            enabled = sheetState.currentValue != Hidden,
-            resistance = null
-        )
-    } else {
-        Modifier
-    }
-
-    return this.then(modifier)
-}
-
 
 @Composable
 private fun Scrim(
@@ -457,7 +481,7 @@ private fun Scrim(
     if (color.isSpecified) {
         val alpha by animateFloatAsState(
             targetValue = if (visible) 1f else 0f,
-            animationSpec = TweenSpec()
+            animationSpec = TweenSpec(), label = "bottom_sheet_alpha"
         )
         val dismissModifier = if (visible) {
             Modifier
@@ -497,3 +521,87 @@ object ModalBottomSheetDefaults {
         @Composable
         get() = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f)
 }
+
+
+private fun ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
+    state: SwipeableV2State<*>,
+    orientation: Orientation
+): NestedScrollConnection = object : NestedScrollConnection {
+    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+        val delta = available.toFloat()
+        return if (delta < 0 && source == NestedScrollSource.Drag) {
+            state.dispatchRawDelta(delta).toOffset()
+        } else {
+            Offset.Zero
+        }
+    }
+
+    override fun onPostScroll(
+        consumed: Offset,
+        available: Offset,
+        source: NestedScrollSource
+    ): Offset {
+        return if (source == NestedScrollSource.Drag) {
+            state.dispatchRawDelta(available.toFloat()).toOffset()
+        } else {
+            Offset.Zero
+        }
+    }
+
+    override suspend fun onPreFling(available: Velocity): Velocity {
+        val toFling = available.toFloat()
+        val currentOffset = state.requireOffset()
+        return if (toFling < 0 && currentOffset > state.minOffset) {
+            state.settle(velocity = toFling)
+            // since we go to the anchor with tween settling, consume all for the best UX
+            available
+        } else {
+            Velocity.Zero
+        }
+    }
+
+    override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+        state.settle(velocity = available.toFloat())
+        return available
+    }
+
+    private fun Float.toOffset(): Offset = Offset(
+        x = if (orientation == Orientation.Horizontal) this else 0f,
+        y = if (orientation == Orientation.Vertical) this else 0f
+    )
+
+    @JvmName("velocityToFloat")
+    private fun Velocity.toFloat() = if (orientation == Orientation.Horizontal) x else y
+
+    @JvmName("offsetToFloat")
+    private fun Offset.toFloat(): Float = if (orientation == Orientation.Horizontal) x else y
+}
+
+private fun ModalBottomSheetAnchorChangeHandler(
+    state: BlurModalBottomSheetState,
+    animateTo: (target: BlurModalBottomSheetValue, velocity: Float) -> Unit,
+    snapTo: (target: BlurModalBottomSheetValue) -> Unit,
+) = AnchorChangeHandler<BlurModalBottomSheetValue> { previousTarget, previousAnchors, newAnchors ->
+    val previousTargetOffset = previousAnchors[previousTarget]
+    val newTarget = when (previousTarget) {
+        Hidden -> Hidden
+        HalfExpanded, Expanded -> {
+            val hasHalfExpandedState =
+                newAnchors.containsKey(HalfExpanded)
+            val newTarget = if (hasHalfExpandedState) HalfExpanded
+            else if (newAnchors.containsKey(Expanded)) Expanded else Hidden
+            newTarget
+        }
+    }
+    val newTargetOffset = newAnchors.getValue(newTarget)
+    if (newTargetOffset != previousTargetOffset) {
+        if (state.isAnimationRunning) {
+            // Re-target the animation to the new offset if it changed
+            animateTo(newTarget, state.lastVelocity)
+        } else {
+            // Snap to the new offset value of the target if no animation was running
+            snapTo(newTarget)
+        }
+    }
+}
+   
