@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -34,7 +35,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.sulgik.common.platform.DatePeriod
+import ru.sulgik.common.platform.LocalDateProvider
 import ru.sulgik.common.platform.LocalTimeFormatter
 import ru.sulgik.diary.mvi.DiaryStore
 import ru.sulgik.periods.ui.AnimatedPeriod
@@ -163,9 +167,17 @@ fun DiaryDateData(
         onRefresh = onRefresh,
         modifier = modifier,
     ) {
+        val dateProvider = LocalDateProvider.current
+        val currentDateIndex = rememberSaveable {
+            val currentDate = dateProvider.currentDate()
+            val index = diary.diary.indexOfFirst { it.date == currentDate }
+            mutableStateOf(if (index == -1) 0 else index)
+        }
+        val scrollState = rememberLazyListState(currentDateIndex.value)
         LazyColumn(
             modifier = diaryInListModifier,
             verticalArrangement = Arrangement.spacedBy(10.dp),
+            state = scrollState,
             content = {
                 items(diary.diary.size, key = { it }, contentType = { "diary" }) {
                     val diaryDate = remember(diary.diary, it) {
