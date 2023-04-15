@@ -23,35 +23,51 @@ import ru.sulgik.ui.core.DesignedDivider
 fun ExtendedModalBottomSheet(
     sheetContent: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier,
-    sheetState: BlurModalBottomSheetState =
-        rememberBlurModalBottomSheetState(BlurModalBottomSheetValue.Hidden),
-    sheetElevation: Dp = ModalBottomSheetDefaults.Elevation,
+    sheetState: ModalSheetState =
+        rememberModalSheetState(ModalSheetValue.Hidden),
+    direction: ModalSheetDirection = ModalSheetDirection.BOTTOM,
+    sheetElevation: Dp = ModalSheetDefaults.Elevation,
     sheetBackgroundColor: Color = MaterialTheme.colorScheme.surface,
     sheetShape: Shape = MaterialTheme.shapes.extraLarge,
     sheetContentColor: Color = contentColorFor(sheetBackgroundColor),
     sheetPadding: Dp = 10.dp,
-    scrimColor: Color = ModalBottomSheetDefaults.scrimColor,
+    scrimColor: Color = ModalSheetDefaults.scrimColor,
     showDivider: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    BlurModalBottomSheetLayout(
+    ModalSheetLayout(
         sheetState = sheetState,
         sheetContent = if (showDivider) {
             {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Spacer(
-                        modifier = Modifier
-                            .height(10.dp)
-                    )
-                    DesignedDivider(modifier = Modifier.fillMaxWidth())
-                    sheetContent()
+                    when (direction) {
+                        ModalSheetDirection.BOTTOM -> {
+                            Spacer(
+                                modifier = Modifier
+                                    .height(10.dp)
+                            )
+                            DesignedDivider(modifier = Modifier.fillMaxWidth())
+                            sheetContent()
+                        }
+
+                        ModalSheetDirection.TOP -> {
+                            sheetContent()
+                            DesignedDivider(modifier = Modifier.fillMaxWidth())
+                            Spacer(
+                                modifier = Modifier
+                                    .height(10.dp)
+                            )
+                        }
+                    }
+
                 }
             }
         } else sheetContent,
         modifier = modifier,
         sheetShape = sheetShape,
+        direction = direction,
         sheetElevation = sheetElevation,
         sheetBackgroundColor = sheetBackgroundColor,
         sheetPadding = sheetPadding,

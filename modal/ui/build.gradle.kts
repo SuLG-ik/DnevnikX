@@ -40,7 +40,7 @@ android {
 }
 
 dependencies {
-    implementation(projects.ui.core)
+    api(projects.ui.core)
     implementation(projects.modal.component)
     implementation(libs.accompanist.placeholder)
     implementation(libs.bundles.android)

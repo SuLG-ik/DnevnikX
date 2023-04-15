@@ -11,26 +11,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import ru.sulgik.modal.component.Modal
-import ru.sulgik.ui.modal.BlurModalBottomSheetValue
 import ru.sulgik.ui.modal.ExtendedModalBottomSheet
-import ru.sulgik.ui.modal.rememberBlurModalBottomSheetState
+import ru.sulgik.ui.modal.ModalSheetDirection
+import ru.sulgik.ui.modal.ModalSheetValue
+import ru.sulgik.ui.modal.rememberModalSheetState
 
 @Composable
 fun FloatingModalUI(
     component: Modal,
     modifier: Modifier = Modifier,
     showDivider: Boolean = true,
+    direction: ModalSheetDirection = ModalSheetDirection.BOTTOM,
     content: @Composable () -> Unit,
 ) {
     val modalState = component.modalState
     val firstState = remember { modalState }
     val sheet =
-        rememberBlurModalBottomSheetState(
-            initialValue = if (firstState.isVisible) BlurModalBottomSheetValue.Expanded else BlurModalBottomSheetValue.Hidden,
+        rememberModalSheetState(
+            initialValue = if (firstState.isVisible) ModalSheetValue.Expanded else ModalSheetValue.Hidden,
             skipHalfExpanded = true,
             confirmValueChange = remember(component) {
                 {
-                    if (it == BlurModalBottomSheetValue.Hidden) {
+                    if (it == ModalSheetValue.Hidden) {
                         component.updateState(false)
                     }
                     true
@@ -53,6 +55,7 @@ fun FloatingModalUI(
         sheetContent = {
             component.Content(modifier = Modifier.fillMaxWidth())
         },
+        direction = direction,
         sheetElevation = 4.dp,
         showDivider = showDivider,
         modifier = modifier,
@@ -65,17 +68,18 @@ fun ModalUI(
     component: Modal,
     modifier: Modifier = Modifier,
     showDivider: Boolean = true,
+    direction: ModalSheetDirection = ModalSheetDirection.BOTTOM,
     content: @Composable () -> Unit,
 ) {
     val modalState = component.modalState
     val firstState = remember { modalState }
     val sheet =
-        rememberBlurModalBottomSheetState(
-            initialValue = if (firstState.isVisible) BlurModalBottomSheetValue.Expanded else BlurModalBottomSheetValue.Hidden,
+        rememberModalSheetState(
+            initialValue = if (firstState.isVisible) ModalSheetValue.Expanded else ModalSheetValue.Hidden,
             skipHalfExpanded = true,
             confirmValueChange = remember(component) {
                 {
-                    if (it == BlurModalBottomSheetValue.Hidden) {
+                    if (it == ModalSheetValue.Hidden) {
                         component.updateState(false)
                     }
                     true
@@ -102,6 +106,7 @@ fun ModalUI(
     })
     ExtendedModalBottomSheet(
         sheetState = sheet,
+        direction = direction,
         sheetContent = {
             component.Content(modifier = Modifier.fillMaxWidth())
         },
