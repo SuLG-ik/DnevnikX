@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "ru.sulgik.schedule.component"
+    namespace = "ru.sulgik.schedule.list.component"
     compileSdk = 33
     defaultConfig {
         minSdk = 21
@@ -49,8 +49,8 @@ dependencies {
     implementation(projects.modal.ui)
     implementation(projects.core.common)
     implementation(projects.core.components)
-    implementation(projects.schedule.mvi)
-    implementation(projects.schedule.ui)
+    implementation(projects.schedule.list.mvi)
+    implementation(projects.schedule.list.ui)
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.bundles.android)

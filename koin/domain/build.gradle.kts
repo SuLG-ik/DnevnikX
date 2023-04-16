@@ -57,7 +57,7 @@ dependencies {
     implementation(projects.finalmarks.domainKtor)
     implementation(projects.finalmarks.domainMerged)
 
-    implementation(projects.schedule.domainKtor)
+    implementation(projects.schedule.list.domainKtor)
 
     implementation(projects.about.domainBuiltin)
 

@@ -12,13 +12,14 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.arkivanov.decompose.defaultComponentContext
+import org.koin.android.ext.android.get
 import org.koin.android.ext.android.getKoin
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.core.component.getScopeId
 import org.koin.core.qualifier.TypeQualifier
 import org.koin.core.scope.Scope
+import ru.sulgik.common.platform.LocalDateProvider
 import ru.sulgik.common.platform.LocalTimeFormatter
-import ru.sulgik.common.platform.android.AndroidTimeFormatter
 import ru.sulgik.core.withDI
 import ru.sulgik.dnevnikx.ui.theme.DnevnikXExtendedTheme
 import ru.sulgik.dnevnikx.ui.theme.DnevnikXTheme
@@ -34,12 +35,12 @@ class MainActivity : ComponentActivity(), AndroidScopeComponent {
         super.onCreate(savedInstanceState)
         actionBar?.hide()
         component = MainWithSplashComponent(defaultComponentContext().withDI(scope))
-        val formatter = AndroidTimeFormatter()
         setContent {
             DnevnikXExtendedTheme {
                 DnevnikXTheme {
                     CompositionLocalProvider(
-                        LocalTimeFormatter provides formatter
+                        LocalTimeFormatter provides get(),
+                        LocalDateProvider provides get(),
                     ) {
                         Surface {
                             component.Content(modifier = Modifier.fillMaxSize())

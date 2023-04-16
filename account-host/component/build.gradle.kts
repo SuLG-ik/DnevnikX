@@ -49,7 +49,7 @@ dependencies {
     implementation(projects.account.component)
     implementation(projects.finalmarks.component)
     implementation(projects.about.component)
-    implementation(projects.schedule.component)
+    implementation(projects.schedule.list.component)
     implementation(projects.marksupdates.component)
     implementation(projects.application.mvi)
     implementation(projects.experimentalsettings.component)

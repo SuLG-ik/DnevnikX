@@ -1,11 +1,10 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
-    namespace = "ru.sulgik.schedule.domain.ktor"
+    namespace = "ru.sulgik.schedule.list.ui"
     compileSdk = 33
     defaultConfig {
         minSdk = 21
@@ -23,7 +22,6 @@ android {
         }
     }
     compileOptions {
-        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -33,19 +31,22 @@ android {
     kotlin {
         jvmToolchain(11)
     }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
+    }
 }
 
 dependencies {
-    coreLibraryDesugaring(libs.desugar.libs)
-    api(projects.auth.core)
-    api(projects.auth.ktor)
-    api(libs.ktor.core)
-    api(projects.schedule.domain)
+    implementation(projects.schedule.list.mvi)
     implementation(projects.core.common)
-    implementation(libs.koin.core)
-    implementation(libs.bundles.android)
-    implementation(libs.kotlinx.serialization.json)
+    implementation(projects.ui.core)
+    implementation(projects.periods.ui)
+    implementation(libs.bundles.compose)
     implementation(libs.kotlinx.datetime)
+    implementation(libs.bundles.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.junit.android)
     androidTestImplementation(libs.room.testing)

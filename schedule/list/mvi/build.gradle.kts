@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "ru.sulgik.schedule.mvi"
+    namespace = "ru.sulgik.schedule.list.mvi"
     compileSdk = 33
     defaultConfig {
         minSdk = 21

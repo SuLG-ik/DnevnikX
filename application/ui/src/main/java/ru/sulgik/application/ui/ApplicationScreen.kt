@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -16,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import ru.sulgik.ui.core.BottomAppBar
 import ru.sulgik.ui.core.CombinedNavigationBarItem
 import ru.sulgik.ui.core.outlined
 
@@ -76,7 +76,7 @@ fun ApplicationBottomNavigation(
         modifier = modifier
             .background(MaterialTheme.colorScheme.background)
             .padding(10.dp)
-            .outlined(),
+            .outlined(shape = MaterialTheme.shapes.large),
     ) {
         navItems.forEach {
             CombinedNavigationBarItem(

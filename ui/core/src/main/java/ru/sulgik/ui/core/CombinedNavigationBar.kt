@@ -13,6 +13,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
@@ -65,6 +67,37 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.map
 import kotlin.math.roundToInt
+
+@Composable
+fun BottomAppBar(
+    modifier: Modifier = Modifier,
+    containerColor: Color = BottomAppBarDefaults.containerColor,
+    contentColor: Color = contentColorFor(containerColor),
+    tonalElevation: Dp = BottomAppBarDefaults.ContainerElevation,
+    contentPadding: PaddingValues = BottomAppBarDefaults.ContentPadding,
+    windowInsets: WindowInsets = BottomAppBarDefaults.windowInsets,
+    content: @Composable RowScope.() -> Unit
+) {
+    Surface(
+        color = containerColor,
+        contentColor = contentColor,
+        tonalElevation = tonalElevation,
+        // TODO(b/209583788): Consider adding a shape parameter if updated design guidance allows
+        modifier = modifier
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(windowInsets)
+                .height(80.dp)
+                .padding(contentPadding),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+            content = content
+        )
+    }
+}
+
 
 @OptIn(ExperimentalFoundationApi::class)
 private fun Modifier.combinedSelectable(

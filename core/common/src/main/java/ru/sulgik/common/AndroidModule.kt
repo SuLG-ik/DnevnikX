@@ -3,6 +3,7 @@ package ru.sulgik.common
 import androidx.activity.ComponentActivity
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import ru.sulgik.common.platform.AndroidDateProvider
 import ru.sulgik.common.platform.TimeFormatter
 import ru.sulgik.common.platform.UriHandler
 import ru.sulgik.common.platform.android.AndroidTimeFormatter
@@ -16,6 +17,7 @@ class AndroidModule {
             scoped { AndroidUriHandler(get<ComponentActivity>()) } bind UriHandler::class
         }
         single { AndroidTimeFormatter() } bind TimeFormatter::class
+        single { AndroidDateProvider() } bind DateProvider::class
     }
 
 }

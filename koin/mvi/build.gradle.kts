@@ -39,7 +39,7 @@ dependencies {
     implementation(projects.marks.mviImpl)
     implementation(projects.marksedit.mviImpl)
     implementation(projects.finalmarks.mviImpl)
-    implementation(projects.schedule.mviImpl)
+    implementation(projects.schedule.list.mviImpl)
     implementation(projects.auth.mviImpl)
     implementation(projects.account.mviImpl)
     implementation(projects.accountSelector.mviImpl)

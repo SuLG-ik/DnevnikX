@@ -16,7 +16,7 @@ import ru.sulgik.core.BaseAuthorizedComponentContext
 import ru.sulgik.core.childDIContext
 import ru.sulgik.core.getStore
 import ru.sulgik.core.states
-import ru.sulgik.modal.ui.FloatingModalUI
+import ru.sulgik.modal.ui.ModalUI
 import ru.sulgik.picker.component.PickerComponent
 import ru.sulgik.picker.ui.PickerInfo
 import ru.sulgik.schedule.mvi.ScheduleStore
@@ -94,7 +94,7 @@ class ScheduleComponent(
     @Composable
     override fun Content(modifier: Modifier) {
         val state = state
-        FloatingModalUI(component = picker) {
+        ModalUI(component = picker) {
             ScheduleScreen(
                 state.periods,
                 state.schedule,

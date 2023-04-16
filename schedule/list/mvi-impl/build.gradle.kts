@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "ru.sulgik.schedule.domain"
+    namespace = "ru.sulgik.schedule.list.mvi.impl"
     compileSdk = 33
     defaultConfig {
         minSdk = 21
@@ -22,6 +22,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -34,9 +35,16 @@ android {
 }
 
 dependencies {
-    api(projects.auth.core)
-    api(projects.core.common)
+    coreLibraryDesugaring(libs.desugar.libs)
+    implementation(projects.core.common)
+    implementation(projects.auth.core)
+    implementation(projects.schedule.list.domain)
+    implementation(projects.periods.domain)
+    implementation(projects.account.domain)
+    implementation(projects.schedule.list.mvi)
+    implementation(projects.core.components)
 
+    implementation(libs.bundles.module.mvi)
     implementation(libs.kotlinx.datetime)
     implementation(libs.bundles.android)
     testImplementation(libs.junit)
