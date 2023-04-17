@@ -12,7 +12,7 @@ pluginManagement {
             }
         }
         dependencies {
-            classpath("com.android.tools:r8:4.0.54")
+            classpath("com.android.tools:r8:8.0.40")
         }
     }
 }
@@ -144,6 +144,7 @@ include(":account:mvi")
 include(":account:mvi-impl")
 include(":account:domain")
 include(":account:domain-room")
+include(":account:domain-merged")
 include(":account:domain-ktor")
 include(":account:domain-datastore")
 include(":account:ui")
