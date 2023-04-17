@@ -8,6 +8,7 @@ interface AccountSelectorStore: Store<AccountSelectorStore.Intent, AccountSelect
 
     data class State(
         val accounts: List<Account>? = null,
+        val selectedAccount: Account? = null,
         val isLoading: Boolean = true,
     ) {
 
@@ -15,7 +16,12 @@ interface AccountSelectorStore: Store<AccountSelectorStore.Intent, AccountSelect
             val id: String,
             val name: String,
             val selected: Boolean,
+            val gender: Gender,
         )
+
+        enum class Gender {
+            MALE, FEMALE
+        }
 
     }
 

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "ru.sulgik.account.domain"
+    namespace = "ru.sulgik.account.domain.merged"
     compileSdk = 33
     defaultConfig {
         minSdk = 21
@@ -34,9 +34,9 @@ android {
 }
 
 dependencies {
-    api(projects.kacher.core)
-    api(projects.auth.core)
-    implementation(libs.bundles.android)
+    implementation(libs.napier)
+    implementation(libs.koin.core)
+    implementation(projects.account.domain)
     testImplementation(libs.junit)
     androidTestImplementation(libs.junit.android)
     androidTestImplementation(libs.room.testing)

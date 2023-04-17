@@ -10,6 +10,7 @@ import com.arkivanov.essenty.parcelable.Parcelize
 import ru.sulgik.account.host.component.AccountHostComponent
 import ru.sulgik.account.selector.component.AccountSelectorComponent
 import ru.sulgik.application.ui.ApplicationScreen
+import ru.sulgik.application.ui.Gender
 import ru.sulgik.application.ui.NavigationConfig
 import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.core.AuthorizedComponentContext
@@ -22,6 +23,13 @@ import ru.sulgik.marks.host.component.MarksHostComponent
 import ru.sulgik.modal.ui.FloatingModalUI
 import ru.sulgik.ui.component.NamedConfig
 import ru.sulgik.ui.component.TrackedContent
+
+private fun AccountSelectorComponent.SelectedAccount.Gender.toState(): Gender {
+    return when (this) {
+        AccountSelectorComponent.SelectedAccount.Gender.MALE -> Gender.MALE
+        AccountSelectorComponent.SelectedAccount.Gender.FEMALE -> Gender.FEMALE
+    }
+}
 
 class ApplicationComponent(
     componentContext: AuthorizedComponentContext,
@@ -95,6 +103,7 @@ class ApplicationComponent(
         val state = childStack
         FloatingModalUI(component = accountSelector) {
             ApplicationScreen(
+                gender = accountSelector.selectedAccount?.gender?.toState(),
                 currentNavigation = state.active.configuration.toState(),
                 onNavigate = this::onNavigate,
                 onSecondaryNavigate = this::onSecondaryNavigate,

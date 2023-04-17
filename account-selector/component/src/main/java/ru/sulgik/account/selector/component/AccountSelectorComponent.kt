@@ -21,6 +21,11 @@ class AccountSelectorComponent(
 
     private val state by store.states(this)
 
+    val selectedAccount: SelectedAccount?
+        get() = state.selectedAccount?.let {
+            SelectedAccount(it.id, it.gender.toState())
+        }
+
     @Composable
     override fun Content(modifier: Modifier) {
         val accounts = state.accounts
@@ -43,4 +48,22 @@ class AccountSelectorComponent(
         updateState(true)
     }
 
+    data class SelectedAccount(
+        val id: String,
+        val gender: Gender
+    ) {
+
+        enum class Gender {
+            MALE, FEMALE
+        }
+
+    }
+
+}
+
+private fun AccountSelectorStore.State.Gender.toState(): AccountSelectorComponent.SelectedAccount.Gender {
+    return when (this) {
+        AccountSelectorStore.State.Gender.MALE -> AccountSelectorComponent.SelectedAccount.Gender.MALE
+        AccountSelectorStore.State.Gender.FEMALE -> AccountSelectorComponent.SelectedAccount.Gender.FEMALE
+    }
 }

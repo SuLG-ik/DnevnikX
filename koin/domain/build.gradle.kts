@@ -48,6 +48,7 @@ dependencies {
     implementation(projects.account.domainRoom)
     implementation(projects.account.domainKtor)
     implementation(projects.account.domainDatastore)
+    implementation(projects.account.domainMerged)
 
     implementation(projects.marks.domainRoom)
     implementation(projects.marks.domainKtor)

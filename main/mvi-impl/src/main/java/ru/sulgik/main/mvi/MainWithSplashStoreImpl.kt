@@ -1,11 +1,13 @@
 package ru.sulgik.main.mvi
 
+import android.util.Log
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.core.utils.ExperimentalMviKotlinApi
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.sulgik.account.domain.LocalSessionAccountRepository
 import ru.sulgik.auth.core.AuthScope
@@ -30,19 +32,26 @@ class MainWithSplashStoreImpl(
         },
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
             onAction<Action.Setup> {
-                launch {
+                launch(Dispatchers.Main) {
+                    Log.d("pisos", "getting last session")
                     val lastSession = sessionAccountRepository.getLastAccountSession()
+                    Log.d("pisos", "get last session")
+
                     if (lastSession == null) {
                         syncDispatch(MainWithSplashStore.State(authScope = null, isLoading = false))
                         return@launch
                     }
+                    Log.d("pisos", "dispatching")
                     val authorization = localAuthRepository.getAuthorization(lastSession.accountId)
-                    syncDispatch(
+                    Log.d("pisos", "dispatch")
+                    dispatch(
                         MainWithSplashStore.State(
                             authScope = AuthScope(id = authorization.accountId),
                             isLoading = false,
                         )
                     )
+                    Log.d("pisos", "dispatched")
+
                 }
             }
         },

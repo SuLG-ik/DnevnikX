@@ -1,14 +1,11 @@
 package ru.sulgik.account.domain.data
 
-data class GetAccountOutput(
+data class GetAccountDataOutput(
+    val id: String,
     val data: AccountData,
     val school: School,
     val student: Student,
 ) {
-    enum class Gender {
-        MALE, FEMALE,
-    }
-
     data class ClassGroup(
         val title: String,
         val parallel: Int,

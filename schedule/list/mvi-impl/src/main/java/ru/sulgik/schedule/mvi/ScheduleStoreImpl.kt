@@ -20,8 +20,8 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toKotlinLocalDate
-import ru.sulgik.account.domain.RemoteAccountRepository
-import ru.sulgik.account.domain.data.GetAccountOutput
+import ru.sulgik.account.domain.RemoteAccountDataRepository
+import ru.sulgik.account.domain.data.GetAccountDataOutput
 import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.core.syncDispatch
@@ -37,7 +37,7 @@ class ScheduleStoreImpl(
     storeFactory: StoreFactory,
     coroutineDispatcher: CoroutineDispatcher,
     authScope: AuthScope,
-    remoteAccountRepository: RemoteAccountRepository,
+    remoteAccountDataRepository: RemoteAccountDataRepository,
     cachedPeriodsRepository: CachedPeriodsRepository,
     remoteScheduleRepository: RemoteScheduleRepository,
 ) : ScheduleStore,
@@ -48,7 +48,7 @@ class ScheduleStoreImpl(
             dispatch(Action.Setup)
         },
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
-            var cachedAccount: GetAccountOutput? = null
+            var cachedAccount: GetAccountDataOutput? = null
             onAction<Action.Setup> {
                 launch(Dispatchers.Main) {
                     val periodsRequest = cachedPeriodsRepository.getPeriods(authScope)
@@ -56,7 +56,7 @@ class ScheduleStoreImpl(
                         statusUpdated = { status ->
                             status.data?.periods?.toState()?.let { periods ->
                                 syncDispatch(Message.UpdatePeriods(periods))
-                                val account = remoteAccountRepository.getAccount(authScope)
+                                val account = remoteAccountDataRepository.getAccount(authScope)
                                 cachedAccount = account
                                 val schedule = remoteScheduleRepository.getSchedule(
                                     auth = authScope,
@@ -90,7 +90,7 @@ class ScheduleStoreImpl(
                 dispatch(Message.SelectPeriod(intent.period))
                 val job = selectPeriodJob
                 selectPeriodJob = launch {
-                    val account = cachedAccount ?: remoteAccountRepository.getAccount(authScope)
+                    val account = cachedAccount ?: remoteAccountDataRepository.getAccount(authScope)
                         .also { cachedAccount = it }
                     job?.cancelAndJoin()
                     val schedule = remoteScheduleRepository.getSchedule(
@@ -112,7 +112,7 @@ class ScheduleStoreImpl(
                 val period = periodsData.selectedPeriod
                 val job = selectPeriodJob
                 selectPeriodJob = launch {
-                    val account = cachedAccount ?: remoteAccountRepository.getAccount(authScope)
+                    val account = cachedAccount ?: remoteAccountDataRepository.getAccount(authScope)
                         .also { cachedAccount = it }
                     job?.cancelAndJoin()
                     val schedule = remoteScheduleRepository.getSchedule(

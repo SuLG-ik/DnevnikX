@@ -17,10 +17,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ru.sulgik.account.selector.mvi.AccountSelectorStore
+
+private val AccountSelectorStore.State.Gender.icon: Painter
+    @Composable
+    get() {
+        return when (this) {
+            AccountSelectorStore.State.Gender.MALE -> painterResource(id = R.drawable.student_male)
+            AccountSelectorStore.State.Gender.FEMALE -> painterResource(id = R.drawable.student_female)
+        }
+    }
 
 @Composable
 fun AccountSelectorScreen(
@@ -35,6 +45,7 @@ fun AccountSelectorScreen(
         accounts.forEach {
             ProfileItem(
                 name = it.name,
+                gender = it.gender,
                 onClick = { onAccountSelected(it) },
                 selected = it.selected,
                 modifier = Modifier.fillMaxWidth()
@@ -48,6 +59,7 @@ fun AccountSelectorScreen(
 @Composable
 fun ProfileItem(
     name: String,
+    gender: AccountSelectorStore.State.Gender,
     onClick: () -> Unit,
     selected: Boolean,
     modifier: Modifier = Modifier,
@@ -58,7 +70,7 @@ fun ProfileItem(
         },
         leadingContent = {
             Image(
-                painterResource(id = R.drawable.student),
+                painter = gender.icon,
                 contentDescription = "Иконка",
                 modifier = Modifier
                     .conditionBorder(
@@ -75,6 +87,7 @@ fun ProfileItem(
             .clickable(onClick = onClick)
     )
 }
+
 
 @Composable
 fun AddAccountItem(

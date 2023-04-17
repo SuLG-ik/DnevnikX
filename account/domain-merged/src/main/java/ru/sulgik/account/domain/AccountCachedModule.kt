@@ -4,10 +4,10 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
-class AccountRemoteModule {
+class AccountCachedModule {
 
     val module = module {
-        singleOf(::KtorRemoteAccountDataRepository) bind RemoteAccountDataRepository::class
+        singleOf(::MergedCachedAccountDataRepository) bind CachedAccountDataRepository::class
     }
 
 }

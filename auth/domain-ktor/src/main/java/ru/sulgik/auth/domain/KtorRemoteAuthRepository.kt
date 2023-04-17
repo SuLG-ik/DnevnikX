@@ -20,7 +20,12 @@ class KtorRemoteAuthRepository(
         }
         val auth = response.safeBody<AuthResponseBody>()
         val user = getUser(auth.token)
-        return UserOutput(title = user.title, id = user.vuid, token = auth.token)
+        return UserOutput(
+            title = user.title,
+            id = user.vuid,
+            token = auth.token,
+            gender = user.gender.toData()
+        )
     }
 
     private suspend fun getUser(token: String): GetRulesResponse {
@@ -32,13 +37,30 @@ class KtorRemoteAuthRepository(
 
 }
 
+private fun GetRulesResponse.Gender.toData(): UserOutput.Gender {
+    return when (this) {
+        GetRulesResponse.Gender.MALE -> UserOutput.Gender.MALE
+        GetRulesResponse.Gender.FEMALE -> UserOutput.Gender.FEMALE
+    }
+}
+
 @Serializable
 private class GetRulesResponse(
     val roles: List<String>,
     val id: String,
     val vuid: String,
     val title: String,
-)
+    val gender: Gender = Gender.MALE,
+) {
+    @Serializable
+    enum class Gender {
+        @SerialName("male")
+        MALE,
+
+        @SerialName("female")
+        FEMALE,
+    }
+}
 
 @Serializable
 private class AuthRequestBody(

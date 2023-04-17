@@ -1,22 +1,27 @@
 package ru.sulgik.application.ui
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ru.sulgik.ui.core.BottomAppBar
 import ru.sulgik.ui.core.CombinedNavigationBarItem
+import ru.sulgik.ui.core.defaultPlaceholder
 import ru.sulgik.ui.core.outlined
 
 
@@ -48,7 +53,7 @@ sealed interface NavigationConfig {
 
     object Profile : NavigationConfig {
         override val icon: Int
-            get() = R.drawable.nav_profile_icon
+            get() = R.drawable.nav_profile_icon_male
         override val title: Int
             get() = R.string.nav_profile_title
         override val haptic: Boolean
@@ -57,13 +62,31 @@ sealed interface NavigationConfig {
     }
 
     companion object {
-        val navItems by lazy(LazyThreadSafetyMode.NONE) { listOf(Dairy, Marks, Profile) }
+        val navItems by lazy(LazyThreadSafetyMode.NONE) { listOf(Dairy, Marks) }
     }
 
 }
 
+enum class Gender {
+    MALE {
+        override val icon: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.nav_profile_icon_male)
+    },
+    FEMALE {
+        override val icon: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.nav_profile_icon_female)
+    };
+
+    abstract val icon: Painter
+        @Composable
+        get
+}
+
 @Composable
 fun ApplicationBottomNavigation(
+    gender: Gender?,
     navItems: List<NavigationConfig>,
     active: NavigationConfig,
     onClick: (NavigationConfig) -> Unit,
@@ -95,11 +118,40 @@ fun ApplicationBottomNavigation(
                     Text(stringResource(id = it.title))
                 })
         }
+
+        CombinedNavigationBarItem(
+            selected = NavigationConfig.Profile == active,
+            onClick = { onClick(NavigationConfig.Profile) },
+            onLongClick = { onLongClick(NavigationConfig.Profile) },
+            haptic = true,
+            icon = {
+                Crossfade(targetState = gender, label = "profile_placeholder") {
+                    when (it) {
+                        null -> Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .size(20.dp)
+                                .defaultPlaceholder()
+                        )
+
+                        else -> Icon(
+                            painter = it.icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
+            },
+            label = {
+                Text(stringResource(id = NavigationConfig.Profile.title))
+            })
     }
 }
 
 @Composable
 fun ApplicationScreen(
+    gender: Gender?,
     currentNavigation: NavigationConfig,
     onNavigate: (NavigationConfig) -> Unit,
     onSecondaryNavigate: (NavigationConfig) -> Unit,
@@ -109,6 +161,7 @@ fun ApplicationScreen(
     Scaffold(
         bottomBar = {
             ApplicationBottomNavigation(
+                gender = gender,
                 navItems = NavigationConfig.navItems,
                 active = currentNavigation,
                 onClick = onNavigate,

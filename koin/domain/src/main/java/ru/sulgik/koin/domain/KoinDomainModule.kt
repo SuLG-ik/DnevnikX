@@ -2,6 +2,7 @@ package ru.sulgik.koin.domain
 
 import org.koin.dsl.module
 import ru.sulgik.about.domain.AboutBuiltInModule
+import ru.sulgik.account.domain.AccountCachedModule
 import ru.sulgik.account.domain.AccountLocalModule
 import ru.sulgik.account.domain.AccountRemoteModule
 import ru.sulgik.account.domain.AccountSessionLocalModule
@@ -51,7 +52,8 @@ class KoinDomainModule {
         includes(
             AccountLocalModule().module,
             AccountRemoteModule().module,
-            AccountSessionLocalModule().module
+            AccountSessionLocalModule().module,
+            AccountCachedModule().module,
         )
         includes(
             MarksUpdatesCachedModule().module,

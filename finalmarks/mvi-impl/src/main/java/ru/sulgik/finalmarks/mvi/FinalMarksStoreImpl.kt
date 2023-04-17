@@ -10,7 +10,6 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.finalmarks.domain.CachedFinalMarksRepository
@@ -43,7 +42,6 @@ class FinalMarksStoreImpl(
                     )
                 }
             }
-            var refreshJob: Job? = null
             onIntent<FinalMarksStore.Intent.RefreshFinalMarks> {
                 val state = state
                 val stateLessons = state.lessons

@@ -33,7 +33,13 @@ interface AccountStore : Store<AccountStore.Intent, AccountStore.State, AccountS
 
         data class Account(
             val name: String,
+            val gender: Gender,
         )
+
+        enum class Gender {
+            MALE, FEMALE,
+        }
+
     }
 
     sealed interface Label

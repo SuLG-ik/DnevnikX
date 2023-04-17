@@ -10,9 +10,11 @@ import ru.sulgik.account.domain.LocalAccountDataRepository
 import ru.sulgik.account.domain.LocalAccountRepository
 import ru.sulgik.account.domain.data.Account
 import ru.sulgik.account.domain.data.AccountData
+import ru.sulgik.account.domain.data.Gender
 import ru.sulgik.auth.domain.LocalAuthRepository
 import ru.sulgik.auth.domain.RemoteAuthRepository
 import ru.sulgik.auth.domain.data.Authorization
+import ru.sulgik.auth.domain.data.UserOutput
 import ru.sulgik.common.ErrorResponseException
 import ru.sulgik.core.directReducer
 import ru.sulgik.core.syncDispatch
@@ -43,7 +45,8 @@ class AuthStoreImpl(
                                 authorizedUser = AuthStore.State.User(
                                     title = user.title,
                                     id = user.id,
-                                    token = user.token
+                                    token = user.token,
+                                    gender = user.gender.toState(),
                                 ),
                                 isConfirming = true,
                             )
@@ -100,6 +103,7 @@ class AuthStoreImpl(
                         AccountData(
                             accountId = user.id,
                             name = user.title,
+                            gender = user.gender.toState(),
                         )
                     )
                     localAuthRepository.addAuthorization(
@@ -114,3 +118,17 @@ class AuthStoreImpl(
         },
         reducer = directReducer(),
     )
+
+private fun AuthStore.State.User.Gender.toState(): Gender {
+    return when (this) {
+        AuthStore.State.User.Gender.MALE -> Gender.MALE
+        AuthStore.State.User.Gender.FEMALE -> Gender.FEMALE
+    }
+}
+
+private fun UserOutput.Gender.toState(): AuthStore.State.User.Gender {
+    return when (this) {
+        UserOutput.Gender.MALE -> AuthStore.State.User.Gender.MALE
+        UserOutput.Gender.FEMALE -> AuthStore.State.User.Gender.FEMALE
+    }
+}

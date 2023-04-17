@@ -113,7 +113,7 @@ fun FinalMarks(
     modifier: Modifier = Modifier,
 ) {
     val horizontalScroll = rememberScrollState()
-    RefreshableBox(refreshing = state.isRefreshing, onRefresh = onRefresh) {
+    RefreshableBox(refreshing = state.isRefreshing, onRefresh = onRefresh, modifier = modifier) {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(ExtendedTheme.dimensions.contentSpaceBetween),
             modifier = Modifier

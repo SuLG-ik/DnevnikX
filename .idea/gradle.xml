@@ -30,6 +30,7 @@
             <option value="$PROJECT_DIR$/account/domain" />
             <option value="$PROJECT_DIR$/account/domain-datastore" />
             <option value="$PROJECT_DIR$/account/domain-ktor" />
+            <option value="$PROJECT_DIR$/account/domain-merged" />
             <option value="$PROJECT_DIR$/account/domain-room" />
             <option value="$PROJECT_DIR$/account/mvi" />
             <option value="$PROJECT_DIR$/account/mvi-impl" />

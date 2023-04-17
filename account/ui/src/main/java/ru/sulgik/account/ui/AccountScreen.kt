@@ -39,6 +39,15 @@ import ru.sulgik.ui.core.defaultPlaceholder
 import ru.sulgik.ui.core.outlined
 
 
+private val AccountStore.State.Gender.icon: Painter
+    @Composable
+    get() {
+        return when (this) {
+            AccountStore.State.Gender.MALE -> painterResource(id = R.drawable.student_male)
+            AccountStore.State.Gender.FEMALE -> painterResource(id = R.drawable.student_female)
+        }
+    }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
@@ -124,7 +133,7 @@ fun Profile(
         modifier = modifier,
     ) {
         Image(
-            painterResource(id = R.drawable.student),
+            painter = account.gender.icon,
             contentDescription = "аватарка",
             modifier = Modifier
                 .clip(CircleShape)

@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -23,6 +24,15 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import ru.sulgik.auth.mvi.AuthStore
 import ru.sulgik.ui.core.ExtendedTheme
+
+private val AuthStore.State.User.Gender.icon: Painter
+    @Composable
+    get() {
+        return when (this) {
+            AuthStore.State.User.Gender.MALE -> painterResource(id = R.drawable.auth_student_male)
+            AuthStore.State.User.Gender.FEMALE -> painterResource(id = R.drawable.auth_student_female)
+        }
+    }
 
 @Composable
 fun AuthConfirmScreen(
@@ -37,7 +47,7 @@ fun AuthConfirmScreen(
         modifier = modifier.padding(ExtendedTheme.dimensions.mainContentPadding),
     ) {
         Image(
-            painter = painterResource(id = R.drawable.auth_student),
+            painter = user.gender.icon,
             contentDescription = null,
             modifier = Modifier
                 .clip(CircleShape)

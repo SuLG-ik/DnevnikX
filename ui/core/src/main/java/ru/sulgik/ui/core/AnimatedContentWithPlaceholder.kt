@@ -30,6 +30,7 @@ fun <T : Any> AnimatedContentWithPlaceholder(
     AnimatedContent(
         targetState = isLoading,
         transitionSpec = { transition },
+        contentAlignment = contentAlignment,
         label = label,
         modifier = modifier,
     ) { it ->
