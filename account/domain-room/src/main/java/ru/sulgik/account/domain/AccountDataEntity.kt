@@ -12,9 +12,19 @@ import ru.sulgik.account.domain.data.Gender
 class AccountAndData(
     @Embedded val account: AccountEntity,
     @Relation(
+        entity = AccountDataEntity::class,
         parentColumn = "id",
         entityColumn = "accountId"
-    ) val data: AccountDataEntity?,
+    ) val data: AccountDataAndClasses?,
+)
+
+class AccountDataAndClasses(
+    @Embedded var account: AccountDataEntity,
+    @Relation(
+        parentColumn = "accountId",
+        entityColumn = "dataId"
+    )
+    var classes: List<AccountDataClassesEntity>,
 )
 
 
@@ -41,3 +51,31 @@ class AccountDataEntity(
     @ColumnInfo(defaultValue = "0")
     val gender: Gender,
 )
+
+@Entity(
+    foreignKeys = [
+        ForeignKey(
+            entity = AccountDataEntity::class,
+            parentColumns = ["accountId"],
+            childColumns = ["dataId"],
+            onDelete = ForeignKey.CASCADE,
+        )
+    ],
+    indices = [
+        Index(
+            value = ["dataId"],
+            unique = false,
+        ),
+        Index(
+            value = ["id"],
+            unique = true,
+        )
+    ]
+)
+class AccountDataClassesEntity(
+    val dataId: String,
+    val fullTitle: String,
+) {
+    @PrimaryKey(autoGenerate = true)
+    var id: Long = 0
+}

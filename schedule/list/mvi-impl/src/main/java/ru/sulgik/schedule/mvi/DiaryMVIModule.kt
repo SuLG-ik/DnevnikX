@@ -7,7 +7,8 @@ import org.koin.dsl.module
 class ScheduleMVIModule {
 
     val module = module {
-        factoryOf(::ScheduleStoreImpl) bind ScheduleStore::class
+        factoryOf(::ScheduleListStoreImpl) bind ScheduleListStore::class
+        factoryOf(::ScheduleListHostStoreImpl) bind ScheduleListHostStore::class
     }
 
 }

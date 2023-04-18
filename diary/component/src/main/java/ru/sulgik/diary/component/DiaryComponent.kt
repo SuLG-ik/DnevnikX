@@ -19,7 +19,7 @@ import ru.sulgik.core.states
 import ru.sulgik.diary.mvi.DiaryStore
 import ru.sulgik.diary.ui.DiaryScreen
 import ru.sulgik.modal.ui.ModalUI
-import ru.sulgik.picker.component.PickerComponent
+import ru.sulgik.picker.component.ModalPickerComponent
 import ru.sulgik.picker.ui.PickerInfo
 import java.time.LocalDate
 
@@ -34,7 +34,7 @@ class DiaryComponent(
     private val currentData = LocalDate.now()
 
     private val picker =
-        PickerComponent(
+        ModalPickerComponent(
             componentContext = childDIContext(key = "period_picker"),
             onContinue = this::onPickerSelected,
             marked = { currentData in it.data },

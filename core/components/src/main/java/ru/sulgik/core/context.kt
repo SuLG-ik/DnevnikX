@@ -2,6 +2,9 @@ package ru.sulgik.core
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.childContext
+import com.arkivanov.decompose.router.slot.ChildSlot
+import com.arkivanov.decompose.router.slot.SlotNavigation
+import com.arkivanov.decompose.router.slot.childSlot
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigationSource
 import com.arkivanov.decompose.router.stack.childStack
@@ -19,7 +22,7 @@ import kotlin.reflect.KClass
 
 interface DIComponentContext : ComponentContext, KoinScopeComponent {
 
-    fun <T : Store<*, *, *>> DIComponentContext.getStore(
+    fun <T : Store<*, *, *>> getStore(
         clazz: KClass<T>,
         params: ParametersDefinition? = null,
     ): T
@@ -35,7 +38,7 @@ private class DefaultAuthorizedComponentContext(
     override val authScope: AuthScope,
 ) : AuthorizedComponentContext, DIComponentContext by componentContext {
 
-    override fun <T : Store<*, *, *>> DIComponentContext.getStore(
+    override fun <T : Store<*, *, *>> getStore(
         clazz: KClass<T>,
         params: ParametersDefinition?,
     ): T {
@@ -54,7 +57,7 @@ private class DefaultDIComponentContext(
     override val scope: Scope,
 ) : DIComponentContext, ComponentContext by componentContext {
 
-    override fun <T : Store<*, *, *>> DIComponentContext.getStore(
+    override fun <T : Store<*, *, *>> getStore(
         clazz: KClass<T>,
         params: ParametersDefinition?,
     ): T {
@@ -186,6 +189,78 @@ inline fun <reified C : Parcelable, T : Any> AuthorizedComponentContext.authChil
     authChildStack(
         source = source,
         initialStack = { listOf(initialConfiguration) },
+        configurationClass = C::class,
+        key = key,
+        handleBackButton = handleBackButton,
+        childFactory = childFactory,
+    )
+
+inline fun <C : Parcelable, T : Any> DIComponentContext.diChildSlot(
+    source: SlotNavigation<C>,
+    noinline initialStack: () -> C?,
+    configurationClass: KClass<out C>,
+    key: String = "DefaultChildSlot",
+    handleBackButton: Boolean = false,
+    crossinline childFactory: (configuration: C, DIComponentContext) -> T,
+): Value<ChildSlot<C, T>> {
+    return childSlot(
+        source = source,
+        initialConfiguration = initialStack,
+        configurationClass = configurationClass,
+        handleBackButton = handleBackButton,
+        key = key,
+    ) { configuration, componentContext ->
+        childFactory(configuration, componentContext.withDI(scope))
+    }
+}
+
+inline fun <reified C : Parcelable, T : Any> DIComponentContext.diChildSlot(
+    source: SlotNavigation<C>,
+    initialConfiguration: C? = null,
+    key: String = "DefaultRouter",
+    handleBackButton: Boolean = false,
+    noinline childFactory: (configuration: C, DIComponentContext) -> T,
+): Value<ChildSlot<C, T>> =
+    diChildSlot(
+        source = source,
+        initialStack = { initialConfiguration },
+        configurationClass = C::class,
+        key = key,
+        handleBackButton = handleBackButton,
+        childFactory = childFactory,
+    )
+
+
+inline fun <C : Parcelable, T : Any> AuthorizedComponentContext.authChildSlot(
+    source: SlotNavigation<C>,
+    noinline initialStack: () -> C?,
+    configurationClass: KClass<out C>,
+    key: String = "DefaultChildSlot",
+    handleBackButton: Boolean = false,
+    crossinline childFactory: (configuration: C, AuthorizedComponentContext) -> T,
+): Value<ChildSlot<C, T>> {
+    return diChildSlot(
+        source = source,
+        initialStack = initialStack,
+        configurationClass = configurationClass,
+        key = key,
+        handleBackButton = handleBackButton,
+        childFactory = { configuration: C, componentContext: DIComponentContext ->
+            childFactory(configuration, componentContext.withAuth(authScope))
+        }
+    )
+}
+
+inline fun <reified C : Parcelable, T : Any> AuthorizedComponentContext.authChildSlot(
+    source: SlotNavigation<C>,
+    initialConfiguration: C? = null,
+    key: String = "DefaultRouter",
+    handleBackButton: Boolean = false,
+    noinline childFactory: (configuration: C, AuthorizedComponentContext) -> T,
+): Value<ChildSlot<C, T>> =
+    authChildSlot(
+        source = source,
+        initialStack = { initialConfiguration },
         configurationClass = C::class,
         key = key,
         handleBackButton = handleBackButton,

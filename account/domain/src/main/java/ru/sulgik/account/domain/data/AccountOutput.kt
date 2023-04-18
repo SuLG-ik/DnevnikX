@@ -14,7 +14,7 @@ data class GetAccountDataOutput(
     data class Student(
         val name: StudentName,
         val gender: Gender,
-        val classGroup: ClassGroup,
+        val classGroup: List<ClassGroup>,
     )
     data class StudentName(
         val fullname: String,

@@ -22,8 +22,7 @@ class KtorRemoteAccountDataRepository(
             ?: throw UnsupportedOperationException("school does not provided")
         val student = body.relations.students.firstNotNullOfOrNull { it.value }
             ?: throw UnsupportedOperationException("student does not provided")
-        val classGroup = body.relations.groups.firstNotNullOfOrNull { it.value }
-            ?: throw UnsupportedOperationException("class does not provided")
+        val classGroup = body.relations.groups
         return GetAccountDataOutput(
             id = body.id,
             data = GetAccountDataOutput.AccountData(
@@ -42,10 +41,12 @@ class KtorRemoteAccountDataRepository(
                     firstname = student.firstname,
                     lastname = student.lastname
                 ),
-                classGroup = GetAccountDataOutput.ClassGroup(
-                    title = classGroup.name,
-                    parallel = classGroup.parallel,
-                ),
+                classGroup = classGroup.map {
+                    GetAccountDataOutput.ClassGroup(
+                        title = it.value.name,
+                        parallel = it.value.parallel,
+                    )
+                },
                 gender = student.gender.toGender(),
             ),
             school = GetAccountDataOutput.School(

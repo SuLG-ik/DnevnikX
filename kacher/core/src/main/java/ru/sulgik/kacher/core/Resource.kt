@@ -28,7 +28,7 @@ class Resource<out T> private constructor(
         }
 
         data class Error<out T>(
-            val error: Exception,
+            val error: Throwable,
             override val data: T?,
         ) : Status<T>
 
@@ -52,7 +52,7 @@ class Resource<out T> private constructor(
         fun empty(): Resource<Nothing> = Resource(status = Status.Empty)
 
         fun <T> error(
-            error: Exception,
+            error: Throwable,
             data: T?,
         ): Resource<T> {
             return Resource(
@@ -80,7 +80,7 @@ inline fun <T> Resource<T>.on(
     success: (T) -> Unit = {},
     successLocal: (T) -> Unit = {},
     successRemote: (T) -> Unit = {},
-    error: (error: Exception, data: T?) -> Unit = { _, _ -> },
+    error: (error: Throwable, data: T?) -> Unit = { _, _ -> },
     empty: () -> Unit = {},
     cancel: (T?) -> Unit = {},
     statusUpdated: (Resource.Status<T>) -> Unit,
@@ -119,7 +119,7 @@ suspend fun <T> Flow<Resource<T>>.on(
     success: suspend (T) -> Unit = {},
     successLocal: suspend (T) -> Unit = {},
     successRemote: suspend (T) -> Unit = {},
-    error: suspend (error: Exception, data: T?) -> Unit = { _, _ -> },
+    error: suspend (error: Throwable, data: T?) -> Unit = { _, _ -> },
     empty: suspend () -> Unit = {},
     cancel: suspend (T?) -> Unit = {},
     statusUpdated: suspend (status: Resource.Status<T>) -> Unit = {},

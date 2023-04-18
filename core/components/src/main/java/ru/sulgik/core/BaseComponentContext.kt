@@ -22,7 +22,7 @@ abstract class BaseAuthorizedComponentContext(private val componentContext: Auth
 
     override val authScope: AuthScope = componentContext.authScope
 
-    override fun <T : Store<*, *, *>> DIComponentContext.getStore(
+    override fun <T : Store<*, *, *>> getStore(
         clazz: KClass<T>,
         params: ParametersDefinition?
     ): T {

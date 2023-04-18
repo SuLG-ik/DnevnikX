@@ -9,12 +9,12 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Factory
 import ru.sulgik.about.domain.data.BuiltInAboutRepository
-import ru.sulgik.account.domain.LocalAccountDataRepository
-import ru.sulgik.account.domain.data.Account
+import ru.sulgik.account.domain.CachedAccountDataRepository
 import ru.sulgik.account.domain.data.Gender
 import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.core.directReducer
 import ru.sulgik.core.syncDispatch
+import ru.sulgik.kacher.core.on
 
 @OptIn(ExperimentalMviKotlinApi::class)
 @Factory(binds = [AccountStore::class])
@@ -22,7 +22,7 @@ class AccountStoreImpl(
     storeFactory: StoreFactory,
     coroutineDispatcher: CoroutineDispatcher,
     authScope: AuthScope,
-    localAccountDataRepository: LocalAccountDataRepository,
+    cachedAccountDataRepository: CachedAccountDataRepository,
     aboutRepository: BuiltInAboutRepository,
 ) : AccountStore,
     Store<AccountStore.Intent, AccountStore.State, AccountStore.Label> by storeFactory.create<_, Action, _, _, _>(
@@ -34,31 +34,36 @@ class AccountStoreImpl(
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
             onAction<Action.Setup> {
                 launch {
-                    val account = localAccountDataRepository.getData(Account(authScope.id))
                     val state = state
-                    val aboutData = aboutRepository.getAboutData()
-                    syncDispatch(
-                        state.copy(
-                            account = AccountStore.State.AccountData(
-                                isLoading = false,
-                                account = AccountStore.State.Account(
-                                    name = account.name,
-                                    gender = account.gender.toState()
-                                ),
-                            ),
-                            actions = AccountStore.State.ActionsData(
-                                isLoading = false,
-                                actions = AccountStore.State.Actions(
-                                    isScheduleAvailable = true,
-                                    isUpdatesAvailable = true,
-                                    isFinalMarksAvailable = true,
-                                    AccountStore.State.AboutData(
-                                        applicationFullName = aboutData.application.fullName,
+                    cachedAccountDataRepository.getData(AuthScope(authScope.id)).on {
+                        val account = it.data
+                        if (account != null) {
+                            val aboutData = aboutRepository.getAboutData()
+                            syncDispatch(
+                                state.copy(
+                                    account = AccountStore.State.AccountData(
+                                        isLoading = false,
+                                        account = AccountStore.State.Account(
+                                            name = account.name,
+                                            gender = account.gender.toState()
+                                        ),
                                     ),
+                                    actions = AccountStore.State.ActionsData(
+                                        isLoading = false,
+                                        actions = AccountStore.State.Actions(
+                                            isScheduleAvailable = true,
+                                            isUpdatesAvailable = true,
+                                            isFinalMarksAvailable = true,
+                                            AccountStore.State.AboutData(
+                                                applicationFullName = aboutData.application.fullName,
+                                            ),
+                                        )
+                                    )
                                 )
                             )
-                        )
-                    )
+                        }
+                    }
+
                 }
             }
         },

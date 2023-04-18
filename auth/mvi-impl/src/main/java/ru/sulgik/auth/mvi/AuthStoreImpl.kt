@@ -47,6 +47,11 @@ class AuthStoreImpl(
                                     id = user.id,
                                     token = user.token,
                                     gender = user.gender.toState(),
+                                    classes = user.classes.map {
+                                        AuthStore.State.Class(
+                                            fullTitle = it.fullTitle,
+                                        )
+                                    }
                                 ),
                                 isConfirming = true,
                             )
@@ -104,6 +109,9 @@ class AuthStoreImpl(
                             accountId = user.id,
                             name = user.title,
                             gender = user.gender.toState(),
+                            classes = user.classes.map {
+                                AccountData.Class(it.fullTitle)
+                            },
                         )
                     )
                     localAuthRepository.addAuthorization(

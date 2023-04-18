@@ -39,6 +39,7 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.auth.core)
     implementation(projects.schedule.list.domain)
+    implementation(projects.schedule.add.domain)
     implementation(projects.periods.domain)
     implementation(projects.account.domain)
     implementation(projects.schedule.list.mvi)

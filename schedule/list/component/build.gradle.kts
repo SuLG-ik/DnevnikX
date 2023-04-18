@@ -44,6 +44,7 @@ android {
 dependencies {
     coreLibraryDesugaring(libs.desugar.libs)
     implementation(projects.auth.core)
+    implementation(projects.ui.component)
     implementation(projects.picker.component)
     implementation(projects.modal.component)
     implementation(projects.modal.ui)

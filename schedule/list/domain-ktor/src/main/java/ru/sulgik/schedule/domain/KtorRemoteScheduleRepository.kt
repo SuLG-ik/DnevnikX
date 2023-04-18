@@ -3,14 +3,11 @@ package ru.sulgik.schedule.domain
 import io.ktor.client.request.parameter
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-import kotlinx.datetime.toJavaLocalDate
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.auth.ktor.Client
-import ru.sulgik.common.CustomLocalDateSerializer
-import ru.sulgik.common.platform.DatePeriod
 import ru.sulgik.common.platform.TimePeriod
 import ru.sulgik.common.safeBody
 import ru.sulgik.schedule.domain.data.GetScheduleOutput
@@ -20,16 +17,9 @@ class KtorRemoteScheduleRepository(
 ) : RemoteScheduleRepository {
     override suspend fun getSchedule(
         auth: AuthScope,
-        period: DatePeriod,
         classGroup: String,
     ): GetScheduleOutput {
         val response = client.authorizedGet(auth, "getschedule") {
-            parameter(
-                "days",
-                "${
-                    period.start.toJavaLocalDate().format(CustomLocalDateSerializer.formatter)
-                }-${period.end.toJavaLocalDate().format(CustomLocalDateSerializer.formatter)}"
-            )
             parameter("rings", true)
             parameter("class", classGroup)
         }
@@ -60,7 +50,6 @@ class KtorRemoteScheduleRepository(
             )
         }
         return GetScheduleOutput(
-            period = period,
             schedule = items,
         )
     }

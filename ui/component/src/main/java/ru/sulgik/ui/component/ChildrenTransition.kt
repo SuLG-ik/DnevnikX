@@ -1,6 +1,7 @@
 package ru.sulgik.ui.component
 
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
@@ -11,6 +12,8 @@ import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.fade
 import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.plus
 import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.scale
 import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.stackAnimation
+import com.arkivanov.decompose.router.slot.ChildSlot
+import com.arkivanov.decompose.router.slot.child
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.parcelable.Parcelable
@@ -78,5 +81,34 @@ fun <Config : NamedConfig> ChildStack<Config, BaseComponentContext>.TrackedConte
     Children(stack = this, animation = animation) {
         it.configuration.screenName?.let { screenName -> trackScreen(screenName) }
         it.instance.Content(modifier = modifier)
+    }
+}
+
+
+@Composable
+fun <Config : Parcelable> ChildSlot<Config, BaseComponentContext>.Content(
+    modifier: Modifier = Modifier,
+    placeholderContent: @Composable () -> Unit = {}
+) {
+    val instance = child?.instance
+    if (instance != null) {
+        instance.Content(modifier = modifier)
+    } else {
+        placeholderContent()
+    }
+}
+
+@Composable
+fun <Config : Parcelable> Value<ChildSlot<Config, BaseComponentContext>>.Content(
+    modifier: Modifier = Modifier,
+    placeholderContent: @Composable () -> Unit = {}
+) {
+    val instance = child?.instance
+    if (instance != null) {
+        instance.Content(modifier = modifier)
+    } else {
+        Box(modifier = modifier) {
+            placeholderContent()
+        }
     }
 }

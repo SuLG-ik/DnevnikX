@@ -68,12 +68,23 @@ include(":diary:ui")
 
 include(":diary:component")
 
+include(":schedule:host:component")
+
 include(":schedule:list:mvi")
 include(":schedule:list:mvi-impl")
 include(":schedule:list:domain")
 include(":schedule:list:domain-ktor")
 include(":schedule:list:ui")
 include(":schedule:list:component")
+
+include(":schedule:add:mvi")
+include(":schedule:add:mvi-impl")
+include(":schedule:add:domain")
+include(":schedule:add:domain-ktor")
+include(":schedule:add:domain-merged")
+include(":schedule:add:domain-room")
+include(":schedule:add:ui")
+include(":schedule:add:component")
 
 include(":finalmarks:mvi")
 include(":finalmarks:mvi-impl")

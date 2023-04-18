@@ -4,6 +4,9 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
@@ -15,21 +18,40 @@ internal class NamedMerger(
         return flow {
             Napier.d("Local request loading", tag = "${tag}Merger")
             emit(Resource.loading(data = defaultData))
-            try {
-                val response = withContext(Dispatchers.IO) { localRequest() }
-                Napier.d("Local request completed", tag = "${tag}Merger")
-                if (response == null) {
-                    emit(Resource.empty())
-                } else {
-                    emit(Resource.success(response, Resource.Source.LOCAL))
-                }
-            } catch (e: Exception) {
-                if (e is CancellationException) {
-                    Napier.d("Local request canceled", tag = "${tag}Merger")
-                }
-                Napier.d("Local request error", throwable = e, tag = "${tag}Merger")
-                emit(Resource.error(e, data = defaultData))
+            val response = withContext(Dispatchers.IO) { localRequest() }
+            Napier.d("Local request completed", tag = "${tag}Merger")
+            if (response == null) {
+                emit(Resource.empty())
+            } else {
+                emit(Resource.success(response, Resource.Source.LOCAL))
             }
+        }.catch {
+            if (it is CancellationException) {
+                Napier.d("Local request canceled", tag = "${tag}Merger")
+            }
+            Napier.d("Local request error", throwable = it, tag = "${tag}Merger")
+            emit(Resource.error(it, data = defaultData))
+        }
+    }
+
+    override fun <T : Any> local(defaultData: T?, localFlow: () -> Flow<T?>): FlowResource<T> {
+        return channelFlow {
+            Napier.d("Local start collecting", tag = "${tag}Merger")
+            channel.send(Resource.loading(data = defaultData))
+            localFlow().collectLatest {
+                Napier.d("Local request collected", tag = "${tag}Merger")
+                if (it == null) {
+                    channel.send(Resource.empty())
+                } else {
+                    channel.send(Resource.success(it, Resource.Source.LOCAL))
+                }
+            }
+        }.catch {
+            if (it is CancellationException) {
+                Napier.d("Local collection canceled", tag = "${tag}Merger")
+            }
+            Napier.d("Local collect error", throwable = it, tag = "${tag}Merger")
+            emit(Resource.error(it, data = defaultData))
         }
     }
 
@@ -38,21 +60,19 @@ internal class NamedMerger(
         save: suspend (T) -> Unit,
         remoteRequest: suspend () -> T,
     ): Flow<Resource<T>> {
-        return flow {
+        return flow<Resource<T>> {
             Napier.d("Single request loading", tag = "${tag}Merger")
             emit(Resource.loading(data = defaultData))
-            try {
-                val response = withContext(Dispatchers.IO) { remoteRequest() }
-                Napier.d("Single request completed", tag = "${tag}Merger")
-                emit(Resource.success(response, Resource.Source.REMOTE))
-                withContext(Dispatchers.IO) { save(response) }
-            } catch (e: Exception) {
-                if (e is CancellationException) {
-                    Napier.d("Single request canceled", tag = "${tag}Merger")
-                }
-                Napier.d("Single request error", throwable = e, tag = "${tag}Merger")
-                emit(Resource.error(e, data = defaultData))
+            val response = withContext(Dispatchers.IO) { remoteRequest() }
+            Napier.d("Single request completed", tag = "${tag}Merger")
+            emit(Resource.success(response, Resource.Source.REMOTE))
+            withContext(Dispatchers.IO) { save(response) }
+        }.catch {
+            if (it is CancellationException) {
+                Napier.d("Single request canceled", tag = "${tag}Merger")
             }
+            Napier.d("Single request error", throwable = it, tag = "${tag}Merger")
+            emit(Resource.error(it, data = defaultData))
         }
     }
 

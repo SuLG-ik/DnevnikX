@@ -52,6 +52,7 @@ dependencies {
     implementation(projects.diary.domainRoom)
     implementation(projects.marks.domainRoom)
     implementation(projects.finalmarks.domainRoom)
+    implementation(projects.schedule.add.domainRoom)
 
     coreLibraryDesugaring(libs.desugar.libs)
     implementation(libs.kotlinx.datetime)

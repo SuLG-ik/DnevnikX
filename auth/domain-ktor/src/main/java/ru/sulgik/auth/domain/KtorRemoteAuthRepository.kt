@@ -24,7 +24,10 @@ class KtorRemoteAuthRepository(
             title = user.title,
             id = user.vuid,
             token = auth.token,
-            gender = user.gender.toData()
+            gender = user.gender.toData(),
+            classes = user.classes.map {
+                UserOutput.Class(it.value.fullTitle)
+            }
         )
     }
 
@@ -51,6 +54,8 @@ private class GetRulesResponse(
     val vuid: String,
     val title: String,
     val gender: Gender = Gender.MALE,
+    @SerialName("groups")
+    val classes: Map<String, Class>
 ) {
     @Serializable
     enum class Gender {
@@ -60,6 +65,12 @@ private class GetRulesResponse(
         @SerialName("female")
         FEMALE,
     }
+
+    @Serializable
+    data class Class(
+        @SerialName("name")
+        val fullTitle: String,
+    )
 }
 
 @Serializable

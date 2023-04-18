@@ -16,7 +16,7 @@ import ru.sulgik.core.authChildStack
 import ru.sulgik.experimentalsettings.component.ExperimentalSettingsComponent
 import ru.sulgik.finalmarks.component.FinalMarksComponent
 import ru.sulgik.marksupdates.component.MarksUpdatesComponent
-import ru.sulgik.schedule.component.ScheduleComponent
+import ru.sulgik.schedule.host.component.ScheduleHostComponent
 import ru.sulgik.ui.component.LocalNestedChildrenStackAnimator
 import ru.sulgik.ui.component.NamedConfig
 import ru.sulgik.ui.component.TrackedContent
@@ -76,7 +76,7 @@ class AccountHostComponent(
                 onSelectAccount = onSelectAccount,
             )
 
-            Config.Schedule -> ScheduleComponent(
+            Config.Schedule -> ScheduleHostComponent(
                 componentContext = componentContext,
                 backAvailable = true,
                 onBack = this::onBack,

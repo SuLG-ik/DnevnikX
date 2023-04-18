@@ -13,6 +13,7 @@ import ru.sulgik.main.mvi.MainMVIModule
 import ru.sulgik.marks.mvi.MarksMVIModule
 import ru.sulgik.marksedit.mvi.MarksEditMVIModule
 import ru.sulgik.marksupdates.MarksUpdatesMVIModule
+import ru.sulgik.schedule.add.mvi.ScheduleAddMVIModule
 import ru.sulgik.schedule.mvi.ScheduleMVIModule
 
 class KoinMVIModule {
@@ -31,6 +32,7 @@ class KoinMVIModule {
         includes(ApplicationMVIModule().module)
         includes(ExperimentalSettingsMVIModule().module)
         includes(MarksUpdatesMVIModule().module)
+        includes(ScheduleAddMVIModule().module)
     }
 
 }

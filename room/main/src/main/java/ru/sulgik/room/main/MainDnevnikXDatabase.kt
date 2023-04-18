@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import ru.sulgik.account.domain.AccountDao
+import ru.sulgik.account.domain.AccountDataClassesEntity
 import ru.sulgik.account.domain.AccountDataDao
 import ru.sulgik.account.domain.AccountDataEntity
 import ru.sulgik.account.domain.AccountEntity
@@ -24,17 +25,20 @@ import ru.sulgik.marks.domain.MarksPeriodEntity
 import ru.sulgik.periods.domain.room.HostPeriodEntity
 import ru.sulgik.periods.domain.room.NestedPeriodEntity
 import ru.sulgik.periods.domain.room.PeriodDao
+import ru.sulgik.schedule.add.domain.ScheduleClassDao
+import ru.sulgik.schedule.add.domain.ScheduleClassEntity
 
 @Database(
     entities = [
-        AccountEntity::class, AccountDataEntity::class,
+        AccountEntity::class, AccountDataEntity::class, AccountDataClassesEntity::class,
         HostPeriodEntity::class, NestedPeriodEntity::class,
         DiaryDateEntity::class, DiaryDateLessonEntity::class, LessonFileEntity::class, LessonHomeworkEntity::class, LessonMarkEntity::class,
         MarksPeriodEntity::class, MarksLessonEntity::class, MarksLessonMarkEntity::class,
         FinalMarksLessonEntity::class, FinalMarksLessonMarkEntity::class,
+        ScheduleClassEntity::class,
     ],
-    version = 3,
-    autoMigrations = [AutoMigration(1, 2), AutoMigration(2, 3)],
+    version = 4,
+    autoMigrations = [AutoMigration(1, 2), AutoMigration(2, 3), AutoMigration(3, 4)],
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -46,5 +50,6 @@ abstract class MainDnevnikXDatabase : RoomDatabase() {
     abstract val diaryDao: DiaryDao
     abstract val marksDao: MarksDao
     abstract val finalMarksDao: FinalMarksDao
+    abstract val scheduleClassDao: ScheduleClassDao
 
 }

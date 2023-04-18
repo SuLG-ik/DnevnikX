@@ -23,16 +23,22 @@ interface AuthStore : Store<AuthStore.Intent, AuthStore.State, AuthStore.Label> 
         val isConfirming: Boolean = false,
         val isCompleted: Boolean = false,
     ) {
-        class User(
+        data class User(
             val title: String,
             val id: String,
             val token: String,
             val gender: Gender,
+            val classes: List<Class>
         ) {
             enum class Gender {
                 MALE, FEMALE,
             }
         }
+
+        data class Class(
+            val fullTitle: String,
+        )
+
     }
 
     sealed interface Label

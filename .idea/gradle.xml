@@ -136,6 +136,17 @@
             <option value="$PROJECT_DIR$/room/auth" />
             <option value="$PROJECT_DIR$/room/main" />
             <option value="$PROJECT_DIR$/schedule" />
+            <option value="$PROJECT_DIR$/schedule/add" />
+            <option value="$PROJECT_DIR$/schedule/add/component" />
+            <option value="$PROJECT_DIR$/schedule/add/domain" />
+            <option value="$PROJECT_DIR$/schedule/add/domain-ktor" />
+            <option value="$PROJECT_DIR$/schedule/add/domain-merged" />
+            <option value="$PROJECT_DIR$/schedule/add/domain-room" />
+            <option value="$PROJECT_DIR$/schedule/add/mvi" />
+            <option value="$PROJECT_DIR$/schedule/add/mvi-impl" />
+            <option value="$PROJECT_DIR$/schedule/add/ui" />
+            <option value="$PROJECT_DIR$/schedule/host" />
+            <option value="$PROJECT_DIR$/schedule/host/component" />
             <option value="$PROJECT_DIR$/schedule/list" />
             <option value="$PROJECT_DIR$/schedule/list/component" />
             <option value="$PROJECT_DIR$/schedule/list/domain" />

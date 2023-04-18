@@ -1,6 +1,5 @@
 package ru.sulgik.account.domain
 
-import ru.sulgik.account.domain.data.Account
 import ru.sulgik.account.domain.data.AccountData
 import ru.sulgik.account.domain.data.GetAccountDataOutput
 import ru.sulgik.auth.core.AuthScope
@@ -12,9 +11,9 @@ class MergedCachedAccountDataRepository(
     private val remoteDiaryRepository: RemoteAccountDataRepository,
 ) : CachedAccountDataRepository {
 
-    private val merger: Merger = Merger.named("Diary")
+    private val merger: Merger = Merger.named("AccountData")
 
-    override fun getData(account: Account): FlowResource<AccountData> {
+    override fun getData(account: AuthScope): FlowResource<AccountData> {
         return merger.merged(
             save = { localDiaryRepository.setData(it) },
             localRequest = { localDiaryRepository.getData(account) },
@@ -22,13 +21,13 @@ class MergedCachedAccountDataRepository(
         )
     }
 
-    override fun getData(account: List<Account>): FlowResource<List<AccountData>> {
+    override fun getData(account: List<AuthScope>): FlowResource<List<AccountData>> {
         return merger.merged(
             save = { localDiaryRepository.setData(it) },
             localRequest = { localDiaryRepository.getData(account) },
             remoteRequest = {
                 remoteDiaryRepository.getAccounts(
-                    auths = account.map { AuthScope(it.id) }
+                    auths = account
                 ).map(GetAccountDataOutput::toData)
             },
         )
@@ -42,5 +41,6 @@ private fun GetAccountDataOutput.toData(): AccountData {
         accountId = id,
         name = data.name.fullname,
         gender = data.gender,
+        classes = student.classGroup.map { AccountData.Class(it.title) },
     )
 }
