@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ru.sulgik.ui.core.BottomAppBar
 import ru.sulgik.ui.core.CombinedNavigationBarItem
@@ -115,7 +116,7 @@ fun ApplicationBottomNavigation(
                     )
                 },
                 label = {
-                    Text(stringResource(id = it.title))
+                    Text(stringResource(id = it.title), maxLines = 1, overflow = TextOverflow.Clip)
                 })
         }
 
@@ -144,7 +145,11 @@ fun ApplicationBottomNavigation(
 
             },
             label = {
-                Text(stringResource(id = NavigationConfig.Profile.title))
+                Text(
+                    stringResource(id = NavigationConfig.Profile.title),
+                    maxLines = 1,
+                    overflow = TextOverflow.Clip
+                )
             })
     }
 }
