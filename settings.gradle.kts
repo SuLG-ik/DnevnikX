@@ -74,6 +74,8 @@ include(":schedule:list:mvi")
 include(":schedule:list:mvi-impl")
 include(":schedule:list:domain")
 include(":schedule:list:domain-ktor")
+include(":schedule:list:domain-room")
+include(":schedule:list:domain-merged")
 include(":schedule:list:ui")
 include(":schedule:list:component")
 

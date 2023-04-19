@@ -27,6 +27,8 @@ import ru.sulgik.periods.domain.room.NestedPeriodEntity
 import ru.sulgik.periods.domain.room.PeriodDao
 import ru.sulgik.schedule.add.domain.ScheduleClassDao
 import ru.sulgik.schedule.add.domain.ScheduleClassEntity
+import ru.sulgik.schedule.list.domain.ScheduleDao
+import ru.sulgik.schedule.list.domain.ScheduleEntity
 
 @Database(
     entities = [
@@ -36,9 +38,13 @@ import ru.sulgik.schedule.add.domain.ScheduleClassEntity
         MarksPeriodEntity::class, MarksLessonEntity::class, MarksLessonMarkEntity::class,
         FinalMarksLessonEntity::class, FinalMarksLessonMarkEntity::class,
         ScheduleClassEntity::class,
+        ScheduleEntity::class,
     ],
-    version = 4,
-    autoMigrations = [AutoMigration(1, 2), AutoMigration(2, 3), AutoMigration(3, 4)],
+    version = 5,
+    autoMigrations = [AutoMigration(1, 2), AutoMigration(2, 3), AutoMigration(
+        3,
+        4
+    ), AutoMigration(4, 5)],
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -51,5 +57,6 @@ abstract class MainDnevnikXDatabase : RoomDatabase() {
     abstract val marksDao: MarksDao
     abstract val finalMarksDao: FinalMarksDao
     abstract val scheduleClassDao: ScheduleClassDao
+    abstract val scheduleDao: ScheduleDao
 
 }

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "ru.sulgik.schedule.add.domain.merged"
+    namespace = "ru.sulgik.schedule.domain.merged"
     compileSdk = 33
     defaultConfig {
         minSdk = 21
@@ -36,7 +36,7 @@ android {
 dependencies {
     implementation(libs.napier)
     implementation(libs.koin.core)
-    implementation(projects.schedule.add.domain)
+    implementation(projects.schedule.list.domain)
     testImplementation(libs.junit)
     androidTestImplementation(libs.junit.android)
     androidTestImplementation(libs.room.testing)

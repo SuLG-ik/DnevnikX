@@ -43,7 +43,6 @@ interface ScheduleListStore :
         )
 
         data class ScheduleDate(
-            val title: String,
             val date: LocalDate,
             val lessonGroups: ImmutableList<LessonGroup>,
         )

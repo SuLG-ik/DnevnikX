@@ -34,11 +34,14 @@ class ScheduleClassesEditStoreImpl(
                 launch(Dispatchers.Main) {
                     cachedAccountDataRepository.getData(authScope).on { accountResponse ->
                         cachedScheduleClassRepository.getClasses(authScope).on { classesResponse ->
+                            val accountClasses =
+                                accountResponse.data?.classes.orEmpty().map { it.toState() }
+                            val accountClassesTitles = accountClasses.map { it.fullTitle }
                             dispatch(
                                 Message.SetData(
                                     ScheduleClassesEditStore.State.SavedClassesData(
-                                        accountResponse.data?.classes.orEmpty()
-                                            .map { it.toState() } + classesResponse.data?.classes.orEmpty()
+                                        accountClasses + classesResponse.data?.classes.orEmpty()
+                                            .filter { it.fullTitle !in accountClassesTitles }
                                             .map { it.toState() }
                                     )
                                 )

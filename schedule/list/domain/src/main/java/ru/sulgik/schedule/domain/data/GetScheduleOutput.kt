@@ -4,11 +4,11 @@ import kotlinx.datetime.LocalDate
 import ru.sulgik.common.platform.TimePeriod
 
 data class GetScheduleOutput(
+    val classFullTitle: String,
     val schedule: List<Item>,
 ) {
     data class Item(
         val date: LocalDate,
-        val title: String,
         val lessonGroups: List<LessonGroup>,
     )
 

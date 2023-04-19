@@ -45,13 +45,21 @@ class ScheduleListHostStoreImpl(
                         ).on { classesResponse ->
                             val accountData = accountResponse.data
                             val data = classesResponse.data
-                            if (data != null)
+                            if (data != null) {
+                                val accountClasses = accountData?.classes.orEmpty()
+                                    .map { it.toState() }
+                                val accountClassesTitles = accountClasses.map { it.fullTitle }
                                 syncDispatch(
                                     Message.UpdateClasses(
-                                        schedule = (accountData?.classes.orEmpty()
-                                            .map { it.toState() } + data.classes.map { it.toState() }).toPersistentList()
+                                        schedule = (
+                                                accountClasses + data.classes
+                                                    .filter { it.fullTitle !in accountClassesTitles }
+                                                    .map { it.toState() }
+                                                )
+                                            .toPersistentList()
                                     )
                                 )
+                            }
                         }
                     }
                 }

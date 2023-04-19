@@ -36,6 +36,7 @@ android {
 dependencies {
     api(projects.auth.core)
     api(projects.core.common)
+    api(projects.kacher.core)
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.bundles.android)

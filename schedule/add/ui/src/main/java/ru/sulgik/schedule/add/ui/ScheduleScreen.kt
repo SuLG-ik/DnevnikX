@@ -63,7 +63,9 @@ fun ScheduleEditScreen(
             )
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = ExtendedTheme.dimensions.mainContentPadding),
             ) {
                 DesignedDivider(
                     modifier = Modifier

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "ru.sulgik.schedule.add.domain.room"
+    namespace = "ru.sulgik.schedule.domain.room"
     compileSdk = 33
     defaultConfig {
         minSdk = 21
@@ -37,8 +37,8 @@ android {
 
 dependencies {
     api(projects.auth.core)
-    api(projects.account.domainRoom)
-    api(projects.schedule.add.domain)
+    api(projects.schedule.list.domain)
+    api(projects.schedule.add.domainRoom)
     implementation(projects.core.common)
     implementation(libs.koin.core)
     implementation(libs.bundles.android)

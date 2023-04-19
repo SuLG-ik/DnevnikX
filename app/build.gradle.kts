@@ -20,8 +20,8 @@ android {
         applicationId = "ru.sulgik.dnevnikx"
         minSdk = 21
         targetSdk = 33
-        versionCode = 9
-        versionName = "0.6.0"
+        versionCode = 10
+        versionName = "0.7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

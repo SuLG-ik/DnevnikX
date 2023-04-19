@@ -1,10 +1,13 @@
-package ru.sulgik.schedule.add.domain
+package ru.sulgik.schedule.list.domain
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import ru.sulgik.account.domain.AccountEntity
+import kotlinx.datetime.LocalDate
+import ru.sulgik.common.platform.TimePeriod
+import ru.sulgik.schedule.add.domain.ScheduleClassEntity
 
 @Entity(
     indices = [
@@ -13,23 +16,27 @@ import ru.sulgik.account.domain.AccountEntity
             unique = true,
         ),
         Index(
-            value = ["accountId"],
+            value = ["classId"],
             unique = false,
         ),
     ],
     foreignKeys = [
         ForeignKey(
-            entity = AccountEntity::class,
+            entity = ScheduleClassEntity::class,
             parentColumns = ["id"],
-            childColumns = ["accountId"],
+            childColumns = ["classId"],
             onDelete = ForeignKey.CASCADE,
         )
     ]
 )
-class ScheduleClassEntity(
-    val accountId: String,
+class ScheduleEntity(
+    val date: LocalDate,
     val number: String,
-    val group: String,
+    val title: String,
+    @Embedded val time: TimePeriod,
+    val teacherName: String,
+    var group: String?,
+    var classId: Long,
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0

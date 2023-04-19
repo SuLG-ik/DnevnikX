@@ -45,11 +45,11 @@ class KtorRemoteScheduleRepository(
             }
             GetScheduleOutput.Item(
                 date = key,
-                title = value.title,
                 lessonGroups = groups.map { it.value },
             )
         }
         return GetScheduleOutput(
+            classFullTitle = classGroup,
             schedule = items,
         )
     }

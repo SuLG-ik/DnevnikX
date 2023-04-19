@@ -12,6 +12,7 @@ import ru.sulgik.marks.domain.MarksDao
 import ru.sulgik.periods.domain.room.PeriodDao
 import ru.sulgik.room.main.migrations.migrations
 import ru.sulgik.schedule.add.domain.ScheduleClassDao
+import ru.sulgik.schedule.list.domain.ScheduleDao
 
 
 @Module
@@ -59,6 +60,11 @@ class MainDatabaseModule {
     @Single
     fun scheduleClassDao(db: MainDnevnikXDatabase): ScheduleClassDao {
         return db.scheduleClassDao
+    }
+
+    @Single
+    fun scheduleDao(db: MainDnevnikXDatabase): ScheduleDao {
+        return db.scheduleDao
     }
 
 }

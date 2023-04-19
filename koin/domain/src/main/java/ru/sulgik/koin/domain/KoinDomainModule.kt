@@ -24,7 +24,9 @@ import ru.sulgik.periods.domain.PeriodsRemoteModule
 import ru.sulgik.periods.domain.room.PeriodsLocalModule
 import ru.sulgik.schedule.add.domain.ScheduleAddCachedModule
 import ru.sulgik.schedule.add.domain.ScheduleAddLocalModule
+import ru.sulgik.schedule.domain.ScheduleCachedModule
 import ru.sulgik.schedule.domain.ScheduleRemoteModule
+import ru.sulgik.schedule.list.domain.ScheduleLocalModule
 
 class KoinDomainModule {
 
@@ -44,7 +46,11 @@ class KoinDomainModule {
             FinalMarksRemoteModule().module,
             FinalMarksCachedModule().module
         )
-        includes(ScheduleRemoteModule().module)
+        includes(
+            ScheduleRemoteModule().module,
+            ScheduleLocalModule().module,
+            ScheduleCachedModule().module,
+        )
         includes(
             PeriodsRemoteModule().module,
             PeriodsLocalModule().module,

@@ -15,7 +15,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.core.syncDispatch
-import ru.sulgik.schedule.domain.RemoteScheduleRepository
+import ru.sulgik.kacher.core.on
+import ru.sulgik.schedule.domain.CachedScheduleRepository
 import ru.sulgik.schedule.domain.data.GetScheduleOutput
 
 @OptIn(ExperimentalMviKotlinApi::class)
@@ -23,7 +24,7 @@ class ScheduleListStoreImpl(
     storeFactory: StoreFactory,
     coroutineDispatcher: CoroutineDispatcher,
     authScope: AuthScope,
-    mergedScheduleRepository: RemoteScheduleRepository,
+    cachedScheduleRepository: CachedScheduleRepository,
 ) : ScheduleListStore,
     Store<ScheduleListStore.Intent, ScheduleListStore.State, ScheduleListStore.Label> by storeFactory.create<_, Action, Message, _, _>(
         name = "ScheduleStoreListImpl",
@@ -41,35 +42,43 @@ class ScheduleListStoreImpl(
                 val job = classLoadingJob
                 classLoadingJob = launch(Dispatchers.Main) {
                     job?.cancel()
-                    val schedule = mergedScheduleRepository.getSchedule(
+                    cachedScheduleRepository.getSchedule(
                         auth = authScope,
                         classGroup = it.classFullTitle,
-                    ).toState()
-                    syncDispatch(
-                        Message.UpdateSchedule(
-                            classFullTitle = it.classFullTitle,
-                            schedule = schedule
-                        )
-                    )
+                    ).on { response ->
+                        val data = response.data?.toState()
+                        if (data != null) {
+                            syncDispatch(
+                                Message.UpdateSchedule(
+                                    classFullTitle = it.classFullTitle,
+                                    schedule = data
+                                )
+                            )
+                        }
+                    }
                 }
             }
             onIntent<ScheduleListStore.Intent.RefreshSchedule> {
-//                val scheduleData = state.schedule.data[intent.period]
-//                if (scheduleData?.isLoading == true || scheduleData?.isRefreshing == true) return@onIntent
-//                dispatch(Message.SetScheduleRefreshing(intent.period))
-//                val period = periodsData.selectedPeriod
-//                val job = selectPeriodJob
-//                selectPeriodJob = launch {
-//                    val account = cachedAccount ?: remoteAccountDataRepository.getAccount(authScope)
-//                        .also { cachedAccount = it }
-//                    job?.cancelAndJoin()
-//                    val schedule = remoteScheduleRepository.getSchedule(
-//                        auth = authScope,
-//                        period = period,
-//                        classGroup = account.student.classGroup.first().title
-//                    ).toState()
-//                    syncDispatch(Message.UpdateSchedule(intent.period, schedule))
-//                }
+                val selectedClass = state.schedule.data.selectedClass ?: return@onIntent
+                dispatch(Message.SetRefreshing)
+                val job = classLoadingJob
+                classLoadingJob = launch(Dispatchers.Main) {
+                    job?.cancel()
+                    cachedScheduleRepository.getScheduleActual(
+                        auth = authScope,
+                        classGroup = selectedClass.fullTitle,
+                    ).on { response ->
+                        val data = response.data?.toState()
+                        if (data != null) {
+                            syncDispatch(
+                                Message.UpdateSchedule(
+                                    classFullTitle = selectedClass.fullTitle,
+                                    schedule = data
+                                )
+                            )
+                        }
+                    }
+                }
             }
         },
         reducer = {
@@ -107,6 +116,15 @@ class ScheduleListStoreImpl(
                         )
                     ),
                 )
+
+                Message.SetRefreshing -> copy(
+                    schedule = schedule.copy(
+                        data = schedule.data.copy(
+                            isLoading = false,
+                            isRefreshing = true,
+                        )
+                    ),
+                )
             }
         },
     ) {
@@ -123,6 +141,8 @@ class ScheduleListStoreImpl(
         data class SetLoading(
             val classFullTitle: String,
         ) : Message
+
+        object SetRefreshing : Message
 
     }
 
@@ -154,7 +174,6 @@ private fun String.formatTeacherName(): String {
 private fun GetScheduleOutput.toState(): PersistentList<ScheduleListStore.State.ScheduleDate> {
     return schedule.map { item ->
         ScheduleListStore.State.ScheduleDate(
-            title = item.title,
             date = item.date,
             lessonGroups = item.lessonGroups.map { lessonGroup ->
                 ScheduleListStore.State.LessonGroup(
