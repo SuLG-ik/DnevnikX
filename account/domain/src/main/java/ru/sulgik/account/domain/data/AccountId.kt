@@ -19,14 +19,11 @@ enum class Gender {
 
 
 @JvmInline
-value class Account(
+value class AccountId(
     val id: String,
 )
 
-fun Account.toAuthScope(): AuthScope {
+fun AccountId.toAuthScope(): AuthScope {
     return AuthScope(id)
 }
 
-data class User(
-    val name: String,
-)

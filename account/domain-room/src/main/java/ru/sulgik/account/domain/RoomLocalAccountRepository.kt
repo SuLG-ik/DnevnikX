@@ -2,20 +2,20 @@ package ru.sulgik.account.domain
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import ru.sulgik.account.domain.data.Account
+import ru.sulgik.account.domain.data.AccountId
 
 class RoomLocalAccountRepository(
     private val accountDao: AccountDao,
 ) : LocalAccountRepository {
 
-    override fun addAccount(account: Account) {
+    override fun addAccount(account: AccountId) {
         accountDao.addAccount(account = AccountEntity(account.id))
     }
 
-    override fun getAccounts(): Flow<List<Account>> {
+    override fun getAccounts(): Flow<List<AccountId>> {
         return accountDao.getAccounts().map { accounts ->
             accounts.map { account ->
-                Account(account.id)
+                AccountId(account.id)
             }
         }
     }

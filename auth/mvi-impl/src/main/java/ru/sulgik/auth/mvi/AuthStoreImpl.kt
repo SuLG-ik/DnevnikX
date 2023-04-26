@@ -8,8 +8,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import ru.sulgik.account.domain.LocalAccountDataRepository
 import ru.sulgik.account.domain.LocalAccountRepository
-import ru.sulgik.account.domain.data.Account
 import ru.sulgik.account.domain.data.AccountData
+import ru.sulgik.account.domain.data.AccountId
 import ru.sulgik.account.domain.data.Gender
 import ru.sulgik.auth.domain.LocalAuthRepository
 import ru.sulgik.auth.domain.RemoteAuthRepository
@@ -103,7 +103,7 @@ class AuthStoreImpl(
                     return@onIntent
                 dispatch(state.copy(isLoading = true))
                 launch {
-                    localAccountRepository.addAccount(Account(user.id))
+                    localAccountRepository.addAccount(AccountId(user.id))
                     localAccountDataRepository.setData(
                         AccountData(
                             accountId = user.id,
