@@ -18,9 +18,8 @@ class MergedCachedScheduleAddRepository(
     ): FlowResource<GetScheduleOutput> {
         return merger.merged(
             localRequest = { localScheduleRepository.getSchedule(auth, classGroup) },
-            save = { localScheduleRepository.saveSchedule(auth, it) },
-            remoteRequest = { remoteScheduleRepository.getSchedule(auth, classGroup) }
-        )
+            save = { localScheduleRepository.saveSchedule(auth, it) }
+        ) { remoteScheduleRepository.getSchedule(auth, classGroup) }
     }
 
     override fun getScheduleActual(
@@ -28,9 +27,8 @@ class MergedCachedScheduleAddRepository(
         classGroup: String
     ): FlowResource<GetScheduleOutput> {
         return merger.remote(
-            save = { localScheduleRepository.saveSchedule(auth, it) },
-            remoteRequest = { remoteScheduleRepository.getSchedule(auth, classGroup) }
-        )
+            save = { localScheduleRepository.saveSchedule(auth, it) }
+        ) { remoteScheduleRepository.getSchedule(auth, classGroup) }
     }
 
 }

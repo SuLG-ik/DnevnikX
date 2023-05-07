@@ -5,6 +5,8 @@ import org.koin.ksp.generated.module
 import ru.sulgik.auth.ktor.AuthClientKtorModule
 import ru.sulgik.common.AndroidModule
 import ru.sulgik.dnevnikx.BaseMviModule
+import ru.sulgik.firebase.main.FirebaseModule
+import ru.sulgik.images.impl.ImagesLoaderModule
 import ru.sulgik.koin.domain.KoinDomainModule
 import ru.sulgik.koin.mvi.KoinMVIModule
 import ru.sulgik.koin.settings.KoinSettingsModule
@@ -27,6 +29,8 @@ class KoinGeneralModule {
             AuthClientKtorModule().module,
             SettingsProviderModule().module,
             KoinSettingsModule().module,
+            FirebaseModule().module,
+            ImagesLoaderModule().module,
         )
     }
 

@@ -15,16 +15,14 @@ class MergedCachedPeriodsRepository(
     override fun getPeriods(auth: AuthScope): FlowResource<GetPeriodsOutput> {
         return merger.merged(
             localRequest = { localPeriodsRepository.getPeriods(auth) },
-            save = { localPeriodsRepository.savePeriods(auth, it) },
-            remoteRequest = { remotePeriodsRepository.getPeriods(auth) }
-        )
+            save = { localPeriodsRepository.savePeriods(auth, it) }
+        ) { remotePeriodsRepository.getPeriods(auth) }
     }
 
     override fun getPeriodsActual(auth: AuthScope): FlowResource<GetPeriodsOutput> {
         return merger.remote(
             save = { localPeriodsRepository.savePeriods(auth, it) },
-            remoteRequest = { remotePeriodsRepository.getPeriods(auth) },
-        )
+        ) { remotePeriodsRepository.getPeriods(auth) }
     }
 
 }

@@ -33,10 +33,7 @@ class KtorModule {
                 contentType(ContentType.Application.Json)
                 this.url {
                     protocol = URLProtocol.HTTPS
-                    host = "school.nso.ru"
                     path("apiv3/")
-                    parameters.append("vendor", "school")
-                    parameters.append("devkey", "0c7968cd2b6e14a4eed3c94e593ae9f0")
                     parameters.append("out_format", "json")
                 }
             }

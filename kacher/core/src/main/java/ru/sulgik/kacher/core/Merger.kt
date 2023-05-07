@@ -8,7 +8,7 @@ interface Merger {
 
     fun <T : Any> remote(
         defaultData: T? = null,
-        save: suspend (T) -> Unit,
+        save: (suspend (T) -> Unit)? = null,
         remoteRequest: suspend () -> T,
     ): FlowResource<T>
 
@@ -25,7 +25,7 @@ interface Merger {
     fun <T : Any> merged(
         defaultData: T? = null,
         localRequest: suspend () -> T?,
-        save: suspend (T) -> Unit,
+        save: (suspend (T) -> Unit)? = null,
         remoteRequest: suspend () -> T,
     ): FlowResource<T>
 

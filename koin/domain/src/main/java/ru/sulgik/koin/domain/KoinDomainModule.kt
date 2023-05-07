@@ -7,7 +7,9 @@ import ru.sulgik.account.domain.AccountLocalModule
 import ru.sulgik.account.domain.AccountRemoteModule
 import ru.sulgik.account.domain.AccountSessionLocalModule
 import ru.sulgik.auth.domain.AuthLocalModule
+import ru.sulgik.auth.domain.AuthMergedModule
 import ru.sulgik.auth.domain.AuthRemoteModule
+import ru.sulgik.auth.domain.VendorAuthRemoteModule
 import ru.sulgik.diary.domain.DiaryCachedModule
 import ru.sulgik.diary.domain.DiaryLocalModule
 import ru.sulgik.diary.domain.DiaryRemoteModule
@@ -56,7 +58,14 @@ class KoinDomainModule {
             PeriodsLocalModule().module,
             PeriodsCachedModule().module
         )
-        includes(AuthLocalModule().module, AuthRemoteModule().module)
+        includes(
+            AuthLocalModule().module,
+            AuthMergedModule().module,
+            AuthRemoteModule().module,
+        )
+        includes(
+            VendorAuthRemoteModule().module,
+        )
         includes(
             AccountLocalModule().module,
             AccountRemoteModule().module,

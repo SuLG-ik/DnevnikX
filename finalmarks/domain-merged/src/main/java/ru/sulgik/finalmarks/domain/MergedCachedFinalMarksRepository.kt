@@ -15,17 +15,16 @@ class MergedCachedFinalMarksRepository(
 
     override fun getFinalMarksActual(auth: AuthScope): FlowResource<FinalMarksOutput> {
         return merger.remote(
-            save = { localFinalMarksRepository.saveFinalMarks(auth, it) },
-            remoteRequest = { remoteFinalMarksRepository.getFinalMarks(auth) })
+            save = { localFinalMarksRepository.saveFinalMarks(auth, it) }
+        ) { remoteFinalMarksRepository.getFinalMarks(auth) }
     }
 
 
     override fun getFinalMarks(auth: AuthScope): FlowResource<FinalMarksOutput> {
         return merger.merged(
             localRequest = { localFinalMarksRepository.getFinalMarks(auth) },
-            save = { localFinalMarksRepository.saveFinalMarks(auth, it) },
-            remoteRequest = { remoteFinalMarksRepository.getFinalMarks(auth) }
-        )
+            save = { localFinalMarksRepository.saveFinalMarks(auth, it) }
+        ) { remoteFinalMarksRepository.getFinalMarks(auth) }
     }
 
 }

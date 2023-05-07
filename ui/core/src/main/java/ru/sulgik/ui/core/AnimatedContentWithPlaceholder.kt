@@ -5,7 +5,7 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 
 
 val LocalAnimatedContentTransition =
-    staticCompositionLocalOf { fadeIn(tween(300)) with fadeOut(tween(250)) }
+    staticCompositionLocalOf { fadeIn(tween(300)) togetherWith fadeOut(tween(250)) }
 
 @Composable
 fun <T : Any> AnimatedContentWithPlaceholder(

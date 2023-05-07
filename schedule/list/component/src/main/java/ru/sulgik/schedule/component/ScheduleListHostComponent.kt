@@ -42,12 +42,11 @@ class ScheduleListHostComponent(
     private val state by store.states(this) {
         val savedClassesData = it.savedClasses.data ?: return@states it
         classSelector.setData(savedClassesData.classes, savedClassesData.selectedClass)
-        onClassSelect(savedClassesData.selectedClass)
+        classList.onSelectClass(savedClassesData.selectedClass.fullTitle)
         it
     }
 
     private fun onClassSelect(selectedClass: ScheduleListHostStore.State.ClassData) {
-        classList.onSelectClass(selectedClass.fullTitle)
         store.accept(ScheduleListHostStore.Intent.SelectClass(selectedClass))
     }
 

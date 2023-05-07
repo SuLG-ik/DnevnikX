@@ -35,17 +35,20 @@ class AccountStoreImpl(
             onAction<Action.Setup> {
                 launch {
                     val state = state
-                    cachedAccountDataRepository.getData(AuthScope(authScope.id)).on {
-                        val account = it.data
-                        if (account != null) {
-                            val aboutData = aboutRepository.getAboutData()
+
+                    val accountResource =
+                        cachedAccountDataRepository.getData(AuthScope(authScope.id))
+                    val aboutResource = aboutRepository.getApplicationData()
+                    accountResource.on {
+                        val accountData = it.data
+                        if (accountData != null) {
                             syncDispatch(
                                 state.copy(
                                     account = AccountStore.State.AccountData(
                                         isLoading = false,
                                         account = AccountStore.State.Account(
-                                            name = account.name,
-                                            gender = account.gender.toState()
+                                            name = accountData.name,
+                                            gender = accountData.gender.toState()
                                         ),
                                     ),
                                     actions = AccountStore.State.ActionsData(
@@ -54,9 +57,9 @@ class AccountStoreImpl(
                                             isScheduleAvailable = true,
                                             isUpdatesAvailable = true,
                                             isFinalMarksAvailable = true,
-                                            AccountStore.State.AboutData(
-                                                applicationFullName = aboutData.application.fullName,
-                                            ),
+                                            aboutData = AccountStore.State.AboutData(
+                                                applicationFullName = aboutResource.fullName,
+                                            )
                                         )
                                     )
                                 )

@@ -41,6 +41,7 @@ android {
 
 dependencies {
     implementation(projects.auth.mvi)
+    implementation(projects.images.ui)
     implementation(projects.core.common)
     implementation(projects.ui.core)
     implementation(projects.periods.ui)

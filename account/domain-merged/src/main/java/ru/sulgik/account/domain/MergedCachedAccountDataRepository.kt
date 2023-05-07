@@ -17,20 +17,18 @@ class MergedCachedAccountDataRepository(
         return merger.merged(
             save = { localDiaryRepository.setData(it) },
             localRequest = { localDiaryRepository.getData(account) },
-            remoteRequest = { remoteDiaryRepository.getAccount(AuthScope(account.id)).toData() },
-        )
+        ) { remoteDiaryRepository.getAccount(AuthScope(account.id)).toData() }
     }
 
     override fun getData(account: List<AuthScope>): FlowResource<List<AccountData>> {
         return merger.merged(
             save = { localDiaryRepository.setData(it) },
             localRequest = { localDiaryRepository.getData(account) },
-            remoteRequest = {
-                remoteDiaryRepository.getAccounts(
-                    auths = account
-                ).map(GetAccountDataOutput::toData)
-            },
-        )
+        ) {
+            remoteDiaryRepository.getAccounts(
+                auths = account
+            ).map(GetAccountDataOutput::toData)
+        }
     }
 
 

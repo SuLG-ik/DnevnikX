@@ -3,30 +3,46 @@ package ru.sulgik.about.domain
 import android.content.Context
 import ru.sulgik.about.domain.data.AboutOutput
 import ru.sulgik.about.domain.data.BuiltInAboutRepository
+import ru.sulgik.auth.core.AuthScope
+import ru.sulgik.auth.domain.MergedAuthRepository
+import ru.sulgik.kacher.core.FlowResource
+import ru.sulgik.kacher.core.Merger
 
 class BuildConfigBuiltInAboutRepository(
     context: Context,
+    private val authRepository: MergedAuthRepository,
 ) : BuiltInAboutRepository {
 
-    val data = AboutOutput(
-        application = AboutOutput.ApplicationData(
-            name = "DnevnikX",
-            version = context.getString(ru.sulgik.about.domain.builtin.R.string.app_version),
-            fullName = "DnevnikX ${context.getString(ru.sulgik.about.domain.builtin.R.string.app_version)}"
-        ),
-        developer = AboutOutput.DeveloperData(
-            name = "@vollllodya",
-            uri = "https://t.me/vollllodya",
-        ),
-        domain = AboutOutput.DomainInfo(
-            name = "Новосибирская область",
-            domain = "school.nso.ru",
-            uri = "https://school.nso.ru"
-        )
+    private val applicationData = AboutOutput.ApplicationData(
+        name = "DnevnikX",
+        version = context.getString(ru.sulgik.about.domain.builtin.R.string.app_version),
+        fullName = "DnevnikX ${context.getString(ru.sulgik.about.domain.builtin.R.string.app_version)}"
     )
 
-    override fun getAboutData(): AboutOutput {
-        return data
+    private val developerData = AboutOutput.DeveloperData(
+        name = "@vollllodya",
+        uri = "https://t.me/vollllodya",
+    )
+
+    private val merger = Merger.named("About")
+
+    override fun getAboutData(authScope: AuthScope): FlowResource<AboutOutput> {
+        return merger.local(localRequest = {
+            val authorization = authRepository.getAuthorization(authScope.id)
+            AboutOutput(
+                application = getApplicationData(),
+                developer = developerData,
+                domain = AboutOutput.DomainInfo(
+                    name = authorization.vendor.realName,
+                    domain = authorization.vendor.host,
+                    uri = "https://${authorization.vendor.host}",
+                    logo = authorization.vendor.logo,
+                ),
+            )
+        })
     }
 
+    override fun getApplicationData(): AboutOutput.ApplicationData {
+        return applicationData
+    }
 }

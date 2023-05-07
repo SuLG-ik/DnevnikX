@@ -35,6 +35,8 @@ android {
 
 dependencies {
     api(projects.auth.core)
+    api(projects.kacher.core)
+    api(projects.images.core)
     implementation(libs.bundles.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.junit.android)

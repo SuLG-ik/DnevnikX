@@ -17,3 +17,7 @@ data class UserOutput(
     }
 
 }
+
+class VendorOutput(
+    val vendors: List<Vendor>,
+)

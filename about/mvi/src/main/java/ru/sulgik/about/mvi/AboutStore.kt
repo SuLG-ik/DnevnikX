@@ -1,6 +1,7 @@
 package ru.sulgik.about.mvi
 
 import com.arkivanov.mvikotlin.core.store.Store
+import ru.sulgik.images.RemoteImage
 
 interface AboutStore : Store<AboutStore.Intent, AboutStore.State, AboutStore.Label> {
 
@@ -21,6 +22,7 @@ interface AboutStore : Store<AboutStore.Intent, AboutStore.State, AboutStore.Lab
                 val name: String,
                 val domain: String,
                 val uri: String,
+                val logo: RemoteImage,
             )
 
             class DeveloperData(

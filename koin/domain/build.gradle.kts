@@ -36,6 +36,8 @@ android {
 dependencies {
     implementation(projects.auth.domainKtor)
     implementation(projects.auth.domainRoom)
+    implementation(projects.auth.domainFirestore)
+    implementation(projects.auth.domainMerged)
 
     implementation(projects.diary.domainRoom)
     implementation(projects.diary.domainKtor)

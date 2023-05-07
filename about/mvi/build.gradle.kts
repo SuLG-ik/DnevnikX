@@ -35,6 +35,7 @@ android {
 
 dependencies {
     implementation(projects.core.common)
+    api(projects.images.core)
 
     implementation(libs.mvi.core)
     implementation(libs.kotlinx.datetime)

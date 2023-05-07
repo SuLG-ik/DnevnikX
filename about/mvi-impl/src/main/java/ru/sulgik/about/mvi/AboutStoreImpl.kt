@@ -6,15 +6,20 @@ import com.arkivanov.mvikotlin.core.utils.ExperimentalMviKotlinApi
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.launch
 import ru.sulgik.about.domain.data.AboutOutput
 import ru.sulgik.about.domain.data.BuiltInAboutRepository
+import ru.sulgik.auth.core.AuthScope
 import ru.sulgik.core.directReducer
+import ru.sulgik.core.syncDispatch
+import ru.sulgik.kacher.core.on
 
 @OptIn(ExperimentalMviKotlinApi::class)
 class AboutStoreImpl(
     storeFactory: StoreFactory,
     coroutineDispatcher: CoroutineDispatcher,
     builtInAboutRepository: BuiltInAboutRepository,
+    authScope: AuthScope,
 ) : AboutStore,
     Store<AboutStore.Intent, AboutStore.State, AboutStore.Label> by storeFactory.create<_, Action, _, _, _>(
         name = "AboutStoreImpl",
@@ -24,8 +29,14 @@ class AboutStoreImpl(
         },
         executorFactory = coroutineExecutorFactory(coroutineDispatcher) {
             onAction<Action.Setup> {
-                val data = builtInAboutRepository.getAboutData().toState()
-                dispatch(AboutStore.State(data))
+                launch {
+                    builtInAboutRepository.getAboutData(authScope).on {
+                        val data = it.data
+                        if (data != null) {
+                            syncDispatch(AboutStore.State(data.toState()))
+                        }
+                    }
+                }
             }
         },
         reducer = directReducer(),
@@ -51,6 +62,7 @@ private fun AboutOutput.toState(): AboutStore.State.AboutData {
             name = domain.name,
             domain = domain.domain,
             uri = domain.uri,
+            logo = domain.logo,
         )
     )
 }

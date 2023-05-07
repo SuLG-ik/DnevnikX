@@ -47,7 +47,9 @@
             <option value="$PROJECT_DIR$/auth/component" />
             <option value="$PROJECT_DIR$/auth/core" />
             <option value="$PROJECT_DIR$/auth/domain" />
+            <option value="$PROJECT_DIR$/auth/domain-firestore" />
             <option value="$PROJECT_DIR$/auth/domain-ktor" />
+            <option value="$PROJECT_DIR$/auth/domain-merged" />
             <option value="$PROJECT_DIR$/auth/domain-room" />
             <option value="$PROJECT_DIR$/auth/ktor" />
             <option value="$PROJECT_DIR$/auth/mvi" />
@@ -81,6 +83,13 @@
             <option value="$PROJECT_DIR$/finalmarks/mvi" />
             <option value="$PROJECT_DIR$/finalmarks/mvi-impl" />
             <option value="$PROJECT_DIR$/finalmarks/ui" />
+            <option value="$PROJECT_DIR$/firebase" />
+            <option value="$PROJECT_DIR$/firebase/main" />
+            <option value="$PROJECT_DIR$/images" />
+            <option value="$PROJECT_DIR$/images/core" />
+            <option value="$PROJECT_DIR$/images/domain" />
+            <option value="$PROJECT_DIR$/images/impl" />
+            <option value="$PROJECT_DIR$/images/ui" />
             <option value="$PROJECT_DIR$/kacher" />
             <option value="$PROJECT_DIR$/kacher/core" />
             <option value="$PROJECT_DIR$/koin" />

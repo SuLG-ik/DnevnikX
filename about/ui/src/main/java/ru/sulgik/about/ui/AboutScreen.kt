@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import ru.sulgik.about.mvi.AboutStore
+import ru.sulgik.images.ui.SubcomponentRemoteImage
 import ru.sulgik.ui.core.outlined
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -176,8 +177,8 @@ fun DomainBlock(
 ) {
     ListItem(
         leadingContent = {
-            Image(
-                painterResource(id = R.drawable.about_domain),
+            SubcomponentRemoteImage(
+                data.logo,
                 contentDescription = null,
                 modifier = Modifier.size(45.dp),
             )

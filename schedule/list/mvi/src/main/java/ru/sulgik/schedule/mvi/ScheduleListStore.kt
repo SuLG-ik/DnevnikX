@@ -38,6 +38,7 @@ interface ScheduleListStore :
         data class ScheduleData(
             val isLoading: Boolean = true,
             val isRefreshing: Boolean = false,
+            val isExists: Boolean = true,
             val selectedClass: SelectedClass? = null,
             val schedule: ImmutableList<ScheduleDate> = persistentListOf(),
         )

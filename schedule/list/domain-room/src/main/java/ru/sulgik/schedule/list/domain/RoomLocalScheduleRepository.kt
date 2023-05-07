@@ -10,7 +10,7 @@ class RoomLocalScheduleRepository(
 
     override suspend fun getSchedule(auth: AuthScope, classGroup: String): GetScheduleOutput? {
         val (number, group) = classGroup.separateNumberAndGroup()
-        val response = dao.getSchedules(auth, number, group) ?: return null
+        val response = dao.getSchedules(auth, number, group)?.ifEmpty { null } ?: return null
         return GetScheduleOutput(
             classFullTitle = classGroup,
             schedule = response.groupBy { it.date }

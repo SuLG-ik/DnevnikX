@@ -1,5 +1,7 @@
 package ru.sulgik.about.domain.data
 
+import ru.sulgik.images.RemoteImage
+
 data class AboutOutput(
     val application: ApplicationData,
     val domain: DomainInfo,
@@ -15,6 +17,7 @@ data class AboutOutput(
         val name: String,
         val domain: String,
         val uri: String,
+        val logo: RemoteImage,
     )
 
     class DeveloperData(

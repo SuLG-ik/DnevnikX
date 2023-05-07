@@ -6,9 +6,8 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.Url
-import io.ktor.http.takeFrom
 import ru.sulgik.auth.core.AuthScope
+import ru.sulgik.auth.core.VendorScope
 import ru.sulgik.auth.domain.LocalAuthRepository
 
 
@@ -19,21 +18,31 @@ class Client(
 
     suspend fun authorizedGet(
         auth: AuthScope,
-        url: Url,
+        path: String,
         block: HttpRequestBuilder.() -> Unit = {}
     ): HttpResponse = client.get {
-        this.url.takeFrom(url)
+        val authorization = localAuthRepository.getAuthorization(auth.id)
+        url(
+            host = authorization.vendor.host,
+            path = "apiv3/$path",
+        )
+        parameter("vendor", authorization.vendor.vendor)
+        parameter("devkey", authorization.vendor.devKey)
         parameter("auth_token", localAuthRepository.getAuthorization(auth.id).token)
         block()
     }
 
-    suspend fun authorizedGet(
-        auth: AuthScope,
-        url: String,
+    suspend fun unauthorizedGet(
+        auth: VendorScope,
+        path: String,
         block: HttpRequestBuilder.() -> Unit = {}
     ): HttpResponse = client.get {
-        url(url)
-        parameter("auth_token", localAuthRepository.getAuthorization(auth.id).token)
+        url(
+            host = auth.host,
+            path = "apiv3/$path",
+        )
+        parameter("vendor", auth.vendor)
+        parameter("devkey", auth.devKey)
         block()
     }
 

@@ -8,6 +8,7 @@ class AuthLocalModule {
 
     val module = module {
         singleOf(::RoomLocalAuthRepository) bind LocalAuthRepository::class
+        singleOf(::RoomLocalVendorAuthRepository) bind LocalVendorAuthRepository::class
     }
 
 }

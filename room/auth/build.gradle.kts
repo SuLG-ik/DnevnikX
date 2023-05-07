@@ -42,6 +42,7 @@ android {
 
 dependencies {
     implementation(projects.auth.domainRoom)
+    implementation(projects.images.domain)
 
     coreLibraryDesugaring(libs.desugar.libs)
     implementation(libs.kotlinx.datetime)

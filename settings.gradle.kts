@@ -11,9 +11,6 @@ pluginManagement {
                 url = uri("https://storage.googleapis.com/r8-releases/raw")
             }
         }
-        dependencies {
-            classpath("com.android.tools:r8:8.0.40")
-        }
     }
 }
 dependencyResolutionManagement {
@@ -147,6 +144,8 @@ include(":auth:core")
 include(":auth:domain")
 include(":auth:domain-room")
 include(":auth:domain-ktor")
+include(":auth:domain-firestore")
+include(":auth:domain-merged")
 include(":auth:ktor")
 include(":auth:ui")
 include(":auth:component")
@@ -170,8 +169,8 @@ include(":account-selector:component")
 include(":account-host:component")
 
 include(":modal:ui")
-
 include(":modal:component")
+
 include(":picker:ui")
 include(":picker:component")
 
@@ -186,3 +185,12 @@ include(":koin:settings")
 
 include(":ktor:main")
 include(":mvi:main")
+
+include(":images:core")
+include(":images:impl")
+include(":images:ui")
+include(":images:domain")
+
+include(":firebase:main")
+
+

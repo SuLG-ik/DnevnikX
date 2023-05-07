@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import coil.ImageLoader
 import com.arkivanov.decompose.defaultComponentContext
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.getKoin
@@ -18,11 +19,14 @@ import org.koin.android.scope.AndroidScopeComponent
 import org.koin.core.component.getScopeId
 import org.koin.core.qualifier.TypeQualifier
 import org.koin.core.scope.Scope
+import ru.sulgik.common.DateProvider
 import ru.sulgik.common.platform.LocalDateProvider
 import ru.sulgik.common.platform.LocalTimeFormatter
+import ru.sulgik.common.platform.TimeFormatter
 import ru.sulgik.core.withDI
 import ru.sulgik.dnevnikx.ui.theme.DnevnikXExtendedTheme
 import ru.sulgik.dnevnikx.ui.theme.DnevnikXTheme
+import ru.sulgik.images.ui.LocalImageLoader
 import ru.sulgik.main.component.MainWithSplashComponent
 
 class MainActivity : ComponentActivity(), AndroidScopeComponent {
@@ -35,12 +39,16 @@ class MainActivity : ComponentActivity(), AndroidScopeComponent {
         super.onCreate(savedInstanceState)
         actionBar?.hide()
         component = MainWithSplashComponent(defaultComponentContext().withDI(scope))
+        val timeFormatter = get<TimeFormatter>()
+        val dateProvider = get<DateProvider>()
+        val imageLoader = get<ImageLoader>()
         setContent {
             DnevnikXExtendedTheme {
                 DnevnikXTheme {
                     CompositionLocalProvider(
-                        LocalTimeFormatter provides get(),
-                        LocalDateProvider provides get(),
+                        LocalTimeFormatter provides timeFormatter,
+                        LocalDateProvider provides dateProvider,
+                        LocalImageLoader provides imageLoader,
                     ) {
                         Surface {
                             component.Content(modifier = Modifier.fillMaxSize())

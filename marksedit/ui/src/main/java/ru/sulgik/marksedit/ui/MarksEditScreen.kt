@@ -8,7 +8,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -418,7 +418,7 @@ fun MarksEditKeyboardButton(
                     targetState = changesCount,
                     label = "marK_changes",
                     transitionSpec = {
-                        fadeIn(animationSpec = tween(50, delayMillis = 20)) with
+                        fadeIn(animationSpec = tween(50, delayMillis = 20)) togetherWith
                                 fadeOut(animationSpec = tween(90))
                     }) {
                     Text(

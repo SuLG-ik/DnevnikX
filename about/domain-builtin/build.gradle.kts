@@ -42,6 +42,7 @@ android {
 
 dependencies {
     api(projects.about.domain)
+    implementation(projects.auth.domain)
     implementation(projects.core.common)
     implementation(libs.koin.core)
     implementation(libs.bundles.android)

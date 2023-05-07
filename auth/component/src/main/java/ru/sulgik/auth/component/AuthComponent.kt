@@ -24,6 +24,12 @@ class AuthComponent(
 
     private val store = getStore<AuthStore>()
 
+    private val vendorSelector = AuthVendorSelectorComponent(
+        componentContext = childDIContext(key = "vendor_selector"),
+        { store.accept(AuthStore.Intent.SelectVendor(it)) },
+        initialVendors = store.state.vendorSelector.vendors,
+    )
+
     private val confirmUser =
         AuthConfirmComponent(
             componentContext = childDIContext(key = "auth_confirm"),
@@ -53,6 +59,9 @@ class AuthComponent(
         if (it.isCompleted && user != null) {
             onAuthenticated(AuthScope(user.id))
         }
+        if (!it.vendorSelector.isLoading) {
+            vendorSelector.updateVendors(it.vendorSelector.vendors)
+        }
         it
     }
 
@@ -68,6 +77,12 @@ class AuthComponent(
         store.accept(AuthStore.Intent.Confirm)
     }
 
+
+    private fun onSelectVendor() {
+        vendorSelector.onVendor()
+    }
+
+
     @Composable
     override fun Content(modifier: Modifier) {
         val focusRequester = LocalFocusManager.current
@@ -77,17 +92,19 @@ class AuthComponent(
             }
         })
         FloatingModalUI(component = confirmUser) {
-            AuthScreen(
-                isLoading = state.isLoading || state.isConfirming,
-                username = state.username,
-                password = state.password,
-                error = state.error,
-                onEditUsername = this::onEditUsername,
-                onEditPassword = this::onEditPassword,
-                onConfirm = this::onConfirm,
-                onBack = if (isBackAvailable) this::onBack else null,
-                modifier = modifier
-            )
+            FloatingModalUI(component = vendorSelector) {
+                AuthScreen(
+                    state = state,
+                    isVendorSelecting = vendorSelector.modalState.isVisible,
+                    onEditUsername = this::onEditUsername,
+                    onEditPassword = this::onEditPassword,
+                    onSelectVendor = this::onSelectVendor,
+                    onConfirm = this::onConfirm,
+                    isBackAvailable = isBackAvailable,
+                    onBack = this::onBack,
+                    modifier = modifier
+                )
+            }
         }
     }
 }

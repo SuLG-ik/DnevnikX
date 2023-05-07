@@ -1,16 +1,16 @@
 [versions]
-agp = "8.0.0"
-kotlin = "1.8.20"
-compose-compiler = "1.4.5"
-compose = "1.5.0-alpha02"
-compose-material3 = "1.1.0-beta02"
-ksp = "1.8.20-1.0.10"
+agp = "8.0.1"
+kotlin = "1.8.21"
+compose-compiler = "1.4.7"
+compose = "1.5.0-alpha03"
+compose-material3 = "1.1.0-rc01"
+ksp = "1.8.21-1.0.11"
 lifecycle = "2.6.1"
 ktor = "2.2.4"
 coroutines = "1.6.4"
 android-core = "1.10.0"
-android-activity = "1.7.0"
-android-splash = "1.0.0"
+android-activity = "1.7.1"
+android-splash = "1.0.1"
 mvi = "3.2.0"
 decompose = "2.0.0-alpha-02"
 essenty = "1.1.0"
@@ -24,21 +24,24 @@ junit-android = "1.1.5"
 napier = "2.6.1"
 datastore = "1.1.0-alpha04"
 material = "1.8.0"
-accompanist = "0.31.0-alpha"
+accompanist = "0.31.1-alpha"
 datetime = "0.4.0"
 desugar = "2.0.3"
 serialization = "1.5.0"
-firebase-crashlytics = "18.3.6"
+firebase-crashlytics = "18.3.7"
+firebase-firestore = "24.6.0"
 firebase-crashlytics-plugin = "2.9.2"
-firebase-analytics = "21.2.1"
+firebase-analytics = "21.2.2"
 firebase-core = "21.1.1"
 firebase-messaging = "23.1.2"
+firebase-storage = "20.2.0"
 google-services = "4.3.15"
 sqlcipher = "4.5.3"
 kotlinx-collections = "0.3.5"
-profileinstaller = "1.3.0"
+profileinstaller = "1.3.1"
 paging = "3.2.0-alpha04"
 paging-compose = "1.0.0-alpha18"
+coil = "2.3.0"
 
 [libraries]
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
@@ -109,12 +112,16 @@ firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx", ve
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ktx", version.ref = "firebase-crashlytics" }
 firebase-core = { module = "com.google.firebase:firebase-core", version.ref = "firebase-core" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging-ktx", version.ref = "firebase-messaging" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore-ktx", version.ref = "firebase-firestore" }
+firebase-storage = { module = "com.google.firebase:firebase-storage-ktx", version.ref = "firebase-storage" }
 sqlcipher = { module = "net.zetetic:android-database-sqlcipher", version.ref = "sqlcipher" }
 profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
 macrobenchmark = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "macrobenchmark" }
 paging-core = { module = "androidx.paging:paging-common", version.ref = "paging" }
 paging-android = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
 paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging-compose" }
+coil-core = { module = "io.coil-kt:coil-base", version.ref = "coil" }
+coil-compose = { module = "io.coil-kt:coil-compose-base", version.ref = "coil" }
 
 [bundles]
 compose = ["compose-ui", "compose-ui-graphics", "compose-runtime", "compose-material", "compose-material3", "compose-animation", "kotlinx-collections"]
@@ -129,7 +136,7 @@ decompose = ["decompose-core", "decompose-compose"]
 essenty = ["essenty-lifecycle", "essenty-parcelable", "essenty-instance"]
 koin = ["koin-core", "koin-android", "koin-annotations"]
 room = ["room-core", "room-ktx"]
-firebase = ["firebase-analytics", "firebase-crashlytics", "firebase-core"]
+firebase = ["firebase-analytics", "firebase-crashlytics", "firebase-core", "firebase-storage", "firebase-firestore"]
 module-mvi = ["napier", "mvi-core", "mvi-main", "mvi-coroutines", "mvi-rx", "koin-core", "koin-annotations"]
 
 [plugins]

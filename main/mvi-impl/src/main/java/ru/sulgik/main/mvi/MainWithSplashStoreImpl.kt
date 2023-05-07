@@ -11,7 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.sulgik.account.domain.LocalSessionAccountRepository
 import ru.sulgik.auth.core.AuthScope
-import ru.sulgik.auth.domain.LocalAuthRepository
+import ru.sulgik.auth.domain.MergedAuthRepository
 import ru.sulgik.core.directReducer
 import ru.sulgik.core.syncDispatch
 
@@ -21,7 +21,7 @@ class MainWithSplashStoreImpl(
     coroutineDispatcher: CoroutineDispatcher,
     savedState: MainWithSplashStore.State?,
     sessionAccountRepository: LocalSessionAccountRepository,
-    localAuthRepository: LocalAuthRepository,
+    localAuthRepository: MergedAuthRepository,
 ) : MainWithSplashStore,
     Store<MainWithSplashStore.Intent, MainWithSplashStore.State, MainWithSplashStore.Label> by storeFactory.create<_, Action, _, _, _>(
         name = "MainWithSplashStoreImpl",

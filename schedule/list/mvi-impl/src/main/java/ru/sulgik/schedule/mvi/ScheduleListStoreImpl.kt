@@ -99,6 +99,7 @@ class ScheduleListStoreImpl(
                             selectedClass = ScheduleListStore.State.SelectedClass(
                                 it.classFullTitle,
                             ),
+                            isExists = it.schedule.any { it.lessonGroups.any { it.lessons.isNotEmpty() } },
                             schedule = it.schedule,
                         )
                     ),

@@ -27,6 +27,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        resourceConfigurations += listOf("ru", "en")
     }
 
     buildTypes {
@@ -36,6 +37,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            isShrinkResources = true
             signingConfig = signingConfigs.getByName("debug")
         }
         debug {
@@ -96,6 +98,7 @@ dependencies {
     implementation(projects.main.component)
     implementation(projects.core.common)
     implementation(projects.core.components)
+    implementation(projects.images.ui)
 
     implementation(libs.bundles.decompose)
     coreLibraryDesugaring(libs.desugar.libs)

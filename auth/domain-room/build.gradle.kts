@@ -39,6 +39,7 @@ dependencies {
     api(projects.auth.core)
     api(projects.auth.domain)
     implementation(projects.core.common)
+    implementation(projects.images.domain)
     implementation(libs.koin.core)
     implementation(libs.datastore)
     implementation(libs.bundles.android)

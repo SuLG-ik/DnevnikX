@@ -57,7 +57,7 @@ internal class NamedMerger(
 
     override fun <T : Any> remote(
         defaultData: T?,
-        save: suspend (T) -> Unit,
+        save: (suspend (T) -> Unit)?,
         remoteRequest: suspend () -> T,
     ): Flow<Resource<T>> {
         return flow<Resource<T>> {
@@ -66,7 +66,7 @@ internal class NamedMerger(
             val response = withContext(Dispatchers.IO) { remoteRequest() }
             Napier.d("Single request completed", tag = "${tag}Merger")
             emit(Resource.success(response, Resource.Source.REMOTE))
-            withContext(Dispatchers.IO) { save(response) }
+            withContext(Dispatchers.IO) { save?.invoke(response) }
         }.catch {
             if (it is CancellationException) {
                 Napier.d("Single request canceled", tag = "${tag}Merger")
@@ -79,7 +79,7 @@ internal class NamedMerger(
     override fun <T : Any> merged(
         defaultData: T?,
         localRequest: suspend () -> T?,
-        save: suspend (T) -> Unit,
+        save: (suspend (T) -> Unit)?,
         remoteRequest: suspend () -> T,
     ): Flow<Resource<T>> {
         return flow {
@@ -98,7 +98,7 @@ internal class NamedMerger(
                     withContext(Dispatchers.IO) { remoteRequest() }
                 Napier.d("Remote request completed", tag = "${tag}Merger")
                 emit(Resource.success(data, Resource.Source.REMOTE))
-                withContext(Dispatchers.IO) { save(data) }
+                withContext(Dispatchers.IO) { save?.invoke(data) }
             } catch (exception: Exception) {
                 if (exception is CancellationException) {
                     Napier.d("Merged request canceled", tag = "${tag}Merger")

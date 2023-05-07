@@ -5,6 +5,7 @@ import androidx.room.Room
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import ru.sulgik.auth.domain.AuthDao
+import ru.sulgik.auth.domain.VendorDao
 
 
 @Module
@@ -22,6 +23,11 @@ class AuthDatabaseModule {
     @Single
     fun authDao(db: AuthDnevnikXDatabase): AuthDao {
         return db.authDao
+    }
+
+    @Single
+    fun vendorDao(db: AuthDnevnikXDatabase): VendorDao {
+        return db.vendorDao
     }
 
 }

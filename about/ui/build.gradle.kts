@@ -43,6 +43,7 @@ dependencies {
     implementation(projects.about.mvi)
     implementation(projects.core.common)
     implementation(projects.ui.core)
+    implementation(projects.images.ui)
 
     implementation(libs.bundles.compose)
     implementation(libs.kotlinx.datetime)

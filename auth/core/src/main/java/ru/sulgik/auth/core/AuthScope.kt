@@ -7,3 +7,10 @@ import com.arkivanov.essenty.parcelable.Parcelize
 data class AuthScope(
     val id: String,
 ) : Parcelable
+
+
+data class VendorScope(
+    val vendor: String,
+    val host: String,
+    val devKey: String,
+)

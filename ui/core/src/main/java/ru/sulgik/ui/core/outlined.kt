@@ -8,11 +8,13 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 fun Modifier.outlined(
     color: Color? = null,
     shape: Shape? = null,
+    width: Dp? = null,
 ) =
     composed(
         inspectorInfo = {
@@ -26,7 +28,7 @@ fun Modifier.outlined(
         Modifier
             .clip(baseShape)
             .border(
-                border = BorderStroke(width = 1.dp, color = baseColor),
+                border = BorderStroke(width = width ?: 1.dp, color = baseColor),
                 shape = baseShape,
             )
     }

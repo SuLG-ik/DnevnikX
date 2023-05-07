@@ -34,6 +34,9 @@ android {
 }
 
 dependencies {
+    api(projects.kacher.core)
+    api(projects.images.core)
+    api(projects.auth.core)
     implementation(libs.kotlinx.datetime)
     implementation(libs.bundles.android)
     testImplementation(libs.junit)

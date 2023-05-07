@@ -24,8 +24,7 @@ class MergedCachedMarksRepository(
         return merger.merged(
             localRequest = { localMarksRepository.getMarks(auth, period.period) },
             save = { localMarksRepository.saveMarks(auth, it) },
-            remoteRequest = { remoteMarksRepository.getMarks(auth, period) },
-        )
+        ) { remoteMarksRepository.getMarks(auth, period) }
     }
 
     override fun getMarksActual(
@@ -34,8 +33,7 @@ class MergedCachedMarksRepository(
     ): FlowResource<MarksOutput> {
         return merger.remote(
             save = { localMarksRepository.saveMarks(auth, it) },
-            remoteRequest = { remoteMarksRepository.getMarks(auth, period) },
-        )
+        ) { remoteMarksRepository.getMarks(auth, period) }
     }
 
     override fun getLesson(
