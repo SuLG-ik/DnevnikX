@@ -15,8 +15,8 @@
 | 🌐 Network        | [Ktor 2.2](https://github.com/ktorio/ktor)                                        |
 | 🎭 User Interface | [Compose](https://developer.android.com/jetpack/compose)                          |
 | ⌨ Logging         | [Napier](https://github.com/AAkira/Napier)                                        |
-| 💻 Local storage  | [Datastore](https://developer.android.com/topic/libraries/architecture/datastore) |
-| 🏗 Architecture   | [MVI](https://github.com/arkivanov/MVIKotlin)                                     |
+| 💻 Local storage  | [Datastore](https://developer.android.com/topic/libraries/architecture/datastore), [Room](https://developer.android.com/training/data-storage/room) |
+| 🏗 Architecture   | [Decompose](https://github.com/arkivanov/Decompose), [MVI](https://github.com/arkivanov/MVIKotlin)                                     |
 
 ## 🥼 Features
 
