@@ -1,4 +1,4 @@
-# 🚀 DnevnikX
+# 🚀 DnevnikX - extended Android application for "ЭлЖур" service
 
 ### ✨ Demo
 
